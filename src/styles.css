@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alumni+Sans+Pinstripe:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Delius&family=Nova+Round&family=Playwrite+DE+Grund:wght@100..400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Hubballi&display=swap');
+
+@import "tailwindcss";
+@import "tailwindcss-primeui";
+@import "primeicons/primeicons.css";
+
+@font-face {
+  font-family: 'Beautyinthestarlight';
+  src: url('./assets/fonts/Beauty in the Starlight.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'caviardreams';
+  src: url('./assets/fonts/CaviarDreams.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Tropical_Avenue';
+  src: url('./assets/fonts/Tropical Avenue.ttf') format('truetype');
+  font-display: swap;
+}
+
+.font-logo {
+  font-family: 'Beautyinthestarlight';
+}
+
+.font-caviar {
+  font-family: 'caviardreams';
+}
+
+.font-tropical {
+  font-family: 'Tropical_Avenue';
+}
+
+.cinzel {
+  font-family: "Cinzel", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.alumni-sans {
+  font-family: "Alumni Sans Pinstripe", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.delius-regular {
+  font-family: "Delius", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.playwrite-de-grund {
+  font-family: "Playwrite DE Grund", cursive;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.nova-round-regular {
+  font-family: "Nova Round", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.hubballi-regular {
+  font-family: "Hubballi", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}

@@ -1,0 +1,71 @@
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1 class="auth-title">{{ showPinForm() ? 'Verificar PIN' : 'Iniciar sesión' }}</h1>
+      <p class="auth-subtitle">
+        {{ showPinForm() ? 'Ingresa el código de 6 dígitos enviado a tu email' : 'Ingresa tus credenciales' }}
+      </p>
+    </div>
+
+    @if (!showPinForm()) {
+    <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" novalidate class="auth-form">
+      @if (errorMessage()) {
+      <p-message severity="error" [text]="errorMessage()!" styleClass="w-full" />
+      }
+
+      <div class="field">
+        <label for="email" class="field-label">Correo electrónico</label>
+        <input pInputText id="email" type="email" formControlName="email" placeholder="tucorreo@ejemplo.com"
+          class="w-full" />
+        @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+        <small class="field-error">Ingresa un correo válido</small>
+        }
+      </div>
+
+      <div class="field">
+        <label for="password" class="field-label">Contraseña</label>
+        <p-password id="password" formControlName="password" placeholder="••••••••" [toggleMask]="true"
+          styleClass="w-full" inputStyleClass="w-full" />
+        @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+        <small class="field-error">Mínimo 6 caracteres</small>
+        }
+      </div>
+
+      <p-button type="submit" label="Continuar" styleClass="w-full" [loading]="loading()" [disabled]="loading()" />
+    </form>
+    }
+
+    @if (showPinForm()) {
+    <form [formGroup]="pinForm" (ngSubmit)="onPinSubmit()" novalidate class="auth-form">
+      @if (errorMessage()) {
+      <p-message severity="error" [text]="errorMessage()!" styleClass="w-full" />
+      }
+
+      <div class="field">
+        <label for="pin" class="field-label">Código PIN</label>
+        <input pInputText id="pin" type="text" formControlName="pin" placeholder="123456" maxlength="6"
+          class="w-full text-center text-2xl" />
+        @if (pinForm.get('pin')?.invalid && pinForm.get('pin')?.touched) {
+        <small class="field-error">Ingresa el código de 6 dígitos</small>
+        }
+      </div>
+
+      <p-button type="submit" label="Verificar" styleClass="w-full" [loading]="loading()" [disabled]="loading()" />
+
+      <div class="text-center mt-3">
+        <button type="button" class="text-pink-400 text-sm hover:text-pink-300 transition-colors" (click)="resendPin()"
+          [disabled]="loading()">
+          ¿No recibiste el código? Reenviar
+        </button>
+      </div>
+    </form>
+    }
+
+    @if (!showPinForm()) {
+    <p class="auth-footer">
+      ¿No tienes cuenta?
+      <a routerLink="/register" class="auth-link">Regístrate</a>
+    </p>
+    }
+  </div>
+</div>

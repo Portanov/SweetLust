@@ -1,0 +1,88 @@
+<div class="auth-wrapper">
+  <div class="auth-card">
+
+    <div class="auth-header">
+      <h1 class="auth-title">Crear cuenta</h1>
+      <p class="auth-subtitle">Únete y empieza a explorar</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="auth-form">
+
+      <!-- Mensajes globales -->
+      @if (errorMessage()) {
+      <p-message severity="error" [text]="errorMessage()!" styleClass="w-full" />
+      }
+      @if (successMessage()) {
+      <p-message severity="success" [text]="successMessage()!" styleClass="w-full" />
+      }
+
+      <!-- Username -->
+      <div class="field">
+        <label for="username" class="field-label">Nombre de usuario</label>
+        <input pInputText id="username" type="text" formControlName="username" placeholder="mi_usuario" class="w-full"
+          [class.ng-invalid]="username?.invalid && username?.touched" />
+        @if (username?.invalid && username?.touched) {
+        <small class="field-error">
+          {{ username?.errors?.['required'] ? 'El usuario es requerido.' : 'Máximo 100 caracteres.' }}
+        </small>
+        }
+      </div>
+
+      <!-- Email -->
+      <div class="field">
+        <label for="email" class="field-label">Correo electrónico</label>
+        <input pInputText id="email" type="email" formControlName="email" placeholder="tucorreo@ejemplo.com"
+          class="w-full" [class.ng-invalid]="email?.invalid && email?.touched" />
+        @if (email?.invalid && email?.touched) {
+        <small class="field-error">
+          {{ email?.errors?.['required'] ? 'El correo es requerido.' : 'Ingresa un correo válido.' }}
+        </small>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="field">
+        <label for="password" class="field-label">Contraseña</label>
+        <p-password inputId="password" formControlName="password" placeholder="••••••••" [toggleMask]="true"
+          [feedback]="true" styleClass="w-full" inputStyleClass="w-full"
+          [class.ng-invalid]="password?.invalid && password?.touched" />
+        @if (password?.invalid && password?.touched) {
+        <small class="field-error">
+          {{ password?.errors?.['required'] ? 'La contraseña es requerida.' : 'Mínimo 6 caracteres.' }}
+        </small>
+        }
+      </div>
+
+      <!-- Teléfono -->
+      <div class="field">
+        <label for="phone" class="field-label">Teléfono (10 dígitos)</label>
+        <p-inputnumber inputId="phone" formControlName="phone" placeholder="5512345678" [useGrouping]="false"
+          styleClass="w-full" inputStyleClass="w-full" [class.ng-invalid]="phone?.invalid && phone?.touched" />
+        @if (phone?.invalid && phone?.touched) {
+        <small class="field-error">Ingresa un teléfono de 10 dígitos.</small>
+        }
+      </div>
+
+      <!-- Fecha de nacimiento -->
+      <div class="field">
+        <label for="birth_date" class="field-label">Fecha de nacimiento</label>
+        <p-datepicker inputId="birth_date" formControlName="birth_date" placeholder="dd/mm/aaaa" dateFormat="dd/mm/yy"
+          [showIcon]="true" [maxDate]="maxDate" [showButtonBar]="true" styleClass="w-full" inputStyleClass="w-full"
+          [class.ng-invalid]="birth_date?.invalid && birth_date?.touched" />
+        @if (birth_date?.invalid && birth_date?.touched) {
+        <small class="field-error">Debes ser mayor de 18 años.</small>
+        }
+      </div>
+
+      <!-- Submit -->
+      <p-button type="submit" label="Crear cuenta" styleClass="w-full" [loading]="loading()" [disabled]="loading()" />
+
+    </form>
+
+    <p class="auth-footer">
+      ¿Ya tienes cuenta?
+      <a routerLink="/login" class="auth-link">Inicia sesión</a>
+    </p>
+
+  </div>
+</div>

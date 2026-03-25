@@ -1,0 +1,153 @@
+<div class="questions-container font-caviar">
+  <div class="questions-header mt-5">
+    <div class="header-content">
+      <div class="header-badge">
+        <i class="pi pi-question-circle"></i>
+        <span>Centro de Ayuda</span>
+      </div>
+      <h1 class="header-title">Preguntas Frecuentes</h1>
+      <p class="header-subtitle">
+        Encuentra respuestas a las preguntas más comunes sobre nuestros servicios y productos
+      </p>
+    </div>
+  </div>
+
+  <div class="categories-section">
+    <div class="categories-grid">
+      @for (categoria of categorias; track categoria.key) {
+      <div class="category-card" (click)="scrollToCategoria(categoria.key)">
+        <div class="category-icon">
+          <i [class]="categoria.icono"></i>
+        </div>
+        <span class="category-name">{{ categoria.nombre }}</span>
+      </div>
+      }
+    </div>
+  </div>
+
+  <div class="faq-content">
+    <div id="envio" class="faq-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="pi pi-truck"></i>
+        </div>
+        <div>
+          <h2 class="section-title">Métodos de Envío</h2>
+          <p class="section-description">Todo lo que necesitas saber sobre nuestros envíos</p>
+        </div>
+      </div>
+
+      <p-accordion [multiple]="true">
+        @for (pregunta of getPreguntasPorCategoria('envio'); track pregunta.id) {
+        <p-accordion-panel>
+          <p-accordion-header>{{pregunta.pregunta}}</p-accordion-header>
+          <div class="answer-content">
+            <div class="answer-text">
+              {{ pregunta.respuesta }}
+            </div>
+            @if (pregunta.popular) {
+            <div class="answer-footer">
+              <i class="pi pi-star-fill"></i>
+              <span>Pregunta popular</span>
+            </div>
+            }
+          </div>
+        </p-accordion-panel>
+        }
+      </p-accordion>
+    </div>
+
+    <div id="pago" class="faq-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="pi pi-credit-card"></i>
+        </div>
+        <div>
+          <h2 class="section-title">Métodos de Pago</h2>
+          <p class="section-description">Formas seguras de realizar tu pago</p>
+        </div>
+      </div>
+
+      <p-accordion>
+        @for (pregunta of getPreguntasPorCategoria('pago'); track pregunta.id) {
+        <p-accordion-panel>
+          <p-accordion-header>{{pregunta.pregunta}}</p-accordion-header>
+          <div class="answer-content">
+            <div class="answer-text">
+              {{ pregunta.respuesta }}
+            </div>
+            @if (pregunta.popular) {
+            <div class="answer-footer">
+              <i class="pi pi-star-fill"></i>
+              <span>Pregunta popular</span>
+            </div>
+            }
+          </div>
+        </p-accordion-panel>
+        }
+      </p-accordion>
+    </div>
+
+    <div id="info" class="faq-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="pi pi-info-circle"></i>
+        </div>
+        <div>
+          <h2 class="section-title">Información General</h2>
+          <p class="section-description">Aspectos importantes sobre nuestros servicios</p>
+        </div>
+      </div>
+
+      <p-accordion>
+        @for (pregunta of getPreguntasPorCategoria('info'); track pregunta.id) {
+        <p-accordion-panel>
+          <p-accordion-header>{{pregunta.pregunta}}</p-accordion-header>
+          <div class="answer-content">
+            <div class="answer-text">
+              {{ pregunta.respuesta }}
+            </div>
+            @if (pregunta.popular) {
+            <div class="answer-footer">
+              <i class="pi pi-star-fill"></i>
+              <span>Pregunta popular</span>
+            </div>
+            }
+          </div>
+        </p-accordion-panel>
+        }
+      </p-accordion>
+    </div>
+
+    <div id="productos" class="faq-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <i class="pi pi-box"></i>
+        </div>
+        <div>
+          <h2 class="section-title">Productos</h2>
+          <p class="section-description">Información sobre nuestros productos</p>
+        </div>
+      </div>
+
+      <p-accordion>
+        @for (pregunta of getPreguntasPorCategoria('productos'); track pregunta.id) {
+        <p-accordion-panel>
+          <p-accordion-header>{{pregunta.pregunta}}</p-accordion-header>
+          <div class="answer-content">
+            <div class="answer-text">
+              {{ pregunta.respuesta }}
+            </div>
+            @if (pregunta.popular) {
+            <div class="answer-footer">
+              <i class="pi pi-star-fill"></i>
+              <span>Pregunta popular</span>
+            </div>
+            }
+          </div>
+        </p-accordion-panel>
+        }
+      </p-accordion>
+    </div>
+  </div>
+</div>

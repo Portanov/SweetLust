@@ -1,0 +1,93 @@
+<div class="cart-container m-auto mt-16">
+  <div class="cart-header">
+    <h1 class="cart-title">
+      <i class="pi pi-shopping-cart"></i>
+      Mi Carrito
+    </h1>
+    <p class="cart-subtitle">{{ itemCount() }} {{ itemCount() === 1 ? 'producto' : 'productos' }}</p>
+  </div>
+
+  @if (items().length === 0) {
+  <div class="empty-cart">
+    <i class="pi pi-shopping-cart empty-cart-icon"></i>
+    <h2>Tu carrito está vacío</h2>
+    <p>¡Explora nuestra tienda y encuentra productos increíbles!</p>
+    <a routerLink="/shop" class="shop-link">
+      <p-button label="Ir a la tienda" icon="pi pi-shopping-bag"></p-button>
+    </a>
+  </div>
+  } @else {
+  <div class="cart-content">
+    <div class="cart-items">
+      @for (item of items(); track item.id) {
+      <div class="cart-item">
+        <div class="item-image">
+          <img [src]="item.product.image" [alt]="item.product.title" (error)="onImageError($event)">
+        </div>
+
+        <div class="item-details">
+          <h3 class="item-title">{{ item.product.title }}</h3>
+          <p class="item-description">{{ item.product.description | slice:0:100 }}...</p>
+
+          <div class="item-price">
+            <span class="price-label">Precio unitario:</span>
+            <span class="price-value">{{ item.price | currency }}</span>
+          </div>
+        </div>
+
+        <div class="item-actions">
+          <div class="quantity-control">
+            <p-inputNumber [(ngModel)]="item.quantity" [min]="1" [max]="item.product.stock"
+              (onChange)="updateQuantity(item.id, $event)" [disabled]="loading()"></p-inputNumber>
+          </div>
+
+          <div class="item-subtotal">
+            <span class="subtotal-label">Subtotal:</span>
+            <span class="subtotal-value">{{ item.subtotal | currency }}</span>
+          </div>
+
+          <p-button icon="pi pi-trash" severity="danger" text (onClick)="removeItem(item.id)" [disabled]="loading()"
+            pTooltip="Eliminar producto"></p-button>
+        </div>
+      </div>
+      }
+    </div>
+
+    <div class="cart-summary">
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="summary-header">
+            <h3>Resumen del pedido</h3>
+          </div>
+        </ng-template>
+
+        <div class="summary-content">
+          <div class="summary-row">
+            <span>Subtotal ({{ itemCount() }} productos)</span>
+            <span>{{ total() | currency }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Envío</span>
+            <span class="free-shipping">Gratis</span>
+          </div>
+          <p-divider></p-divider>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span class="total-value">{{ total() | currency }}</span>
+          </div>
+
+          <div class="actions">
+            <p-button label="Vaciar carrito" icon="pi pi-trash" severity="secondary" outlined (onClick)="clearCart()"
+              [disabled]="loading()" styleClass="w-full mb-2"></p-button>
+            <p-button label="Finalizar compra" icon="pi pi-check" (onClick)="checkout()" [loading]="loading()"
+              styleClass="w-full"></p-button>
+          </div>
+        </div>
+      </p-card>
+    </div>
+  </div>
+  }
+
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+</div>

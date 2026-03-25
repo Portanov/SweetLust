@@ -1,0 +1,88 @@
+// src/app.routes.ts
+import { Routes } from '@angular/router';
+import { PublicLayout } from './layouts/public-layout/public-layout';
+import { AdminLayout } from './layouts/admin-layout/admin-layout';
+import { authGuard, authMatchGuard, guestGuard } from './guards/auth-guard/auth.guard';
+import { adminGuard, adminMatchGuard } from './guards/admin-guard/admin.guard';
+
+export const routes: Routes = [
+  {
+    path: '',
+    component: PublicLayout,
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/public/landing/landing').then((m) => m.Landing),
+      },
+      {
+        path: 'shop',
+        loadComponent: () =>
+          import('./pages/public/shop/shop').then((m) => m.Shop),
+      },
+      {
+        path: 'questions',
+        loadComponent: () =>
+          import('./pages/public/questions/questions').then((m) => m.Questions),
+      },
+      {
+        path: 'cart',
+        canActivate: [authGuard], 
+        loadComponent: () =>
+          import('./pages/public/cart/cart').then((m) => m.Cart),
+      },
+    ],
+  },
+
+  {
+    path: 'login',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./pages/auth/login/login').then((m) => m.Login),
+  },
+  {
+    path: 'register',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./pages/auth/register/register').then((m) => m.Register),
+  },
+
+  {
+    path: 'unauthorized',
+    loadComponent: () =>
+      import('./pages/public/unauthorized/unauthorized').then(
+        (m) => m.Unauthorized
+      ),
+  },
+
+  {
+    path: 'admin',
+    component: AdminLayout,
+    canMatch: [adminMatchGuard],
+    children: [
+      {
+        path: 'dashboard',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./pages/admin/dashboard/dashboard').then((m) => m.Dashboard),
+      },
+      {
+        path: 'users',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./pages/admin/users/users').then((m) => m.Users),
+      },
+      {
+        path: 'products',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./pages/admin/shop/shop').then((m) => m.Shop),
+      },
+    ],
+  },
+
+  {
+    path: '**',
+    redirectTo: '',
+  },
+];
