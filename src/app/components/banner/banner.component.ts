@@ -86,7 +86,7 @@ import { ImagesService, LocalImage } from '../../services/images/images.service'
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.6);
       z-index: 1;
     }
 
@@ -105,7 +105,7 @@ import { ImagesService, LocalImage } from '../../services/images/images.service'
     }
 
     .company-name {
-      font-size: 7rem;
+      font-size: 8.5rem;
       margin: 0 0 1rem 0;
     }
 

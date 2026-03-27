@@ -12,12 +12,10 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { PasswordModule } from 'primeng/password';
 import { DividerModule } from 'primeng/divider';
 import { DialogModule } from 'primeng/dialog';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService } from 'primeng/api';
-import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { TextareaModule } from 'primeng/textarea';
 import { CheckboxModule } from 'primeng/checkbox';
+import { ConfirmationAlertService } from '../../../services/confirmationAlert/confirmation-alert.service';
 
 @Component({
   selector: 'app-profile',
@@ -33,13 +31,10 @@ import { CheckboxModule } from 'primeng/checkbox';
     PasswordModule,
     DividerModule,
     DialogModule,
-    ConfirmDialogModule,
-    ToastModule,
     TagModule,
     TextareaModule,
     CheckboxModule
   ],
-  providers: [ConfirmationService],
   templateUrl: './profile.html',
   styleUrls: ['./profile.css']
 })
@@ -48,7 +43,7 @@ export class Profile implements OnInit {
   private userService = inject(UserService);
   private addressService = inject(AddressService);
   private alertService = inject(AlertService);
-  private confirmationService = inject(ConfirmationService);
+  private confirmationService = inject(ConfirmationAlertService);
 
   loading = signal(false);
   addressDialog = signal(false);
@@ -259,11 +254,9 @@ export class Profile implements OnInit {
   }
 
   deleteAddress(id: number, recipientName: string): void {
-    this.confirmationService.confirm({
-      message: `¿Estás seguro de eliminar la dirección de ${recipientName}?`,
-      header: 'Confirmar eliminación',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
+    this.confirmationService.confirmDelete(
+      `¿Estás seguro de eliminar la dirección de ${recipientName}?`,
+      () => {
         this.addressService.deleteAddress(id).subscribe({
           next: () => {
             this.alertService.success('Dirección eliminada', 'La dirección ha sido eliminada correctamente');
@@ -273,7 +266,7 @@ export class Profile implements OnInit {
           }
         });
       }
-    });
+    );
   }
 
   setDefaultAddress(id: number): void {

@@ -23,3 +23,26 @@ export interface ChangePasswordRequest {
 export interface ChangePasswordResponse {
   message: string;
 }
+
+export interface CreateUserRequest {
+  username: string;
+  email: string;
+  password: string;
+  phone: number;
+  birth_date: Date | string;
+  role?: 'admin' | 'client';
+}
+
+export interface UpdateRoleRequest {
+  role: 'admin' | 'client';
+}
+
+export interface UserResponse {
+  id: number;
+  username: string;
+  email: string;
+  phone: number;
+  birth_date: Date;
+  role: string;
+  created_at: Date;
+}

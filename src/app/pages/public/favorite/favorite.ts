@@ -7,9 +7,8 @@ import { AlertService } from '../../../services/alert/alert.service';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService } from 'primeng/api';
 import { SkeletonModule } from 'primeng/skeleton';
+import { ConfirmationAlertService } from '../../../services/confirmationAlert/confirmation-alert.service';
 
 @Component({
   selector: 'app-favorites',
@@ -20,10 +19,8 @@ import { SkeletonModule } from 'primeng/skeleton';
     ButtonModule,
     CardModule,
     ToastModule,
-    ConfirmDialogModule,
     SkeletonModule
   ],
-  providers: [ConfirmationService],
   templateUrl: './favorite.html',
   styleUrls: ['./favorite.css']
 })
@@ -31,7 +28,7 @@ export class Favorite implements OnInit {
   private favoritesService = inject(FavoritesService);
   private cartService = inject(CartService);
   private alertService = inject(AlertService);
-  private confirmationService = inject(ConfirmationService);
+  private confirmationService = inject(ConfirmationAlertService);
 
   favorites = this.favoritesService.favorites;
   loading = this.favoritesService.loading;
@@ -42,11 +39,9 @@ export class Favorite implements OnInit {
   }
 
   removeFavorite(productId: number, productTitle: string): void {
-    this.confirmationService.confirm({
-      message: `¿Estás seguro de eliminar "${productTitle}" de favoritos?`,
-      header: 'Confirmar eliminación',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
+    this.confirmationService.confirmDelete(
+      `¿Estás seguro de eliminar "${productTitle}" de favoritos?`,
+      () => {
         this.favoritesService.removeFavorite(productId).subscribe({
           next: () => {
             this.alertService.success('Eliminado', `${productTitle} eliminado de favoritos`);
@@ -56,7 +51,7 @@ export class Favorite implements OnInit {
           }
         });
       }
-    });
+    );
   }
 
   addToCart(productId: number, productTitle: string): void {

@@ -7,14 +7,13 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DividerModule } from 'primeng/divider';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService } from 'primeng/api';
 import { FormsModule } from "@angular/forms";
 import { AlertService } from '../../../services/alert/alert.service';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { Address } from '../../../assets/models/user/address.model';
+import { ConfirmationAlertService } from '../../../services/confirmationAlert/confirmation-alert.service';
 
 @Component({
   selector: 'app-cart',
@@ -26,20 +25,18 @@ import { Address } from '../../../assets/models/user/address.model';
     CardModule,
     InputNumberModule,
     DividerModule,
-    ConfirmDialogModule,
     FormsModule,
     DialogModule,
     InputTextModule,
     RadioButtonModule
   ],
-  providers: [ConfirmationService],
   templateUrl: './cart.html',
   styleUrls: ['./cart.css']
 })
 export class Cart implements OnInit {
   private cartService = inject(CartService);
   private addressService = inject(AddressService);
-  private confirmationService = inject(ConfirmationService);
+  private confirmationService = inject(ConfirmationAlertService);
   private alertService = inject(AlertService);
   private router = inject(Router);
 
@@ -80,11 +77,9 @@ export class Cart implements OnInit {
   }
 
   removeItem(itemId: number): void {
-    this.confirmationService.confirm({
-      message: '¿Estás seguro de eliminar este producto del carrito?',
-      header: 'Confirmar eliminación',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
+    this.confirmationService.confirmDelete(
+      '¿Estás seguro de eliminar este producto del carrito?',
+      () => {
         this.loading.set(true);
         this.cartService.removeCartItem(itemId).subscribe({
           next: () => {
@@ -97,15 +92,13 @@ export class Cart implements OnInit {
           }
         });
       }
-    });
+    );
   }
 
   clearCart(): void {
-    this.confirmationService.confirm({
-      message: '¿Estás seguro de vaciar todo el carrito?',
-      header: 'Vaciar carrito',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
+    this.confirmationService.confirmDelete(
+      '¿Estás seguro de vaciar todo el carrito?',
+      () => {
         this.loading.set(true);
         this.cartService.clearCart().subscribe({
           next: () => {
@@ -118,7 +111,7 @@ export class Cart implements OnInit {
           }
         });
       }
-    });
+    );
   }
 
   openCheckoutDialog(): void {
@@ -131,7 +124,6 @@ export class Cart implements OnInit {
       next: () => {
         if (this.addresses().length === 0) {
           this.alertService.warn('Sin dirección', 'Por favor agrega una dirección de envío antes de continuar');
-          // Redirigir a perfil para agregar dirección
           this.router.navigate(['/profile']);
           return;
         }
@@ -158,11 +150,11 @@ export class Cart implements OnInit {
       return;
     }
 
-    this.confirmationService.confirm({
-      message: '¿Confirmas realizar la compra?',
-      header: 'Confirmar compra',
-      icon: 'pi pi-shopping-cart',
-      accept: () => {
+    this.confirmationService.confirmCustom(
+      '¿Confirmas realizar la compra?',
+      'Confirmar compra',
+      'pi pi-shopping-cart',
+      () => {
         this.loading.set(true);
         this.cartService.checkout({
           addressId: this.selectedAddress()!.id
@@ -184,7 +176,7 @@ export class Cart implements OnInit {
           }
         });
       }
-    });
+    );
   }
 
   goToAddAddress(): void {

@@ -1,3 +1,24 @@
+export enum OfferType {
+  PERCENTAGE = 'percentage',
+  FIXED_PRICE = 'fixed_price',
+  TWO_FOR_ONE = 'two_for_one',
+  BUNDLE = 'bundle'
+}
+
+export interface Offer {
+  id: number;
+  productId: number;
+  type: OfferType;
+  label: string;
+  discount_value?: number;
+  bundle_quantity?: number;
+  is_active: boolean;
+  starts_at?: Date;
+  ends_at?: Date;
+  created_at: Date;
+  updated_at: Date;
+}
+
 export interface Product {
   id: number;
   title: string;
@@ -5,6 +26,8 @@ export interface Product {
   image: string;
   price: number;
   stock: number;
+  offer?: Offer | null;
+  final_price?: number;
   created_at: Date;
   updated_at: Date;
 }
@@ -23,6 +46,25 @@ export interface UpdateProductRequest {
   image?: string;
   price?: number;
   stock?: number;
+}
+
+export interface CreateOfferRequest {
+  type: OfferType;
+  label: string;
+  discount_value?: number;
+  bundle_quantity?: number;
+  is_active?: boolean;
+  starts_at?: Date | string;
+  ends_at?: Date | string;
+}
+
+export interface UpdateOfferRequest {
+  label?: string;
+  discount_value?: number;
+  bundle_quantity?: number;
+  is_active?: boolean;
+  starts_at?: Date | string;
+  ends_at?: Date | string;
 }
 
 export interface ProductResponse {

@@ -94,7 +94,7 @@ export const routes: Routes = [
         path: 'users',
         canActivate: [adminGuard],
         loadComponent: () =>
-          import('./pages/admin/users/users').then((m) => m.Users),
+          import('./pages/admin/users/users').then((m) => m.AdminUsers),
       },
       {
         path: 'products',

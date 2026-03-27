@@ -16,5 +16,6 @@
     "profile": "admin",
     "orders": "moon",
     "address": "home",
+    "order-detail": "moon",
   }
 }

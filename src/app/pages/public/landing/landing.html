@@ -1,11 +1,75 @@
-<div class="carousel-elegant">
+<div class="">
   <app-banner-carousel
     companyName="Sweety Lust"
     companySlogan="Dulce, Placer y Pecado"
     ctaText="Descubre más"
-    folderName="carrousel">
+    folderName="carrousel"
+  >
   </app-banner-carousel>
-  <div class="mt-3 main-content">
+  <div class="main-content">
+    <div class="grid grid-cols-2 gap-2 p-8 py-16 bg-zinc-800">
+      <div class="p-6 text-white font-caviar flex flex-col justify-around">
+        <h1 class="text-7xl font-tropical text-center">Descubre tu sensualidad</h1>
+        <div class="w-3/4 text-center mx-auto">
+          Sweet Lust esta diseñada con los mejores productos para potenciar tu placer y consentir a
+          tu cuerpo como se merece, nuestra vision es elevar tus sentidos y convertirnos en tu
+          tienda intima preferida.
+        </div>
+        <p-button
+          icon="pi pi-arrow-right"
+          label="Ir a la tienda"
+          iconPos="right"
+          class="text-center"
+          severity="secondary"
+          [raised]="true"
+          size="large"
+        ></p-button>
+      </div>
+      <div class="">
+        <img src="images/sensualidad.jpg" alt="sensualidad" class="border-8 border-white rounded-2xl" />
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-2 px-10 py-16">
+      <div class="p-16 flex flex-col justify-around">
+        <h1 class="text-9xl font-tropical">Nuestros Best Seller</h1>
+      </div>
+      <div class="">
+        <p-carousel [value]="products()" [numVisible]="1" [numScroll]="1" orientation="vertical" verticalViewPortHeight="500px"
+          contentClass="flex items-center">
+          <ng-template let-product #item>
+            <p-card [style]="{ width: '28rem', overflow: 'hidden' }" class="border border-gray-300">
+              <ng-template #header>
+                <div class="card-header" style="height: 290px; overflow: hidden;">
+                  <img [src]="product.image" [alt]="product.title" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+              </ng-template>
+              <ng-template #title>
+                <h1 class="text-2xl text-center cinzel">{{product.title}}</h1>
+              </ng-template>
+              <ng-template #subtitle>
+                <p class="text-md text-center font-caviar">${{product.final_price ? product.final_price : product.price}} MXN</p>
+              </ng-template>
+              <div class="p-6 py-2">
+                <p class="w-48 truncate text-justify font-light text-md text-gray-400">{{product.description}}</p>
+              </div>
+              <ng-template #footer>
+                <div class="text-center">
+                  <p-button icon="pi pi-shopping-cart" label="Añadir al carrito" [raised]="true" fluid></p-button>
+                </div>
+              </ng-template>
+            </p-card>
+          </ng-template>
+        </p-carousel>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-2 px-8 py-10 bg-gray-300">
+      <div class="">
 
+      </div>
+      <div class="p-12">
+        <h1 class="text-9xl text-right font-tropical">Nuestros nuevos productos</h1>
+        <p class="text-right mt-3 font-caviar text-lg text-gray-600">Deleitate con nuestros nuevos productos y visita la tienda para mas novedades.</p>
+      </div>
+    </div>
   </div>
 </div>
