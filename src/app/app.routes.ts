@@ -27,9 +27,33 @@ export const routes: Routes = [
       },
       {
         path: 'cart',
-        canActivate: [authGuard], 
+        canActivate: [authGuard],
         loadComponent: () =>
           import('./pages/public/cart/cart').then((m) => m.Cart),
+      },
+      {
+        path: 'favorites',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./pages/public/favorite/favorite').then((m) => m.Favorite),
+      },
+      {
+        path: 'profile',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./pages/public/profile/profile').then((m) => m.Profile),
+      },
+      {
+        path: 'orders',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./pages/public/orders/orders').then((m) => m.Orders),
+      },
+      {
+        path: 'orders/:id',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./pages/public/order-detail/order-detail').then((m) => m.OrderDetail),
       },
     ],
   },

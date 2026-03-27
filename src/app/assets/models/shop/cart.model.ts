@@ -1,14 +1,18 @@
+export interface Product {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
+  stock: number;
+  image: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
 export interface CartItem {
   id: number;
   productId: number;
-  product: {
-    id: number;
-    title: string;
-    description: string;
-    image: string;
-    price: number;
-    stock: number;
-  };
+  product: Product;
   quantity: number;
   price: number;
   subtotal: number;
@@ -41,4 +45,22 @@ export interface UpdateCartItemRequest {
 export interface CartResponse {
   cart: Cart;
   summary: CartSummary;
+}
+
+export interface CheckoutRequest {
+  addressId: number;
+  paymentMethod?: string;
+  notes?: string;
+}
+
+export interface CheckoutResponse {
+  message: string;
+  orderId: number;
+  status: string;
+  tracking: {
+    id: number;
+    status: string;
+    note: string;
+    createdAt: Date;
+  };
 }

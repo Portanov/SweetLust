@@ -8,7 +8,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PaginatorModule } from 'primeng/paginator';
 import { SkeletonModule } from 'primeng/skeleton';
 import { CartService } from '../../../services/cart/cart.service';
-import { MessageService } from 'primeng/api';
+import { FavoritesService } from '../../../services/favorite/favorite.service';
+import { AlertService } from '../../../services/alert/alert.service';
 
 @Component({
   selector: 'app-shop',
@@ -22,12 +23,12 @@ import { MessageService } from 'primeng/api';
   ],
   templateUrl: './shop.html',
   styleUrl: './shop.css',
-  providers: [MessageService]
 })
 export class Shop {
   private productService = inject(ProductService);
   private cartService = inject(CartService);
-  private messageService = inject(MessageService);
+  private favoriteService = inject(FavoritesService);
+  private alertService = inject(AlertService);
 
   products = signal<Product[]>([]);
   loading = signal(true);
@@ -79,28 +80,39 @@ export class Shop {
 
   addToCart(product: Product): void {
     if (product.stock === 0) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Sin stock',
-        detail: 'Este producto no está disponible'
-      });
+      this.alertService.warn('Sin stock', 'Este producto no está disponible');
       return;
     }
 
     this.cartService.addToCart(product.id, 1).subscribe({
       next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Agregado al carrito',
-          detail: `${product.title} ha sido agregado al carrito`
-        });
+        this.alertService.success('Agregado al carrito', `${product.title} ha sido agregado al carrito`);
       },
       error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: error.error?.message || 'Error al agregar al carrito'
-        });
+        this.alertService.error('Error', error.error?.message || 'Error al agregar al carrito');
+      }
+    });
+  }
+
+  isFavorite(productId: number): boolean{
+    return this.favoriteService.isFavorite(productId);
+  }
+
+  toggleFavorite(productId: number, event: Event): void {
+    event.stopPropagation();
+
+    this.favoriteService.toggleFavorite(productId).subscribe({
+      next: () => {
+        const isNowFavorite = this.favoriteService.isFavorite(productId);
+        this.alertService.success(
+          isNowFavorite ? 'Agregado' : 'Eliminado',
+          isNowFavorite
+            ? 'Producto agregado a favoritos'
+            : 'Producto eliminado de favoritos'
+        );
+      },
+      error: (error) => {
+        this.alertService.error('Error', error.error?.message || 'Error al actualizar favoritos');
       }
     });
   }

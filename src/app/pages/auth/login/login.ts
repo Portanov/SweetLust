@@ -6,8 +6,8 @@ import { AuthService } from '../../../services/auth/auth.service';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
-import { MessageModule } from 'primeng/message';
 import { CommonModule } from '@angular/common';
+import { AlertService } from '../../../services/alert/alert.service';
 
 @Component({
   selector: 'app-login',
@@ -19,7 +19,6 @@ import { CommonModule } from '@angular/common';
     InputTextModule,
     PasswordModule,
     ButtonModule,
-    MessageModule,
   ],
   templateUrl: './login.html',
   styleUrls: ['./login.css'],
@@ -28,9 +27,9 @@ export class Login {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private alertService = inject(AlertService);
 
   loading = signal(false);
-  errorMessage = signal<string | null>(null);
   showPinForm = signal(false);
   tempToken = signal<string | null>(null);
   userEmail = signal<string | null>(null);
@@ -51,7 +50,6 @@ export class Login {
     }
 
     this.loading.set(true);
-    this.errorMessage.set(null);
 
     const { email, password } = this.loginForm.value;
 
@@ -61,14 +59,10 @@ export class Login {
         this.tempToken.set(res.temp_token);
         this.userEmail.set(email!);
         this.showPinForm.set(true);
-
-        console.log('PIN enviado al email del usuario');
       },
       error: (err) => {
         this.loading.set(false);
-        this.errorMessage.set(
-          err?.error?.message ?? 'Credenciales inválidas'
-        );
+        this.alertService.error('Error', err?.error?.message ?? 'Credenciales inválidas');
       },
     });
   }
@@ -80,7 +74,6 @@ export class Login {
     }
 
     this.loading.set(true);
-    this.errorMessage.set(null);
 
     this.authService.verifyPin({
       email: this.userEmail()!,
@@ -92,15 +85,15 @@ export class Login {
 
         if (res.user.role === 'admin') {
           this.router.navigate(['/admin/dashboard']);
+          this.alertService.success('Éxito', 'Sesión iniciada con éxito');
         } else {
           this.router.navigate(['/shop']);
+          this.alertService.success('Éxito', 'Sesión iniciada con éxito');
         }
       },
       error: (err) => {
         this.loading.set(false);
-        this.errorMessage.set(
-          err?.error?.message ?? 'PIN inválido o expirado'
-        );
+        this.alertService.error('Error', err?.error?.message ?? 'PIN inválido o expirado');
 
         if (err?.error?.message?.includes('inválido')) {
           this.pinForm.reset();
@@ -122,12 +115,10 @@ export class Login {
       next: (res) => {
         this.loading.set(false);
         this.tempToken.set(res.temp_token);
-        this.errorMessage.set(null);
-        console.log('Nuevo PIN enviado');
       },
       error: (err) => {
         this.loading.set(false);
-        this.errorMessage.set('Error al reenviar el PIN');
+        this.alertService.error('Error', 'Error al reenviar el PIN');
       }
     });
   }

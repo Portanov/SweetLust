@@ -3,13 +3,12 @@ import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth/auth.service';
 
-// PrimeNG
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { PasswordModule } from 'primeng/password';
 import { DatePickerModule } from 'primeng/datepicker';
 import { ButtonModule } from 'primeng/button';
-import { MessageModule } from 'primeng/message';
+import { AlertService } from '../../../services/alert/alert.service';
 
 @Component({
   selector: 'app-register',
@@ -21,7 +20,6 @@ import { MessageModule } from 'primeng/message';
     PasswordModule,
     DatePickerModule,
     ButtonModule,
-    MessageModule,
   ],
   templateUrl: './register.html',
   styleUrl: './register.css',
@@ -30,12 +28,10 @@ export class Register {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private alertService = inject(AlertService);
 
   loading = signal(false);
-  errorMessage = signal<string | null>(null);
-  successMessage = signal<string | null>(null);
 
-  // Fecha máxima: debe ser mayor de 18 años
   maxDate = new Date(
     new Date().getFullYear() - 18,
     new Date().getMonth(),
@@ -63,8 +59,6 @@ export class Register {
     }
 
     this.loading.set(true);
-    this.errorMessage.set(null);
-    this.successMessage.set(null);
 
     const { username, email, password, phone, birth_date } = this.form.value;
 
@@ -83,14 +77,12 @@ export class Register {
     }).subscribe({
       next: (res) => {
         this.loading.set(false);
-        this.successMessage.set(res.message);
+        this.alertService.success('Éxito', res.message);
         setTimeout(() => void this.router.navigate(['/login']), 1500);
       },
       error: (err) => {
         this.loading.set(false);
-        this.errorMessage.set(
-          err?.error?.message ?? 'Ocurrió un error, intenta de nuevo.'
-        );
+        this.alertService.error('Error', err?.error?.message ?? 'Ocurrió un error, intenta de nuevo.');
       },
     });
   }

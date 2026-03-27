@@ -1,0 +1,92 @@
+<div class="orders-container mx-auto mt-16">
+  <div class="orders-header">
+    <div>
+      <h1 class="orders-title">
+        <i class="pi pi-shopping-bag"></i>
+        Mis Pedidos
+      </h1>
+      <p class="orders-subtitle">Historial de tus compras</p>
+    </div>
+    <p-button icon="pi pi-refresh" label="Actualizar" severity="secondary" [loading]="loading()"
+      (onClick)="refresh()"></p-button>
+  </div>
+
+  @if (loading()) {
+  <div class="orders-skeleton">
+    @for (item of [1,2,3]; track item) {
+    <p-card>
+      <div class="skeleton-header">
+        <div class="skeleton-order-id"></div>
+        <div class="skeleton-status"></div>
+      </div>
+      <div class="skeleton-items">
+        <div class="skeleton-item"></div>
+        <div class="skeleton-item"></div>
+      </div>
+      <div class="skeleton-footer">
+        <div class="skeleton-total"></div>
+        <div class="skeleton-button"></div>
+      </div>
+    </p-card>
+    }
+  </div>
+  } @else if (orders().length === 0) {
+  <div class="empty-orders">
+    <i class="pi pi-shopping-bag empty-icon"></i>
+    <h2>No tienes pedidos aún</h2>
+    <p>¡Realiza tu primera compra y descubre nuestros productos!</p>
+    <a routerLink="/shop" class="shop-link">
+      <p-button label="Ir a la tienda" icon="pi pi-shopping-cart"></p-button>
+    </a>
+  </div>
+  } @else {
+  <div class="orders-grid">
+    @for (order of orders(); track order.id) {
+    <p-card class="order-card">
+      <ng-template pTemplate="header">
+        <div class="order-header">
+          <div class="order-info">
+            <span class="order-id">Pedido #{{ order.id }}</span>
+            <span class="order-date">{{ formatDate(order.created_at) }}</span>
+          </div>
+          <p-tag [value]="getStatusText(order.status)" [severity]="getStatusSeverity(order.status)"></p-tag>
+        </div>
+      </ng-template>
+
+      <div class="order-items">
+        @for (item of order.items.slice(0, 2); track item.id) {
+        <div class="order-item">
+          <img [src]="item.product.image" [alt]="item.product.title" class="item-image">
+          <div class="item-details">
+            <h4 class="item-title">{{ item.product.title }}</h4>
+            <div class="item-meta">
+              <span class="item-quantity">Cantidad: {{ item.quantity }}</span>
+              <span class="item-price">{{ item.unit_price | currency }}</span>
+            </div>
+          </div>
+          <div class="item-subtotal">
+            {{ item.subtotal | currency }}
+          </div>
+        </div>
+        }
+        @if (order.items.length > 2) {
+        <div class="more-items">
+          +{{ order.items.length - 2 }} productos más
+        </div>
+        }
+      </div>
+
+      <div class="order-footer">
+        <div class="order-total">
+          <span class="total-label">Total del pedido:</span>
+          <span class="total-value">{{ order.total | currency }}</span>
+        </div>
+        <a [routerLink]="['/orders', order.id]">
+          <p-button label="Ver detalles" icon="pi pi-eye" severity="primary" outlined></p-button>
+        </a>
+      </div>
+    </p-card>
+    }
+  </div>
+  }
+</div>

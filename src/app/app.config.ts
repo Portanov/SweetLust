@@ -8,6 +8,8 @@ import { MyPreset } from './assets/themes/my_theme';
 import { provideHttpClient } from '@angular/common/http';
 import { authInterceptor } from './assets/interceptors/auth/auth.interceptor';
 import { withInterceptors } from '@angular/common/http';
+import { MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -29,6 +31,8 @@ export const appConfig: ApplicationConfig = {
     }),
     provideAnimationsAsync(),
     provideAnimations(),
-    provideRouter(routes)
+    provideRouter(routes),
+    MessageService,
+    ConfirmationService
   ]
 };

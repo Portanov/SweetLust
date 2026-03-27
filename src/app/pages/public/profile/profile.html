@@ -1,0 +1,274 @@
+<div class="profile-container mx-auto mt-16">
+  <div class="profile-header">
+    <h1 class="profile-title">
+      <i class="pi pi-user"></i>
+      Mi Perfil
+    </h1>
+    <p class="profile-subtitle">Gestiona tu información personal y direcciones de envío</p>
+  </div>
+
+  <div class="profile-grid">
+    <div class="profile-section">
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="section-header">
+            <i class="pi pi-id-card"></i>
+            <h2>Información Personal</h2>
+          </div>
+        </ng-template>
+
+        <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
+          <div class="form-grid">
+            <div class="field">
+              <label for="username">Nombre de usuario</label>
+              <input pInputText id="username" formControlName="username" class="w-full" />
+              @if (profileForm.get('username')?.invalid && profileForm.get('username')?.touched) {
+              <small class="error-text">El nombre de usuario es requerido</small>
+              }
+            </div>
+
+            <div class="field">
+              <label for="email">Correo electrónico</label>
+              <input pInputText id="email" type="email" formControlName="email" class="w-full" />
+              @if (profileForm.get('email')?.invalid && profileForm.get('email')?.touched) {
+              <small class="error-text">Ingresa un correo válido</small>
+              }
+            </div>
+
+            <div class="field">
+              <label for="phone">Teléfono</label>
+              <p-inputNumber id="phone" formControlName="phone" [useGrouping]="false" class="w-full" />
+              @if (profileForm.get('phone')?.invalid && profileForm.get('phone')?.touched) {
+              <small class="error-text">Ingresa un teléfono de 10 dígitos</small>
+              }
+            </div>
+
+            <div class="field">
+              <label for="birth_date">Fecha de nacimiento</label>
+              <p-date-picker id="birth_date" formControlName="birth_date" dateFormat="dd/mm/yy" class="w-full" />
+              @if (profileForm.get('birth_date')?.invalid && profileForm.get('birth_date')?.touched) {
+              <small class="error-text">La fecha de nacimiento es requerida</small>
+              }
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <p-button type="submit" label="Guardar cambios" icon="pi pi-save" [loading]="loading()"
+              [disabled]="loading() || profileForm.pristine"></p-button>
+          </div>
+        </form>
+      </p-card>
+    </div>
+
+    <div class="profile-section">
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="section-header">
+            <i class="pi pi-lock"></i>
+            <h2>Cambiar Contraseña</h2>
+          </div>
+        </ng-template>
+
+        <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+          <div class="form-group">
+            <label for="current_password">Contraseña actual</label>
+            <p-password id="current_password" formControlName="current_password" [toggleMask]="true" feedback="false"
+              class="w-full"></p-password>
+            @if (passwordForm.get('current_password')?.invalid && passwordForm.get('current_password')?.touched) {
+            <small class="error-text">La contraseña actual es requerida</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="new_password">Nueva contraseña</label>
+            <p-password id="new_password" formControlName="new_password" [toggleMask]="true"
+              class="w-full"></p-password>
+            @if (passwordForm.get('new_password')?.invalid && passwordForm.get('new_password')?.touched) {
+            <small class="error-text">Mínimo 6 caracteres</small>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="confirm_password">Confirmar nueva contraseña</label>
+            <p-password id="confirm_password" formControlName="confirm_password" [toggleMask]="true" feedback="false"
+              class="w-full"></p-password>
+            @if (passwordForm.errors?.['mismatch'] && passwordForm.get('confirm_password')?.touched) {
+            <small class="error-text">Las contraseñas no coinciden</small>
+            }
+          </div>
+
+          <div class="form-actions">
+            <p-button type="submit" label="Cambiar contraseña" icon="pi pi-key" [loading]="loading()"
+              [disabled]="loading() || passwordForm.invalid || passwordForm.pristine"></p-button>
+          </div>
+        </form>
+      </p-card>
+    </div>
+  </div>
+
+  <div class="addresses-section">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="section-header">
+          <i class="pi pi-map-marker"></i>
+          <h2>Mis Direcciones</h2>
+          <p-button label="Nueva dirección" icon="pi pi-plus" styleClass="ml-auto"
+            (onClick)="openAddressDialog()"></p-button>
+        </div>
+      </ng-template>
+
+      @if (loadingAddresses()) {
+      <div class="loading-spinner">
+        <i class="pi pi-spin pi-spinner"></i>
+        <p>Cargando direcciones...</p>
+      </div>
+      } @else if (addresses().length === 0) {
+      <div class="empty-state">
+        <i class="pi pi-map-marker"></i>
+        <p>No tienes direcciones guardadas</p>
+        <p-button label="Agregar dirección" icon="pi pi-plus" (onClick)="openAddressDialog()"></p-button>
+      </div>
+      } @else {
+      <div class="addresses-grid">
+        @for (address of addresses(); track address.id) {
+        <div class="address-card" [class.default]="address.is_default">
+          <div class="address-card-header">
+            <div class="recipient-info">
+              <i class="pi pi-user"></i>
+              <span>{{ address.recipient_name }}</span>
+            </div>
+            <div class="phone-info">
+              <i class="pi pi-phone"></i>
+              <span>{{ address.recipient_phone }}</span>
+            </div>
+          </div>
+
+          <div class="address-details">
+            <p>{{ address.street }} {{ address.ext_number }} {{ address.int_number ? 'Int ' + address.int_number : '' }}
+            </p>
+            <p>{{ address.neighborhood }}</p>
+            <p>{{ address.city }}, {{ address.state }}</p>
+            <p>C.P. {{ address.postal_code }}</p>
+            @if (address.references) {
+            <p class="references">Ref: {{ address.references }}</p>
+            }
+          </div>
+
+          <div class="address-actions">
+            @if (address.is_default) {
+            <p-tag value="Predeterminada" severity="success" icon="pi pi-check"></p-tag>
+            } @else {
+            <p-button label="Establecer como predeterminada" icon="pi pi-star" text size="small"
+              (onClick)="setDefaultAddress(address.id)"></p-button>
+            }
+            <div class="action-buttons">
+              <p-button icon="pi pi-pencil" text severity="info" size="small" (onClick)="openAddressDialog(address)"
+                pTooltip="Editar"></p-button>
+              <p-button icon="pi pi-trash" text severity="danger" size="small"
+                (onClick)="deleteAddress(address.id, address.recipient_name)" pTooltip="Eliminar"></p-button>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+      }
+    </p-card>
+  </div>
+
+  <p-dialog [header]="editingAddress() ? 'Editar Dirección' : 'Nueva Dirección'" [(visible)]="addressDialog"
+    [modal]="true" [style]="{ width: '600px' }" (onHide)="closeAddressDialog()">
+    <form [formGroup]="addressForm" (ngSubmit)="saveAddress()">
+      <div class="address-form-grid">
+        <div class="field">
+          <label for="recipient_name">Nombre del destinatario *</label>
+          <input pInputText id="recipient_name" formControlName="recipient_name" class="w-full" />
+          @if (addressForm.get('recipient_name')?.invalid && addressForm.get('recipient_name')?.touched) {
+          <small class="error-text">El nombre es requerido</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="recipient_phone">Teléfono del destinatario *</label>
+          <input pInputText id="recipient_phone" formControlName="recipient_phone" class="w-full" />
+          @if (addressForm.get('recipient_phone')?.invalid && addressForm.get('recipient_phone')?.touched) {
+          <small class="error-text">Ingresa un teléfono de 10 dígitos</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="street">Calle *</label>
+          <input pInputText id="street" formControlName="street" class="w-full" />
+          @if (addressForm.get('street')?.invalid && addressForm.get('street')?.touched) {
+          <small class="error-text">La calle es requerida</small>
+          }
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="ext_number">Número exterior *</label>
+            <input pInputText id="ext_number" formControlName="ext_number" class="w-full" />
+            @if (addressForm.get('ext_number')?.invalid && addressForm.get('ext_number')?.touched) {
+            <small class="error-text">Requerido</small>
+            }
+          </div>
+          <div class="field">
+            <label for="int_number">Número interior</label>
+            <input pInputText id="int_number" formControlName="int_number" class="w-full" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="neighborhood">Colonia *</label>
+          <input pInputText id="neighborhood" formControlName="neighborhood" class="w-full" />
+          @if (addressForm.get('neighborhood')?.invalid && addressForm.get('neighborhood')?.touched) {
+          <small class="error-text">La colonia es requerida</small>
+          }
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="city">Ciudad *</label>
+            <input pInputText id="city" formControlName="city" class="w-full" />
+            @if (addressForm.get('city')?.invalid && addressForm.get('city')?.touched) {
+            <small class="error-text">Requerido</small>
+            }
+          </div>
+          <div class="field">
+            <label for="state">Estado *</label>
+            <input pInputText id="state" formControlName="state" class="w-full" />
+            @if (addressForm.get('state')?.invalid && addressForm.get('state')?.touched) {
+            <small class="error-text">Requerido</small>
+            }
+          </div>
+          <div class="field">
+            <label for="postal_code">Código Postal *</label>
+            <input pInputText id="postal_code" formControlName="postal_code" class="w-full" />
+            @if (addressForm.get('postal_code')?.invalid && addressForm.get('postal_code')?.touched) {
+            <small class="error-text">5 dígitos</small>
+            }
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="references">Referencias (opcional)</label>
+          <textarea pInputTextarea id="references" formControlName="references" rows="3" class="w-full"
+            placeholder="Casa de color azul, cerca del parque, etc."></textarea>
+        </div>
+
+        <div class="field-checkbox">
+          <p-checkbox id="is_default" formControlName="is_default" [binary]="true"
+            label="Establecer como dirección predeterminada"></p-checkbox>
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        <p-button label="Cancelar" severity="secondary" (onClick)="closeAddressDialog()"
+          [disabled]="loading()"></p-button>
+        <p-button type="submit" label="Guardar" [loading]="loading()"
+          [disabled]="loading() || addressForm.invalid"></p-button>
+      </div>
+    </form>
+  </p-dialog>
+
+  <p-confirmDialog></p-confirmDialog>
+</div>

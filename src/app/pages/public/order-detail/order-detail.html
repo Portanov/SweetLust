@@ -1,0 +1,157 @@
+<div class="order-detail-container">
+  <div class="order-detail-header">
+    <a routerLink="/orders" class="back-link">
+      <i class="pi pi-arrow-left"></i>
+      Volver a mis pedidos
+    </a>
+    <h1 class="order-detail-title">
+      <i class="pi pi-info-circle"></i>
+      Detalle del Pedido #{{ order()?.id }}
+    </h1>
+  </div>
+
+  @if (loading()) {
+  <div class="order-detail-skeleton">
+    <div class="skeleton-header"></div>
+    <div class="skeleton-content"></div>
+  </div>
+  } @else if (order()) {
+  <div class="order-detail-grid">
+    <!-- Información de la orden -->
+    <div class="order-info-section">
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="section-header">
+            <i class="pi pi-info-circle"></i>
+            <h3>Información del Pedido</h3>
+          </div>
+        </ng-template>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Estado:</label>
+            <p-tag [value]="getStatusText(order()!.status)" [severity]="getStatusSeverity(order()!.status)"></p-tag>
+          </div>
+          <div class="info-item">
+            <label>Fecha del pedido:</label>
+            <span>{{ formatDate(order()!.created_at) }}</span>
+          </div>
+          <div class="info-item">
+            <label>Total:</label>
+            <span class="total-value">{{ order()!.total | currency }}</span>
+          </div>
+        </div>
+
+        @if (canCancel()) {
+        <div class="cancel-action">
+          <p-button label="Cancelar pedido" icon="pi pi-times" severity="danger" [loading]="canceling()"
+            (onClick)="cancelOrder()"></p-button>
+        </div>
+        }
+      </p-card>
+
+      <!-- Dirección de envío -->
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="section-header">
+            <i class="pi pi-map-marker"></i>
+            <h3>Dirección de Envío</h3>
+          </div>
+        </ng-template>
+
+        @if (order()!.address) {
+        <div class="address-info">
+          <p><strong>{{ order()!.address?.recipient_name }}</strong></p>
+          <p>{{ order()!.address?.recipient_phone }}</p>
+          <p>{{ order()!.address?.street }} {{ order()!.address?.ext_number }}
+            {{ order()!.address?.int_number ? 'Int ' + order()!.address?.int_number : '' }}</p>
+          <p>{{ order()!.address?.neighborhood }}</p>
+          <p>{{ order()!.address?.city }}, {{ order()!.address?.state }}</p>
+          <p>C.P. {{ order()!.address?.postal_code }}</p>
+        </div>
+        }
+      </p-card>
+    </div>
+
+    <!-- Productos -->
+    <div class="products-section">
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="section-header">
+            <i class="pi pi-shopping-bag"></i>
+            <h3>Productos</h3>
+          </div>
+        </ng-template>
+
+        <div class="products-list">
+          @for (item of order()!.items; track item.id) {
+          <div class="product-item">
+            <img [src]="item.product.image" [alt]="item.product.title" class="product-image">
+            <div class="product-details">
+              <h4 class="product-title">{{ item.product.title }}</h4>
+              <div class="product-meta">
+                <span>Cantidad: {{ item.quantity }}</span>
+                <span>Precio unitario: {{ item.unit_price | currency }}</span>
+              </div>
+            </div>
+            <div class="product-subtotal">
+              {{ item.subtotal | currency }}
+            </div>
+          </div>
+          }
+        </div>
+
+        <div class="order-summary">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>{{ order()!.total | currency }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Envío</span>
+            <span class="free-shipping">Gratis</span>
+          </div>
+          <p-divider></p-divider>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span class="total-value">{{ order()!.total | currency }}</span>
+          </div>
+        </div>
+      </p-card>
+    </div>
+  </div>
+
+  <!-- Seguimiento -->
+  <div class="tracking-section">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="section-header">
+          <i class="pi pi-chart-line"></i>
+          <h3>Seguimiento del Pedido</h3>
+        </div>
+      </ng-template>
+
+      @if (order()!.tracking && order()!.tracking.length > 0) {
+      <p-timeline [value]="getTimelineEvents()" align="left">
+        <ng-template pTemplate="marker" let-event>
+          <span class="timeline-marker" [class.completed]="event.status !== 'Pendiente'">
+            <i [class]="event.icon"></i>
+          </span>
+        </ng-template>
+        <ng-template pTemplate="content" let-event>
+          <div class="timeline-event">
+            <div class="event-status">{{ event.status }}</div>
+            <div class="event-date">{{ event.date }}</div>
+            <div class="event-note">{{ event.note }}</div>
+          </div>
+        </ng-template>
+      </p-timeline>
+      } @else {
+      <div class="no-tracking">
+        <i class="pi pi-clock"></i>
+        <p>El seguimiento estará disponible pronto</p>
+      </div>
+      }
+    </p-card>
+  </div>
+  }
+</div>

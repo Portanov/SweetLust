@@ -1,7 +1,15 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { Cart, CartSummary, AddToCartRequest, UpdateCartItemRequest, CartResponse  } from '../../assets/models/shop/cart.model';
+import {
+  Cart,
+  CartSummary,
+  AddToCartRequest,
+  UpdateCartItemRequest,
+  CartResponse,
+  CheckoutRequest,
+  CheckoutResponse
+} from '../../assets/models/shop/cart.model';
 
 const API_URL = 'http://localhost:3000/api';
 
@@ -14,10 +22,12 @@ export class CartService {
   private cartItems = signal<any[]>([]);
   private cartTotal = signal(0);
   private itemCount = signal(0);
+  private cartStatus = signal<string>('active');
 
   readonly items = this.cartItems.asReadonly();
   readonly total = this.cartTotal.asReadonly();
   readonly count = this.itemCount.asReadonly();
+  readonly status = this.cartStatus.asReadonly();
 
   constructor() {
     this.loadCart();
@@ -29,6 +39,7 @@ export class CartService {
         this.cartItems.set(response.summary.items);
         this.cartTotal.set(response.summary.total);
         this.itemCount.set(response.summary.itemCount);
+        this.cartStatus.set(response.cart.status);
       },
       error: (error) => {
         console.error('Error loading cart:', error);
@@ -80,9 +91,9 @@ export class CartService {
     );
   }
 
-  checkout(): Observable<any> {
-    return this.http.post(`${API_URL}/cart/checkout`, {}).pipe(
-      tap(() => {
+  checkout(checkoutData: CheckoutRequest): Observable<CheckoutResponse> {
+    return this.http.post<CheckoutResponse>(`${API_URL}/cart/checkout`, checkoutData).pipe(
+      tap((response) => {
         this.cartItems.set([]);
         this.cartTotal.set(0);
         this.itemCount.set(0);

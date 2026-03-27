@@ -36,6 +36,9 @@
         </div>
         <p-button label="Agregar al carrito" icon="pi pi-shopping-cart" [disabled]="product.stock === 0" (onClick)="addToCart(product)"></p-button>
       </div>
+      <p-button [class.active]="isFavorite(product.id)" (click)="toggleFavorite(product.id, $event)">
+        <i [class]="isFavorite(product.id) ? 'pi pi-heart-fill' : 'pi pi-heart'"></i>
+      </p-button>
       <div class="text-sm text-gray-500 mt-2">
         Stock: {{ product.stock }} unidades
       </div>

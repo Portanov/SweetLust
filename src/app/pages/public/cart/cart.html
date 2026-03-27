@@ -1,4 +1,4 @@
-<div class="cart-container m-auto mt-16">
+<div class="cart-container mx-auto mt-16">
   <div class="cart-header">
     <h1 class="cart-title">
       <i class="pi pi-shopping-cart"></i>
@@ -79,8 +79,8 @@
           <div class="actions">
             <p-button label="Vaciar carrito" icon="pi pi-trash" severity="secondary" outlined (onClick)="clearCart()"
               [disabled]="loading()" styleClass="w-full mb-2"></p-button>
-            <p-button label="Finalizar compra" icon="pi pi-check" (onClick)="checkout()" [loading]="loading()"
-              styleClass="w-full"></p-button>
+            <p-button label="Proceder al pago" icon="pi pi-arrow-right" (onClick)="openCheckoutDialog()"
+              [loading]="loading()" styleClass="w-full"></p-button>
           </div>
         </div>
       </p-card>
@@ -88,6 +88,60 @@
   </div>
   }
 
-  <p-toast></p-toast>
+  <!-- Dialog de Checkout -->
+  <p-dialog header="Confirmar dirección de envío" [(visible)]="checkoutDialog" [modal]="true"
+    [style]="{ width: '500px' }" [closable]="!loading()">
+    <div class="checkout-dialog">
+      @if (loadingAddresses()) {
+      <div class="flex justify-center p-4">
+        <i class="pi pi-spin pi-spinner text-2xl text-pink-500"></i>
+        <p class="ml-2">Cargando direcciones...</p>
+      </div>
+      } @else {
+      <div class="address-list">
+        <h3>Selecciona una dirección de envío</h3>
+
+        @for (address of addresses(); track address.id) {
+        <div class="address-option" (click)="selectedAddress.set(address)">
+          <div class="address-radio">
+            <i
+              [class]="selectedAddress()?.id === address.id ? 'pi pi-check-circle text-pink-500' : 'pi pi-circle text-gray-400'"></i>
+          </div>
+          <div class="address-details">
+            <p class="address-line"><strong>{{ address.recipient_name }}</strong></p>
+            <p class="address-line">{{ address.recipient_phone }}</p>
+            <p class="address-line">{{ address.street }} {{ address.ext_number }} {{ address.int_number ? 'Int ' +
+              address.int_number : '' }}</p>
+            <p class="address-line">{{ address.neighborhood }}</p>
+            <p class="address-line">{{ address.city }}, {{ address.state }}</p>
+            <p class="address-line">C.P. {{ address.postal_code }}</p>
+            @if (address.references) {
+            <p class="address-line references">{{ address.references }}</p>
+            }
+            @if (address.is_default) {
+            <span class="default-badge">Predeterminada</span>
+            }
+          </div>
+        </div>
+        }
+
+        <div class="add-address-link">
+          <a (click)="goToAddAddress()" class="cursor-pointer text-pink-500 hover:text-pink-600">
+            <i class="pi pi-plus-circle mr-1"></i>
+            Agregar nueva dirección
+          </a>
+        </div>
+      </div>
+
+      <div class="checkout-actions">
+        <p-button label="Cancelar" severity="secondary" (onClick)="checkoutDialog.set(false)"
+          [disabled]="loading()"></p-button>
+        <p-button label="Confirmar compra" (onClick)="confirmCheckout()" [loading]="loading()"
+          [disabled]="!selectedAddress()"></p-button>
+      </div>
+      }
+    </div>
+  </p-dialog>
+
   <p-confirmDialog></p-confirmDialog>
 </div>

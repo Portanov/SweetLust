@@ -1,0 +1,20 @@
+{
+  "material-icon-theme.folders.associations": {
+    "favorite": "mojo",
+    "favorites": "mojo",
+    "dashboard": "layout",
+    "users": "admin",
+    "user": "admin",
+    "questions": "helper",
+    "unauthorized": "coverage",
+    "shop": "store",
+    "products": "gulp",
+    "permissions": "guard",
+    "alert": "private",
+    "confirmationAlert": "private",
+    "landing": "home",
+    "profile": "admin",
+    "orders": "moon",
+    "address": "home",
+  }
+}

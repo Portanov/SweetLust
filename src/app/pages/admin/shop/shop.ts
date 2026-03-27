@@ -9,11 +9,10 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { TextareaModule } from 'primeng/textarea';
+import { AlertService } from '../../../services/alert/alert.service';
+import { ConfirmationAlertService } from '../../../services/confirmationAlert/confirmation-alert.service';
 
 @Component({
   selector: 'app-shop',
@@ -27,19 +26,16 @@ import { TextareaModule } from 'primeng/textarea';
     InputNumberModule,
     DialogModule,
     TableModule,
-    ConfirmDialogModule,
-    ToastModule,
     ToolbarModule
   ],
   templateUrl: './shop.html',
   styleUrl: './shop.css',
-  providers: [ConfirmationService, MessageService],
 })
 export class Shop {
   private productService = inject(ProductService);
   private fb = inject(FormBuilder);
-  private confirmationService = inject(ConfirmationService);
-  private messageService = inject(MessageService);
+  private alertService = inject(AlertService);
+  private confirmationService = inject(ConfirmationAlertService);
 
   products = signal<Product[]>([]);
   loading = signal(true);
@@ -71,11 +67,7 @@ export class Shop {
       error: (error) => {
         console.error('Error loading products:', error);
         this.loading.set(false);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'No se pudieron cargar los productos'
-        });
+        this.alertService.error('Error', 'No se pudieron cargar los productos');
       }
     });
   }
@@ -102,7 +94,7 @@ export class Shop {
       title: product.title,
       description: product.description,
       image: product.image,
-      price: product.price,
+      price: Number(product.price),
       stock: product.stock
     });
     this.isEditing.set(true);
@@ -125,20 +117,12 @@ export class Shop {
     if (this.isEditing() && this.selectedProductId) {
       this.productService.updateProduct(this.selectedProductId, productData).subscribe({
         next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Éxito',
-            detail: 'Producto actualizado correctamente'
-          });
+          this.alertService.success('Éxito', 'Producto actualizado correctamente');
           this.loadProducts();
           this.hideDialog();
         },
         error: (error) => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Error al actualizar el producto'
-          });
+          this.alertService.error('Error', 'Error al actualizar el producto');
         }
       });
     } else {
@@ -152,50 +136,32 @@ export class Shop {
 
       this.productService.createProduct(createData).subscribe({
         next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Éxito',
-            detail: 'Producto creado correctamente'
-          });
+          this.alertService.success('Éxito', 'Producto creado correctamente');
           this.loadProducts();
           this.hideDialog();
         },
         error: (error) => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Error al crear el producto'
-          });
+          this.alertService.error('Error', 'Error al crear el producto');
         }
       });
     }
   }
 
   deleteProduct(product: Product): void {
-    this.confirmationService.confirm({
-      message: `¿Estás seguro de eliminar el producto "${product.title}"?`,
-      header: 'Confirmar eliminación',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
+    this.confirmationService.confirmDelete(
+      `¿Estás seguro de eliminar el producto "${product.title}"?`,
+      () => {
         this.productService.deleteProduct(product.id).subscribe({
           next: () => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Éxito',
-              detail: 'Producto eliminado correctamente'
-            });
+            this.alertService.success('Éxito', 'Producto eliminado correctamente');
             this.loadProducts();
           },
           error: (error) => {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'Error al eliminar el producto'
-            });
+            this.alertService.error('Error', 'Error al eliminar el producto');
           }
         });
       }
-    });
+    );
   }
 
   hideDialog(): void {

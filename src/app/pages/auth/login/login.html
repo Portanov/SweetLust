@@ -9,9 +9,6 @@
 
     @if (!showPinForm()) {
     <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" novalidate class="auth-form">
-      @if (errorMessage()) {
-      <p-message severity="error" [text]="errorMessage()!" styleClass="w-full" />
-      }
 
       <div class="field">
         <label for="email" class="field-label">Correo electrónico</label>
@@ -24,8 +21,7 @@
 
       <div class="field">
         <label for="password" class="field-label">Contraseña</label>
-        <p-password id="password" formControlName="password" placeholder="••••••••" [toggleMask]="true"
-          styleClass="w-full" inputStyleClass="w-full" />
+        <p-password id="password" formControlName="password" placeholder="••••••••" [toggleMask]="true" fluid />
         @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
         <small class="field-error">Mínimo 6 caracteres</small>
         }
@@ -37,9 +33,6 @@
 
     @if (showPinForm()) {
     <form [formGroup]="pinForm" (ngSubmit)="onPinSubmit()" novalidate class="auth-form">
-      @if (errorMessage()) {
-      <p-message severity="error" [text]="errorMessage()!" styleClass="w-full" />
-      }
 
       <div class="field">
         <label for="pin" class="field-label">Código PIN</label>

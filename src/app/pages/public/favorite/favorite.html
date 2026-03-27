@@ -1,0 +1,75 @@
+<div class="favorites-container mx-auto mt-16">
+  <div class="favorites-header">
+    <h1 class="favorites-title">
+      <i class="pi pi-heart"></i>
+      Mis Favoritos
+    </h1>
+    <p class="favorites-subtitle">
+      {{ favoriteCount() }} {{ favoriteCount() === 1 ? 'producto' : 'productos' }} guardados
+    </p>
+  </div>
+
+  @if (loading()) {
+  <div class="favorites-grid">
+    @for (item of [1,2,3,4]; track item) {
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="skeleton-image"></div>
+      </ng-template>
+      <div class="skeleton-content">
+        <div class="skeleton-title"></div>
+        <div class="skeleton-price"></div>
+        <div class="skeleton-button"></div>
+      </div>
+    </p-card>
+    }
+  </div>
+  } @else if (favorites().length === 0) {
+  <div class="empty-favorites">
+    <i class="pi pi-heart empty-icon"></i>
+    <h2>No tienes favoritos aún</h2>
+    <p>¡Explora nuestra tienda y guarda tus productos favoritos!</p>
+    <a routerLink="/shop" class="shop-link">
+      <p-button label="Ir a la tienda" icon="pi pi-shopping-bag"></p-button>
+    </a>
+  </div>
+  } @else {
+  <div class="favorites-grid">
+    @for (favorite of favorites(); track favorite.id) {
+    <p-card class="favorite-card">
+      <ng-template pTemplate="header">
+        <div class="product-image-container">
+          <img [src]="favorite.product.image" [alt]="favorite.product.title" (error)="onImageError($event)"
+            class="product-image">
+          <button class="remove-favorite-btn" (click)="removeFavorite(favorite.productId, favorite.product.title)"
+            pTooltip="Eliminar de favoritos">
+            <i class="pi pi-heart-fill"></i>
+          </button>
+        </div>
+      </ng-template>
+
+      <div class="product-info">
+        <h3 class="product-title">{{ favorite.product.title }}</h3>
+        <p class="product-description">{{ favorite.product.description | slice:0:80 }}...</p>
+
+        <div class="product-footer">
+          <div class="product-price">
+            {{ favorite.product.price | currency }}
+          </div>
+          <div class="product-stock" [class.low-stock]="favorite.product.stock < 10">
+            Stock: {{ favorite.product.stock }} unidades
+          </div>
+        </div>
+
+        <div class="product-actions">
+          <p-button label="Agregar al carrito" icon="pi pi-shopping-cart" [disabled]="favorite.product.stock === 0"
+            (onClick)="addToCart(favorite.productId, favorite.product.title)" styleClass="w-full"></p-button>
+        </div>
+      </div>
+    </p-card>
+    }
+  </div>
+  }
+
+  <p-confirmDialog></p-confirmDialog>
+</div>

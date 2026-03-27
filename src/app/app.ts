@@ -1,10 +1,12 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { PrimeNG } from 'primeng/config';
+import { AlertComponent } from './components/alert/alert.component';
+import { ConfirmationDialogComponent } from './components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, AlertComponent, ConfirmationDialogComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
