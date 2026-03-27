@@ -1,5 +1,4 @@
-// src/pages/public/shop/shop.ts
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductService } from '../../../services/products/products.service';
 import { CartService } from '../../../services/cart/cart.service';
@@ -9,10 +8,15 @@ import { Product, OfferType } from '../../../assets/models/shop/product.model';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
-import { PaginatorModule } from 'primeng/paginator';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
+import { PaginatorModule } from 'primeng/paginator';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { PaginatorState } from 'primeng/paginator';
 
 @Component({
   selector: 'app-shop',
@@ -22,13 +26,15 @@ import { TooltipModule } from 'primeng/tooltip';
     ButtonModule,
     CardModule,
     InputTextModule,
-    PaginatorModule,
     SkeletonModule,
     TagModule,
-    TooltipModule
+    TooltipModule,
+    PaginatorModule,
+    IconFieldModule,
+    InputIconModule,
   ],
   templateUrl: './shop.html',
-  styleUrls: ['./shop.css']
+  styleUrls: ['./shop.css'],
 })
 export class Shop implements OnInit {
   private productService = inject(ProductService);
@@ -36,48 +42,67 @@ export class Shop implements OnInit {
   private favoritesService = inject(FavoritesService);
   private alertService = inject(AlertService);
 
-  products = signal<Product[]>([]);
+  allProducts = signal<Product[]>([]);
   loading = signal(true);
-  total = signal(0);
-  currentPage = signal(1);
-  pageSize = signal(10);
   searchTerm = signal('');
+  currentPage = signal(0);
+  readonly pageSize = 10;
+
+
+  pagedProducts = computed(() => {
+    const start = this.currentPage() * this.pageSize;
+    return this.allProducts().slice(start, start + this.pageSize);
+  });
+
+  total = computed(() => this.allProducts().length);
+
+  private searchSubject = new Subject<string>();
+
+  constructor() {
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      takeUntilDestroyed(),
+    ).subscribe((term) => {
+      this.searchTerm.set(term);
+      this.currentPage.set(0);
+      this.loadProducts();
+    });
+  }
 
   ngOnInit(): void {
     this.loadProducts();
-    this.favoritesService.loadFavorites();
   }
 
   loadProducts(): void {
     this.loading.set(true);
-    this.productService.getProducts(
-      this.currentPage(),
-      this.pageSize(),
-      this.searchTerm()
-    ).subscribe({
+    this.productService.getProducts(this.searchTerm()).subscribe({
       next: (response) => {
-        this.products.set(response.products);
-        this.total.set(response.total);
+        this.allProducts.set(response.products);
         this.loading.set(false);
       },
-      error: (error) => {
-        console.error('Error loading products:', error);
+      error: () => {
+        this.allProducts.set([]);
         this.loading.set(false);
-      }
+        this.alertService.error('Error', 'Error al cargar los productos');
+      },
     });
   }
 
   onPageChange(event: any): void {
-    this.currentPage.set(event.page + 1);
-    this.pageSize.set(event.rows);
-    this.loadProducts();
+    this.currentPage.set(event.page ?? 0);
+    const productGrid = document.querySelector('.p-16');
+    productGrid?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   onSearch(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.searchTerm.set(input.value);
-    this.currentPage.set(1);
-    this.loadProducts();
+    this.searchSubject.next((event.target as HTMLInputElement).value);
+  }
+
+  clearSearch(): void {
+    this.searchSubject.next('');
+    const input = document.querySelector('input[type="text"]') as HTMLInputElement;
+    if (input) input.value = '';
   }
 
   addToCart(product: Product): void {
@@ -85,31 +110,23 @@ export class Shop implements OnInit {
       this.alertService.warn('Sin stock', 'Este producto no está disponible');
       return;
     }
-
     this.cartService.addToCart(product.id, 1).subscribe({
-      next: () => {
-        this.alertService.success('Agregado al carrito', `${product.title} ha sido agregado al carrito`);
-      },
-      error: (error) => {
-        this.alertService.error('Error', error.error?.message || 'Error al agregar al carrito');
-      }
+      next: () => this.alertService.success('Agregado', `${product.title} agregado al carrito`),
+      error: (err) => this.alertService.error('Error', err.error?.message || 'Error al agregar'),
     });
   }
 
   toggleFavorite(productId: number, event: Event): void {
     event.stopPropagation();
-
     this.favoritesService.toggleFavorite(productId).subscribe({
       next: () => {
-        const isFavorite = this.favoritesService.isFavorite(productId);
+        const isFav = this.favoritesService.isFavorite(productId);
         this.alertService.success(
-          isFavorite ? 'Agregado' : 'Eliminado',
-          isFavorite ? 'Producto agregado a favoritos' : 'Producto eliminado de favoritos'
+          isFav ? 'Agregado' : 'Eliminado',
+          isFav ? 'Agregado a favoritos' : 'Eliminado de favoritos',
         );
       },
-      error: (error) => {
-        this.alertService.error('Error', error.error?.message || 'Error al actualizar favoritos');
-      }
+      error: (err) => this.alertService.error('Error', err.error?.message || 'Error'),
     });
   }
 
@@ -117,34 +134,22 @@ export class Shop implements OnInit {
     return this.favoritesService.isFavorite(productId);
   }
 
-  getOfferLabel(product: Product): string | null {
-    if (!product.offer || !product.offer.is_active) return null;
-
-    const offer = product.offer;
-    switch (offer.type) {
-      case OfferType.PERCENTAGE:
-        return `${offer.discount_value}% OFF`;
-      case OfferType.FIXED_PRICE:
-        return `Oferta: $${offer.discount_value}`;
-      case OfferType.TWO_FOR_ONE:
-        return `2x1`;
-      case OfferType.BUNDLE:
-        return `${offer.bundle_quantity} x $${offer.discount_value}`;
-      default:
-        return offer.label;
+  getOfferLabel(product: Product): string {
+    if (!product.offer?.is_active) return '';
+    switch (product.offer.type) {
+      case OfferType.PERCENTAGE: return `${product.offer.discount_value}% OFF`;
+      case OfferType.FIXED_PRICE: return `Oferta: $${product.offer.discount_value}`;
+      case OfferType.TWO_FOR_ONE: return '2x1';
+      case OfferType.BUNDLE: return `${product.offer.bundle_quantity} x $${product.offer.discount_value}`;
+      default: return product.offer.label;
     }
   }
 
   getOfferSeverity(product: Product): 'success' | 'danger' | 'warn' | 'info' {
-    if (!product.offer) return 'info';
-
-    switch (product.offer.type) {
-      case OfferType.PERCENTAGE:
-        return 'danger';
-      case OfferType.TWO_FOR_ONE:
-        return 'success';
-      default:
-        return 'warn';
+    switch (product.offer?.type) {
+      case OfferType.PERCENTAGE: return 'danger';
+      case OfferType.TWO_FOR_ONE: return 'success';
+      default: return 'warn';
     }
   }
 
@@ -157,7 +162,6 @@ export class Shop implements OnInit {
   }
 
   onImageError(event: Event): void {
-    const img = event.target as HTMLImageElement;
-    img.src = 'assets/images/placeholder.png';
+    (event.target as HTMLImageElement).src = 'assets/images/placeholder.png';
   }
 }

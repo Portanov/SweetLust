@@ -1,4 +1,3 @@
-// src/pages/public/questions/questions.ts
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AccordionModule } from 'primeng/accordion';
@@ -8,6 +7,7 @@ import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { AvatarModule } from 'primeng/avatar';
+import { ChipModule } from 'primeng/chip';
 
 interface Pregunta {
   id: string;
@@ -29,7 +29,8 @@ interface Pregunta {
     TagModule,
     ButtonModule,
     TooltipModule,
-    AvatarModule
+    AvatarModule,
+    ChipModule,
   ],
   templateUrl: './questions.html',
   styleUrls: ['./questions.css']

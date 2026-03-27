@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ProductService } from '../../../services/products/products.service';
@@ -68,6 +68,8 @@ export class Shop implements OnInit {
   selectedProductId = signal<number | null>(null);
   selectedProduct = signal<Product | null>(null);
   selectedOffer = signal<Offer | null>(null);
+  first = signal(0);
+  rows = signal(10);
 
   offerTypes = [
     { label: 'Porcentaje de descuento', value: OfferType.PERCENTAGE },
@@ -98,24 +100,48 @@ export class Shop implements OnInit {
     this.loadProducts();
   }
 
-  loadProducts(page: number = 0, limit: number = 10): void {
+  pagedProducts = computed(() => {
+    const start = this.first();
+    const end = start + this.rows();
+    return this.products().slice(start, end);
+  });
+
+  loadProducts(): void {
     this.loading.set(true);
-    this.productService.getProducts(page + 1, limit).subscribe({
+    this.productService.getProducts().subscribe({
       next: (response) => {
         this.products.set(response.products);
-        this.total.set(response.total);
+        this.total.set(response.products.length);
+
         this.loading.set(false);
       },
       error: (error) => {
-        console.error('Error loading products:', error);
         this.loading.set(false);
         this.alertService.error('Error', 'No se pudieron cargar los productos');
       }
     });
   }
 
+  onPageChange(event: any): void {
+    this.first.set(event.first);
+    this.rows.set(event.rows);
+  }
+
   loadProductsLazy(event: any): void {
-    this.loadProducts(event.first / event.rows, event.rows);
+    this.loadProducts();
+  }
+
+  onSearch(event: any): void {
+    const query = event.target.value;
+    this.loading.set(true);
+    this.productService.getProducts(query).subscribe({
+      next: (response) => {
+        this.products.set(response.products);
+        this.total.set(response.total);
+        this.first.set(0);
+        this.loading.set(false);
+      }
+    });
   }
 
   openNewProduct(): void {
@@ -219,44 +245,27 @@ export class Shop implements OnInit {
     const offerData: any = {
       type: formValue.type!,
       label: formValue.label!,
-      is_active: formValue.is_active === true
+      is_active: !!formValue.is_active,
+      discount_value: formValue.discount_value ?? undefined,
+      bundle_quantity: formValue.bundle_quantity ?? undefined,
+      starts_at: formValue.starts_at ?? undefined,
+      ends_at: formValue.ends_at ?? undefined
     };
-    if (formValue.discount_value !== null && formValue.discount_value !== undefined) {
-      offerData.discount_value = formValue.discount_value;
-    }
-
-    if (formValue.bundle_quantity !== null && formValue.bundle_quantity !== undefined) {
-      offerData.bundle_quantity = formValue.bundle_quantity;
-    }
-
-    if (formValue.starts_at) {
-      offerData.starts_at = formValue.starts_at;
-    }
-
-    if (formValue.ends_at) {
-      offerData.ends_at = formValue.ends_at;
-    }
 
     if (this.selectedOffer()) {
       this.productService.updateOffer(this.selectedOffer()!.id, offerData).subscribe({
         next: () => {
-          this.alertService.success('Éxito', 'Oferta actualizada correctamente');
+          this.alertService.success('Éxito', 'Oferta actualizada');
           this.loadProducts();
           this.offerDialog.set(false);
-        },
-        error: (error) => {
-          this.alertService.error('Error', error.error?.message || 'Error al actualizar la oferta');
         }
       });
     } else {
       this.productService.createOffer(this.selectedProduct()!.id, offerData).subscribe({
         next: () => {
-          this.alertService.success('Éxito', 'Oferta creada correctamente');
+          this.alertService.success('Éxito', 'Oferta creada');
           this.loadProducts();
           this.offerDialog.set(false);
-        },
-        error: (error) => {
-          this.alertService.error('Error', error.error?.message || 'Error al crear la oferta');
         }
       });
     }

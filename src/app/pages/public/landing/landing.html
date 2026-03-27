@@ -37,24 +37,35 @@
         <p-carousel [value]="products()" [numVisible]="1" [numScroll]="1" orientation="vertical" verticalViewPortHeight="500px"
           contentClass="flex items-center">
           <ng-template let-product #item>
-            <p-card [style]="{ width: '28rem', overflow: 'hidden' }" class="border border-gray-300">
+            <p-card [style]="{ width: '28rem', overflow: 'hidden' }">
               <ng-template #header>
-                <div class="card-header" style="height: 290px; overflow: hidden;">
+                <div class="relative" style="height: 290px; overflow: hidden;">
                   <img [src]="product.image" [alt]="product.title" style="width: 100%; height: 100%; object-fit: cover;">
+                  @if (product.offer) {
+                  <div class="absolute top-2 right-2 z-10">
+                    <p-tag severity="danger" [value]="getOfferLabel(product)" icon="pi pi-tag"></p-tag>
+                  </div>
+                  }
+                  <div class="absolute bottom-2 left-2 z-10">
+                    <p-button [icon]="isFavorite(product.id) ? 'pi pi-heart-fill' : 'pi pi-heart'" [rounded]="true"
+                      severity="secondary" (onClick)="toggleFavorite(product.id, $event)" />
+                  </div>
                 </div>
               </ng-template>
               <ng-template #title>
                 <h1 class="text-2xl text-center cinzel">{{product.title}}</h1>
               </ng-template>
               <ng-template #subtitle>
-                <p class="text-md text-center font-caviar">${{product.final_price ? product.final_price : product.price}} MXN</p>
+                <p class="text-md text-center font-caviar">${{product.final_price ? product.final_price : product.price}}
+                  MXN</p>
               </ng-template>
               <div class="p-6 py-2">
-                <p class="w-48 truncate text-justify font-light text-md text-gray-400">{{product.description}}</p>
+                <p class="w-full truncate text-justify font-light text-md text-gray-400">{{product.description}}</p>
               </div>
               <ng-template #footer>
                 <div class="text-center">
-                  <p-button icon="pi pi-shopping-cart" label="Añadir al carrito" [raised]="true" fluid></p-button>
+                  <p-button icon="pi pi-shopping-cart" label="Añadir al carrito" [raised]="true"
+                    (onClick)="addToCart(product.id, $event)" fluid />
                 </div>
               </ng-template>
             </p-card>
@@ -62,9 +73,49 @@
         </p-carousel>
       </div>
     </div>
-    <div class="grid grid-cols-2 gap-2 px-8 py-10 bg-gray-300">
-      <div class="">
-
+    <div class="grid grid-cols-2 gap-2 px-8 pb-10 pt-16 bg-gray-400">
+      <div class="flex items-center justify-center">
+        <p-carousel [value]="newProducts()" [circular]="true" autoplayInterval="3000" [numVisible]="1" [numScroll]="1" [style]="{width: '33.5rem'}">
+          <ng-template let-newProduct #item>
+            <p-card [style]="{ width: '28rem', overflow: 'hidden' }">
+              <ng-template #header>
+                <div class="relative" style="height: 290px; overflow: hidden;">
+                  <img [src]="newProduct.image" [alt]="newProduct.title" style="width: 100%; height: 100%; object-fit: cover;">
+                  @if (newProduct.offer) {
+                  <div class="absolute top-2 right-2 z-10">
+                    <p-tag severity="danger" [value]="getOfferLabel(newProduct)" icon="pi pi-tag"></p-tag>
+                  </div>
+                  }
+                  <div class="absolute bottom-2 left-2 z-10">
+                    <p-button
+                      [icon]="isFavorite(newProduct.id) ? 'pi pi-heart-fill' : 'pi pi-heart'"
+                      [rounded]="true" severity="secondary"
+                      (onClick)="toggleFavorite(newProduct.id, $event)" />
+                  </div>
+                </div>
+              </ng-template>
+              <ng-template #title>
+                <h1 class="text-2xl text-center cinzel">{{newProduct.title}}</h1>
+              </ng-template>
+              <ng-template #subtitle>
+                <p class="text-md text-center font-caviar">${{newProduct.final_price ? newProduct.final_price : newProduct.price}} MXN</p>
+              </ng-template>
+              <div class="p-6 py-2">
+                <p class="w-full truncate text-justify font-light text-md text-gray-400">{{newProduct.description}}</p>
+              </div>
+              <ng-template #footer>
+                <div class="text-center">
+                  <p-button
+                    icon="pi pi-shopping-cart"
+                    label="Añadir al carrito"
+                    [raised]="true"
+                    (onClick)="addToCart(newProduct.id, $event)"
+                  fluid />
+                </div>
+              </ng-template>
+            </p-card>
+          </ng-template>
+        </p-carousel>
       </div>
       <div class="p-12">
         <h1 class="text-9xl text-right font-tropical">Nuestros nuevos productos</h1>

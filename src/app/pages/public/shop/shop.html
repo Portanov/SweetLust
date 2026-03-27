@@ -1,80 +1,202 @@
-<!-- src/pages/public/shop/shop.html -->
-<div class="shop-container">
-  <div class="shop-header">
-    <h1 class="shop-title">Nuestros Productos</h1>
-    <div class="search-bar">
-      <i class="pi pi-search search-icon"></i>
-      <input pInputText placeholder="Buscar productos..." class="search-input" (input)="onSearch($event)" />
+<div class="w-full">
+  <div class="relative overflow-hidden bg-linear-to-tr from-[#0f0507] via-[#2d1119] to-[#461B27] py-24 mb-12 shadow-2xl">
+    <div class="container mx-auto px-6 relative z-10 text-center">
+      <span
+        class="inline-block px-5 py-1.5 mb-6 text-[10px] tracking-[0.4em] uppercase text-[#f3d0d7] border border-[#f3d0d7]/10 rounded-full bg-white/5 backdrop-blur-md font-light">
+        Catalogo extendido
+      </span>
+
+      <h1
+        class="text-7xl p-3 md:text-9xl font-logo mb-4 text-[#ffa9a9]">
+        Catálogo
+      </h1>
+
+      <div class="w-24 h-px bg-linear-to-r from-transparent via-[#f3d0d7]/30 to-transparent mx-auto mb-8"></div>
+
+      <div class="relative max-w-lg mx-auto group">
+        <p-iconfield>
+          <p-inputicon class="pi pi-search text-white/70" />
+          <input pInputText type="text" placeholder="Buscar piezas..." (input)="onSearch($event)" fluid
+            class="py-4 pl-12 rounded-full bg-white/5 backdrop-blur-2xl text-white placeholder:text-white focus:border-white" />
+          @if (searchTerm()) {
+          <button type="button" (click)="clearSearch()"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-[#a64d5d] hover:text-[#f3d0d7]">
+            <i class="pi pi-times-circle"></i>
+          </button>
+          }
+        </p-iconfield>
+      </div>
     </div>
   </div>
 
-  @if (loading()) {
-  <div class="products-grid">
-    @for (item of [1,2,3,4,5,6]; track item) {
-    <p-card>
-      <ng-template pTemplate="header">
-        <div class="skeleton-image"></div>
-      </ng-template>
-      <div class="skeleton-content">
-        <div class="skeleton-title"></div>
-        <div class="skeleton-price"></div>
-        <div class="skeleton-button"></div>
+  <div class="p-16 pt-0 pb-0 my-12">
+    @if (loading()) {
+      <div
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3"
+      >
+        @for (item of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; track item) {
+          <p-card>
+            <ng-template #header>
+              <div style="height: 290px">
+                <p-skeleton width="100%" height="100%"></p-skeleton>
+              </div>
+            </ng-template>
+            <ng-template #title>
+              <p-skeleton width="80%" height="24px" class="mx-auto"></p-skeleton>
+            </ng-template>
+            <ng-template #subtitle>
+              <p-skeleton width="60%" height="20px" class="mx-auto"></p-skeleton>
+            </ng-template>
+            <div class="p-6 py-2">
+              <p-skeleton width="100%" height="60px"></p-skeleton>
+            </div>
+            <ng-template #footer>
+              <p-skeleton width="100%" height="40px"></p-skeleton>
+            </ng-template>
+          </p-card>
+        }
       </div>
-    </p-card>
     }
-  </div>
-  } @else if (products().length === 0) {
-  <div class="empty-state">
-    <i class="pi pi-search"></i>
-    <h3>No se encontraron productos</h3>
-    <p>Intenta con otros términos de búsqueda</p>
-    <p-button label="Limpiar búsqueda" (onClick)="searchTerm.set(''); loadProducts()"></p-button>
-  </div>
-  } @else {
-  <div class="products-grid">
-    @for (product of products(); track product.id) {
-    <p-card class="product-card">
-      <ng-template pTemplate="header">
-        <div class="product-image-container">
-          <img [src]="product.image" [alt]="product.title" (error)="onImageError($event)" class="product-image">
-          @if (getOfferLabel(product)) {
-          <p-tag [value]="getOfferLabel(product)!" [severity]="getOfferSeverity(product)" class="offer-tag"></p-tag>
-          }
-          <button class="favorite-btn" [class.active]="isFavorite(product.id)"
-            (click)="toggleFavorite(product.id, $event)"
-            pTooltip="{{ isFavorite(product.id) ? 'Eliminar de favoritos' : 'Agregar a favoritos' }}">
-            <i [class]="isFavorite(product.id) ? 'pi pi-heart-fill' : 'pi pi-heart'"></i>
-          </button>
-        </div>
-      </ng-template>
 
-      <div class="product-info">
-        <h3 class="product-title">{{ product.title }}</h3>
-        <p class="product-description">{{ product.description | slice:0:80 }}...</p>
-
-        <div class="product-price">
-          @if (hasDiscount(product)) {
-          <span class="original-price">{{ product.price | currency }}</span>
-          <span class="final-price">{{ getDisplayPrice(product) | currency }}</span>
+    @else if (allProducts().length === 0) {
+      <div class="flex flex-col items-center justify-center py-20">
+        <i class="pi pi-search text-6xl text-gray-300 mb-4"></i>
+        <h3 class="text-2xl font-semibold text-gray-600">No se encontraron productos</h3>
+        <p class="text-gray-500 mt-2 text-center max-w-md">
+          @if (searchTerm()) {
+            No encontramos productos que coincidan con "{{ searchTerm() }}"
           } @else {
-          <span class="price">{{ product.price | currency }}</span>
+            No hay productos disponibles en este momento
           }
-        </div>
-
-        <div class="product-stock" [class.low-stock]="product.stock < 10">
-          Stock: {{ product.stock }} unidades
-        </div>
-
-        <p-button label="Agregar al carrito" icon="pi pi-shopping-cart" [disabled]="product.stock === 0"
-          (onClick)="addToCart(product)" styleClass="w-full mt-3"></p-button>
+        </p>
+        @if (searchTerm()) {
+          <p-button
+            label="Limpiar búsqueda"
+            icon="pi pi-times"
+            (onClick)="clearSearch()"
+            class="mt-4"
+            [outlined]="true"
+          />
+        }
       </div>
-    </p-card>
+    }
+
+    @else {
+      <div
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3"
+      >
+        @for (product of pagedProducts(); track product.id) {
+          <p-card class="h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-gray-200 rounded-4xl">
+            <ng-template #header>
+              <div class="relative" style="height: 290px; overflow: hidden">
+                <img
+                  [src]="product.image"
+                  [alt]="product.title"
+                  class="w-full h-full object-cover transition-transform duration-300 hover:scale-110 rounded-t-4xl"
+                  (error)="onImageError($event)"
+                  loading="lazy"
+                />
+
+                @if (product.offer?.is_active) {
+                  <div class="absolute top-2 right-2 z-10">
+                    <p-tag
+                      [severity]="getOfferSeverity(product)"
+                      [value]="getOfferLabel(product)"
+                      icon="pi pi-tag"
+                      [rounded]="true"
+                    />
+                  </div>
+                }
+
+                <div class="absolute bottom-2 left-2 z-10">
+                  <p-button
+                    [icon]="isFavorite(product.id) ? 'pi pi-heart-fill' : 'pi pi-heart'"
+                    [rounded]="true"
+                    severity="secondary"
+                    [text]="true"
+                    (onClick)="toggleFavorite(product.id, $event)"
+                    [pTooltip]="
+                      isFavorite(product.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'
+                    "
+                    tooltipPosition="top"
+                  />
+                </div>
+
+                @if (product.stock > 0 && product.stock <= 5) {
+                  <div class="absolute bottom-2 right-2 z-10">
+                    <p-tag
+                      severity="warn"
+                      [value]="'Solo ' + product.stock + ' disponibles'"
+                      [rounded]="true"
+                      size="small"
+                    />
+                  </div>
+                }
+
+                @if (product.stock === 0) {
+                  <div
+                    class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10"
+                  >
+                    <p-tag severity="danger" value="Agotado" size="large" />
+                  </div>
+                }
+              </div>
+            </ng-template>
+
+            <ng-template #title>
+              <h1 class="text-lg text-center cinzel line-clamp-2 min-h-14">{{ product.title }}</h1>
+            </ng-template>
+
+            <ng-template #subtitle>
+              <div class="text-center font-caviar">
+                @if (hasDiscount(product)) {
+                  <span class="text-sm line-through text-gray-400 mr-2">${{ product.price }}</span>
+                  <span class="text-md text-green-600"
+                    >${{ getDisplayPrice(product) }} MXN</span
+                  >
+                } @else {
+                  <p class="text-md">
+                    ${{ getDisplayPrice(product) }} MXN
+                  </p>
+                }
+              </div>
+            </ng-template>
+
+            <div class="p-6 py-2">
+              <p class="w-full line-clamp-3 text-justify font-light text-xs text-gray-400 min-h-18">
+                {{ product.description }}
+              </p>
+            </div>
+
+            <ng-template #footer>
+              <div class="text-center">
+                <p-button
+                  icon="pi pi-shopping-cart"
+                  label="Añadir al carrito"
+                  [raised]="true"
+                  (onClick)="addToCart(product)"
+                  [disabled]="product.stock === 0"
+                  fluid
+                />
+              </div>
+            </ng-template>
+          </p-card>
+        }
+      </div>
+
+      @if (total() > pageSize) {
+        <div class="flex justify-center mt-8">
+          <p-paginator
+            [rows]="pageSize"
+            [totalRecords]="total()"
+            [first]="currentPage() * pageSize"
+            (onPageChange)="onPageChange($event)"
+            [rowsPerPageOptions]="[]"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="{first} - {last} de {totalRecords} productos"
+          />
+        </div>
+      }
     }
   </div>
-
-  <div class="paginator-container">
-    <p-paginator [first]="(currentPage() - 1) * pageSize()" [rows]="pageSize()" [totalRecords]="total()"
-      [rowsPerPageOptions]="[10, 20, 30]" (onPageChange)="onPageChange($event)"></p-paginator>
-  </div>
-  }
 </div>

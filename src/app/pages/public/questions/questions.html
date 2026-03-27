@@ -1,19 +1,17 @@
-<div class="questions-container font-caviar">
-  <div class="questions-header mt-5">
-    <div class="header-content">
-      <div class="header-badge">
-        <i class="pi pi-question-circle"></i>
-        <span>Centro de Ayuda</span>
-      </div>
-      <h1 class="header-title">Preguntas Frecuentes</h1>
-      <p class="header-subtitle">
+<div class="" >
+  <div class="questions-header mt-14 py-4 border-b border-black/25 mb-6">
+    <div class="text-center">
+      <h1 class="header-title font-logo text-8xl">
+        Preguntas Frecuentes
+      </h1>
+      <p class="text-sm font-caviar text-black/70">
         Encuentra respuestas a las preguntas más comunes sobre nuestros servicios y productos
       </p>
     </div>
   </div>
 
-  <div class="categories-section">
-    <div class="categories-grid">
+  <div class="w-3/4 mb-6 mx-auto">
+    <div class="grid grid-cols-4 gap-4">
       @for (categoria of categorias; track categoria.key) {
       <div class="category-card" (click)="scrollToCategoria(categoria.key)">
         <div class="category-icon">
@@ -25,7 +23,7 @@
     </div>
   </div>
 
-  <div class="faq-content">
+  <div class="w-3/4 mx-auto" >
     <div id="envio" class="faq-section">
       <div class="section-header">
         <div class="section-icon">

@@ -13,10 +13,10 @@ export interface Offer {
   discount_value?: number;
   bundle_quantity?: number;
   is_active: boolean;
-  starts_at?: Date;
-  ends_at?: Date;
-  created_at: Date;
-  updated_at: Date;
+  starts_at?: Date | string;
+  ends_at?: Date | string;
+  created_at: Date | string;
+  updated_at: Date | string;
 }
 
 export interface Product {
@@ -28,8 +28,8 @@ export interface Product {
   stock: number;
   offer?: Offer | null;
   final_price?: number;
-  created_at: Date;
-  updated_at: Date;
+  created_at: Date | string;
+  updated_at: Date | string;
 }
 
 export interface CreateProductRequest {
@@ -70,6 +70,4 @@ export interface UpdateOfferRequest {
 export interface ProductResponse {
   products: Product[];
   total: number;
-  page: number;
-  totalPages: number;
 }

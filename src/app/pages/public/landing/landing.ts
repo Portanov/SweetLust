@@ -10,6 +10,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { Product, OfferType } from '../../../assets/models/shop/product.model';
 import { AlertService } from '../../../services/alert/alert.service';
 import { CartService } from '../../../services/cart/cart.service';
+import { FavoritesService } from '../../../services/favorite/favorite.service';
 
 @Component({
   selector: 'app-landing',
@@ -21,7 +22,7 @@ import { CartService } from '../../../services/cart/cart.service';
     SkeletonModule,
     CarouselModule,
     TagModule,
-  ],
+],
   templateUrl: './landing.html',
   styleUrl: './landing.css',
 })
@@ -29,12 +30,15 @@ export class Landing implements OnInit {
   private productService = inject(ProductService);
   private alertService = inject(AlertService);
   private cartService = inject(CartService);
+  private favoritesService = inject(FavoritesService);
 
   products = signal<Product[]>([]);
+  newProducts = signal<Product[]>([]);
   loading = signal(true);
 
   ngOnInit() {
     this.loadingBestSellers();
+    this.loadingNewProducts();
   }
 
   loadingBestSellers() {
@@ -43,6 +47,21 @@ export class Landing implements OnInit {
     this.productService.getBestSellers().subscribe({
       next: (products) => {
         this.products.set(products);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.alertService.error('Error', 'No se pudieron cargar los productos.');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  loadingNewProducts() {
+    this.loading.set(true);
+
+    this.productService.getNewArrivals().subscribe({
+      next: (products) => {
+        this.newProducts.set(products);
         this.loading.set(false);
       },
       error: () => {
@@ -78,8 +97,8 @@ export class Landing implements OnInit {
     return !!product.final_price && product.final_price < product.price;
   }
 
-  getOfferLabel(product: Product): string | null {
-    if (!product.offer || !product.offer.is_active) return null;
+  getOfferLabel(product: Product): string | undefined {
+    if (!product.offer || !product.offer.is_active) return undefined;
 
     switch (product.offer.type) {
       case OfferType.PERCENTAGE:
@@ -113,9 +132,25 @@ export class Landing implements OnInit {
     });
   }
 
-  addToFavorites(productId: number, event: Event): void {
+  toggleFavorite(productId: number, event: Event): void {
     event.stopPropagation();
-    console.log('Agregar a favoritos:', productId);
+
+    this.favoritesService.toggleFavorite(productId).subscribe({
+      next: () => {
+        const isFavorite = this.favoritesService.isFavorite(productId);
+        this.alertService.success(
+          isFavorite ? 'Agregado' : 'Eliminado',
+          isFavorite ? 'Producto agregado a favoritos' : 'Producto eliminado de favoritos'
+        );
+      },
+      error: (error) => {
+        this.alertService.error('Error', error.error?.message || 'Error al actualizar favoritos');
+      }
+    });
+  }
+
+  isFavorite(productId: number): boolean {
+    return this.favoritesService.isFavorite(productId);
   }
 
   onImageError(event: Event): void {
