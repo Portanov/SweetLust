@@ -75,6 +75,7 @@
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #b5b8c0;
 }
 
 .section-header {
@@ -92,7 +93,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f472b6, #ec489a);
+  background: #a63363;
   border-radius: 12px;
   color: white;
   font-size: 1.5rem;

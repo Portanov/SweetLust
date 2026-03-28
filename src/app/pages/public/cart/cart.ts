@@ -14,6 +14,10 @@ import { InputTextModule } from 'primeng/inputtext';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { Address } from '../../../assets/models/user/address.model';
 import { ConfirmationAlertService } from '../../../services/confirmationAlert/confirmation-alert.service';
+import { DataViewModule } from 'primeng/dataview';
+import { CheckboxModule } from 'primeng/checkbox';
+import { ScrollPanelModule } from 'primeng/scrollpanel';
+import { PanelModule } from 'primeng/panel';
 
 @Component({
   selector: 'app-cart',
@@ -28,7 +32,11 @@ import { ConfirmationAlertService } from '../../../services/confirmationAlert/co
     FormsModule,
     DialogModule,
     InputTextModule,
-    RadioButtonModule
+    RadioButtonModule,
+    DataViewModule,
+    CheckboxModule,
+    ScrollPanelModule,
+    PanelModule,
   ],
   templateUrl: './cart.html',
   styleUrls: ['./cart.css']

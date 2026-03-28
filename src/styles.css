@@ -76,3 +76,23 @@
 body {
   background: #fcfcfc;
 }
+
+body::-webkit-scrollbar {
+  width: 6px;
+}
+
+body::-webkit-scrollbar-track {
+  background: rgb(11, 11, 11);
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: rgb(255, 255, 255);
+  border-radius: 20px;
+  border: 1px solid rgb(11, 11, 11);
+}
+
+:root {
+  --cherry-deep: #1a0101;
+  --cherry-mid: #5c0011;
+  --cherry-bright: #e41e3f;
+}

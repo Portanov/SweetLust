@@ -1,7 +1,7 @@
 <div class="" >
   <div class="questions-header mt-14 py-4 border-b border-black/25 mb-6">
     <div class="text-center">
-      <h1 class="header-title font-logo text-8xl">
+      <h1 class="header-title font-logo text-8xl tracking-wider">
         Preguntas Frecuentes
       </h1>
       <p class="text-sm font-caviar text-black/70">
@@ -35,25 +35,27 @@
         </div>
       </div>
 
-      <p-accordion [multiple]="true">
+      <p-accordion [multiple]="true" value="0">
         @for (pregunta of getPreguntasPorCategoria('envio'); track pregunta.id) {
-        <p-accordion-panel>
+        <p-accordion-panel [value]="pregunta.id">
           <p-accordion-header>{{pregunta.pregunta}}</p-accordion-header>
-          <div class="answer-content">
-            <div class="answer-text">
-              {{ pregunta.respuesta }}
+          <p-accordion-content>
+            <div class="answer-content">
+              <div class="answer-text">
+                {{ pregunta.respuesta }}
+              </div>
+              @if (pregunta.popular) {
+              <div class="answer-footer">
+                <i class="pi pi-star-fill"></i>
+                <span>Pregunta popular</span>
+              </div>
+              }
             </div>
-            @if (pregunta.popular) {
-            <div class="answer-footer">
-              <i class="pi pi-star-fill"></i>
-              <span>Pregunta popular</span>
-            </div>
-            }
-          </div>
+          </p-accordion-content>
         </p-accordion-panel>
         }
       </p-accordion>
-    </div>
+      </div>
 
     <div id="pago" class="faq-section">
       <div class="section-header">
@@ -66,21 +68,23 @@
         </div>
       </div>
 
-      <p-accordion>
+      <p-accordion [multiple]="true" value="1">
         @for (pregunta of getPreguntasPorCategoria('pago'); track pregunta.id) {
-        <p-accordion-panel>
+        <p-accordion-panel [value]="pregunta.id">
           <p-accordion-header>{{pregunta.pregunta}}</p-accordion-header>
-          <div class="answer-content">
-            <div class="answer-text">
-              {{ pregunta.respuesta }}
+          <p-accordion-content>
+            <div class="answer-content">
+              <div class="answer-text">
+                {{ pregunta.respuesta }}
+              </div>
+              @if (pregunta.popular) {
+              <div class="answer-footer">
+                <i class="pi pi-star-fill"></i>
+                <span>Pregunta popular</span>
+              </div>
+              }
             </div>
-            @if (pregunta.popular) {
-            <div class="answer-footer">
-              <i class="pi pi-star-fill"></i>
-              <span>Pregunta popular</span>
-            </div>
-            }
-          </div>
+          </p-accordion-content>
         </p-accordion-panel>
         }
       </p-accordion>
@@ -97,21 +101,23 @@
         </div>
       </div>
 
-      <p-accordion>
+      <p-accordion [multiple]="true" value="2">
         @for (pregunta of getPreguntasPorCategoria('info'); track pregunta.id) {
-        <p-accordion-panel>
+        <p-accordion-panel [value]="pregunta.id">
           <p-accordion-header>{{pregunta.pregunta}}</p-accordion-header>
-          <div class="answer-content">
-            <div class="answer-text">
-              {{ pregunta.respuesta }}
+          <p-accordion-content>
+            <div class="answer-content">
+              <div class="answer-text">
+                {{ pregunta.respuesta }}
+              </div>
+              @if (pregunta.popular) {
+              <div class="answer-footer">
+                <i class="pi pi-star-fill"></i>
+                <span>Pregunta popular</span>
+              </div>
+              }
             </div>
-            @if (pregunta.popular) {
-            <div class="answer-footer">
-              <i class="pi pi-star-fill"></i>
-              <span>Pregunta popular</span>
-            </div>
-            }
-          </div>
+          </p-accordion-content>
         </p-accordion-panel>
         }
       </p-accordion>
@@ -128,21 +134,23 @@
         </div>
       </div>
 
-      <p-accordion>
+      <p-accordion [multiple]="true" value="3">
         @for (pregunta of getPreguntasPorCategoria('productos'); track pregunta.id) {
-        <p-accordion-panel>
+        <p-accordion-panel [value]="pregunta.id">
           <p-accordion-header>{{pregunta.pregunta}}</p-accordion-header>
-          <div class="answer-content">
-            <div class="answer-text">
-              {{ pregunta.respuesta }}
+          <p-accordion-content>
+            <div class="answer-content">
+              <div class="answer-text">
+                {{ pregunta.respuesta }}
+              </div>
+              @if (pregunta.popular) {
+              <div class="answer-footer">
+                <i class="pi pi-star-fill"></i>
+                <span>Pregunta popular</span>
+              </div>
+              }
             </div>
-            @if (pregunta.popular) {
-            <div class="answer-footer">
-              <i class="pi pi-star-fill"></i>
-              <span>Pregunta popular</span>
-            </div>
-            }
-          </div>
+          </p-accordion-content>
         </p-accordion-panel>
         }
       </p-accordion>

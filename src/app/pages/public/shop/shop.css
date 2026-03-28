@@ -46,11 +46,7 @@
   }
 }
 
-:root {
-  --cherry-deep: #1a0101;
-  --cherry-mid: #5c0011;
-  --cherry-bright: #e41e3f;
-}
+
 
 .bg-cherry-950 {
   background-color: #0d0101;
