@@ -8,7 +8,10 @@ import {
   UpdateProductRequest,
   CreateOfferRequest,
   UpdateOfferRequest,
-  Offer
+  Offer,
+  ProductFilters,
+  CategoryWithCount,
+  ProductCategory
 } from '../../assets/models/shop/product.model';
 
 const API_URL = 'http://localhost:3000/api';
@@ -19,20 +22,30 @@ const API_URL = 'http://localhost:3000/api';
 export class ProductService {
   private http = inject(HttpClient);
 
-  // ==================== CRUD de Productos ====================
-
   /**
-   * Obtiene todos los productos con filtro opcional de búsqueda
-   * Nota: El backend no soporta paginación en este endpoint
+   * Obtiene todos los productos con múltiples filtros
+   * Soporta: search, category, minPrice, maxPrice, onSale, inStock
    */
-  getProducts(search?: string): Observable<ProductResponse> {
+  getProducts(filters?: ProductFilters): Observable<ProductResponse> {
     let params = new HttpParams();
 
-    if (search) {
-      params = params.set('search', search);
+    if (filters) {
+      if (filters.search) params = params.set('search', filters.search);
+      if (filters.category) params = params.set('category', filters.category);
+      if (filters.minPrice !== undefined) params = params.set('minPrice', filters.minPrice.toString());
+      if (filters.maxPrice !== undefined) params = params.set('maxPrice', filters.maxPrice.toString());
+      if (filters.onSale !== undefined) params = params.set('onSale', filters.onSale.toString());
+      if (filters.inStock !== undefined) params = params.set('inStock', filters.inStock.toString());
     }
 
     return this.http.get<ProductResponse>(`${API_URL}/products`, { params });
+  }
+
+  /**
+   * Obtiene todas las categorías con conteo de productos
+   */
+  getCategories(): Observable<CategoryWithCount[]> {
+    return this.http.get<CategoryWithCount[]>(`${API_URL}/products/categories`);
   }
 
   /**
@@ -70,7 +83,6 @@ export class ProductService {
     return this.http.patch<Product>(`${API_URL}/products/${id}/stock`, { quantity });
   }
 
-  // ==================== Productos Destacados ====================
 
   /**
    * Obtiene los 3 productos más vendidos
@@ -92,8 +104,6 @@ export class ProductService {
   getProductsOnSale(): Observable<Product[]> {
     return this.http.get<Product[]>(`${API_URL}/products/on-sale`);
   }
-
-  // ==================== Ofertas ====================
 
   /**
    * Crea una nueva oferta para un producto (solo admin)

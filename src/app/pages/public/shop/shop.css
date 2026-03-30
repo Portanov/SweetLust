@@ -31,7 +31,7 @@
 }
 
 .p-skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, #2a1218 25%, #3e1c24 50%, #2a1218 75%);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
 }
@@ -46,18 +46,12 @@
   }
 }
 
-
-
 .bg-cherry-950 {
   background-color: #0d0101;
 }
 
 .text-cherry-200 {
   color: #f8d7da;
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.8s ease-out;
 }
 
 @keyframes fadeIn {
@@ -70,4 +64,29 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Estilos personalizados para la tienda */
+.font-cinzel {
+  font-family: 'Cinzel', serif;
+}
+
+/* Estilos para el slider de PrimeNG */
+.p-slider .p-slider-range {
+  background: linear-gradient(90deg, #b55a6b, #ff8a8a);
+}
+
+.p-slider .p-slider-handle {
+  border-color: #ffb7b7;
+  background: #ffb7b7;
+}
+
+.p-paginator {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(181, 90, 107, 0.3);
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page {
+  color: #f3d0d7;
 }

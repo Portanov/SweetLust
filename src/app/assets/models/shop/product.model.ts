@@ -1,8 +1,25 @@
+
 export enum OfferType {
   PERCENTAGE = 'percentage',
   FIXED_PRICE = 'fixed_price',
   TWO_FOR_ONE = 'two_for_one',
   BUNDLE = 'bundle'
+}
+
+export enum ProductCategory {
+  DISFRACES = 'disfraces',
+  VIBRADORES = 'vibradores',
+  JUGUETES = 'juguetes',
+  LENCERIA = 'lenceria',
+  ACCESORIOS = 'accesorios',
+  LUBRICANTES = 'lubricantes',
+  CONDONES = 'condones',
+  JUEGOS = 'juegos',
+  ACEITES = 'aceites',
+  BONDAGE = 'bondage',
+  MASCARAS = 'mascaras',
+  MUÑECAS = 'muñecas',
+  OTROS = 'otros',
 }
 
 export interface Offer {
@@ -26,10 +43,16 @@ export interface Product {
   image: string;
   price: number;
   stock: number;
+  category?: ProductCategory;
   offer?: Offer | null;
   final_price?: number;
   created_at: Date | string;
   updated_at: Date | string;
+}
+
+export interface CategoryWithCount {
+  category: ProductCategory;
+  count: number;
 }
 
 export interface CreateProductRequest {
@@ -38,6 +61,7 @@ export interface CreateProductRequest {
   image: string;
   price: number;
   stock: number;
+  category?: ProductCategory;
 }
 
 export interface UpdateProductRequest {
@@ -46,6 +70,7 @@ export interface UpdateProductRequest {
   image?: string;
   price?: number;
   stock?: number;
+  category?: ProductCategory;
 }
 
 export interface CreateOfferRequest {
@@ -70,4 +95,13 @@ export interface UpdateOfferRequest {
 export interface ProductResponse {
   products: Product[];
   total: number;
+}
+
+export interface ProductFilters {
+  search?: string;
+  category?: ProductCategory;
+  minPrice?: number;
+  maxPrice?: number;
+  onSale?: boolean;
+  inStock?: boolean;
 }

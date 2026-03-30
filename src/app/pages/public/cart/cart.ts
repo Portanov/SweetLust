@@ -64,10 +64,13 @@ export class Cart implements OnInit {
     this.addressService.getMyAddresses().subscribe();
   }
 
-  updateQuantity(itemId: number, event: any): void {
-    const quantity = event.value || event;
+  updateQuantity(itemId: number, quantity: number): void {
     if (quantity < 1) {
       this.removeItem(itemId);
+      return;
+    }
+
+    if (this.loading()) {
       return;
     }
 
@@ -80,6 +83,7 @@ export class Cart implements OnInit {
       error: (error) => {
         this.loading.set(false);
         this.alertService.error('Error', error.error?.message || 'Error al actualizar el carrito');
+        this.cartService.loadCart();
       }
     });
   }
