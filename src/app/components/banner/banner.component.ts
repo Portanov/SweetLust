@@ -52,7 +52,7 @@ import { ImagesService, LocalImage } from '../../services/images/images.service'
     .banner-container {
       position: relative;
       width: 100%;
-      height: 100vh;
+      height: 98vh;
       max-height: 800px;
       overflow: hidden;
       margin: 0;
@@ -86,7 +86,7 @@ import { ImagesService, LocalImage } from '../../services/images/images.service'
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.65);
       z-index: 1;
     }
 
@@ -171,8 +171,6 @@ import { ImagesService, LocalImage } from '../../services/images/images.service'
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(5px);
       border: none;
       width: 48px;
       height: 48px;
@@ -186,7 +184,7 @@ import { ImagesService, LocalImage } from '../../services/images/images.service'
     }
 
     .nav-button:hover {
-      background: rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.1);
       transform: translateY(-50%) scale(1.1);
     }
 

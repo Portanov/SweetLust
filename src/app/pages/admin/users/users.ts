@@ -18,6 +18,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { PasswordModule } from 'primeng/password';
 import { SelectModule } from 'primeng/select';
 import { ConfirmationAlertService } from '../../../services/confirmationAlert/confirmation-alert.service';
+import { UserRole } from '../../../assets/models/user/user.model';
 
 @Component({
   selector: 'app-admin-users',
@@ -50,7 +51,7 @@ export class AdminUsers implements OnInit {
   private confirmationService = inject(ConfirmationAlertService);
 
   users = this.userService.users;
-  loading = this.userService.loadingUsers;
+  loading = this.userService.loading;
 
   userDialog = signal(false);
   editingUser = signal(false);
@@ -102,20 +103,20 @@ export class AdminUsers implements OnInit {
   }
 
   openNewUser(): void {
-    this.userForm.reset({
-      username: '',
-      email: '',
-      password: '',
-      phone: null,
-      birth_date: null,
-      role: 'client'
-    });
+    this.userForm.reset({ role: 'client' });
+    this.userForm.get('username')?.enable();
+    this.userForm.get('email')?.enable();
+    this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
+
     this.editingUser.set(false);
     this.selectedUserId.set(null);
     this.userDialog.set(true);
   }
 
   editUser(user: any): void {
+    this.editingUser.set(true);
+    this.selectedUserId.set(user.id);
+
     this.userForm.patchValue({
       username: user.username,
       email: user.email,
@@ -123,11 +124,12 @@ export class AdminUsers implements OnInit {
       birth_date: new Date(user.birth_date),
       role: user.role
     });
+
+    this.userForm.get('username')?.disable();
+    this.userForm.get('email')?.disable();
     this.userForm.get('password')?.clearValidators();
     this.userForm.get('password')?.updateValueAndValidity();
 
-    this.editingUser.set(true);
-    this.selectedUserId.set(user.id);
     this.userDialog.set(true);
   }
 
@@ -144,7 +146,7 @@ export class AdminUsers implements OnInit {
       password: formValue.password!,
       phone: formValue.phone!,
       birth_date: formValue.birth_date!.toISOString().split('T')[0],
-      role: formValue.role as 'admin' | 'client'
+      role: formValue.role as UserRole
     };
 
     if (this.editingUser() && this.selectedUserId()) {
@@ -171,8 +173,8 @@ export class AdminUsers implements OnInit {
   }
 
   updateRole(userId: number, currentRole: string): void {
-    const newRole = currentRole === 'admin' ? 'client' : 'admin';
-    const roleText = newRole === 'admin' ? 'Administrador' : 'Cliente';
+    const newRole = (currentRole === UserRole.ADMIN ? UserRole.CLIENT : UserRole.ADMIN) as UserRole;
+    const roleText = newRole === UserRole.ADMIN ? 'Administrador' : 'Cliente';
 
     this.confirmationService.confirmCustom(
       `¿Estás seguro de cambiar el rol de este usuario a ${roleText}?`,

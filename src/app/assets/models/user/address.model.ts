@@ -12,7 +12,7 @@ export interface Address {
   postal_code: string;
   references?: string;
   is_default: boolean;
-  created_at: Date;
+  created_at?: string;
 }
 
 export interface CreateAddressRequest {

@@ -65,24 +65,16 @@ export class Cart implements OnInit {
   }
 
   updateQuantity(itemId: number, quantity: number): void {
-    if (quantity < 1) {
-      this.removeItem(itemId);
-      return;
-    }
-
-    if (this.loading()) {
-      return;
-    }
+    if (quantity < 1) return;
 
     this.loading.set(true);
     this.cartService.updateCartItem(itemId, quantity).subscribe({
       next: () => {
         this.loading.set(false);
-        this.alertService.success('Carrito Actualizado', 'Cantidad actualizada correctamente');
       },
       error: (error) => {
         this.loading.set(false);
-        this.alertService.error('Error', error.error?.message || 'Error al actualizar el carrito');
+        this.alertService.error('Error', 'No pudimos actualizar el stock');
         this.cartService.loadCart();
       }
     });

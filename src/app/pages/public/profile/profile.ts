@@ -1,288 +1,223 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputMaskModule } from 'primeng/inputmask';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { MessageService } from 'primeng/api';
 import { UserService } from '../../../services/user/user.service';
 import { AddressService } from '../../../services/address/address.service';
-import { AlertService } from '../../../services/alert/alert.service';
+import { User } from '../../../assets/models/user/user.model';
+import { Address } from '../../../assets/models/user/address.model';
 import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputNumberModule } from 'primeng/inputnumber';
+import { FormsModule } from '@angular/forms';
+import { CheckboxModule } from 'primeng/checkbox';
+import { DialogModule } from 'primeng/dialog';
 import { DatePickerModule } from 'primeng/datepicker';
 import { PasswordModule } from 'primeng/password';
-import { DividerModule } from 'primeng/divider';
-import { DialogModule } from 'primeng/dialog';
+import { AvatarModule } from 'primeng/avatar';
+import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
+import { AlertService } from '../../../services/alert/alert.service';
+import { UpdateProfileRequest } from '../../../assets/models/user/user.model';
 import { TextareaModule } from 'primeng/textarea';
-import { CheckboxModule } from 'primeng/checkbox';
-import { ConfirmationAlertService } from '../../../services/confirmationAlert/confirmation-alert.service';
 
 @Component({
   selector: 'app-profile',
-  standalone: true,
   imports: [
-    CommonModule,
-    ReactiveFormsModule,
     ButtonModule,
-    CardModule,
-    InputTextModule,
-    InputNumberModule,
+    FormsModule,
+    CheckboxModule,
+    DialogModule,
+    InputMaskModule,
     DatePickerModule,
     PasswordModule,
-    DividerModule,
-    DialogModule,
+    AvatarModule,
+    SkeletonModule,
     TagModule,
-    TextareaModule,
-    CheckboxModule
+    InputTextModule,
+    TextareaModule
   ],
   templateUrl: './profile.html',
-  styleUrls: ['./profile.css']
+  styleUrls: ['./profile.css'],
+  standalone: true
 })
 export class Profile implements OnInit {
-  private fb = inject(FormBuilder);
   private userService = inject(UserService);
   private addressService = inject(AddressService);
+  private messageService = inject(MessageService);
   private alertService = inject(AlertService);
-  private confirmationService = inject(ConfirmationAlertService);
 
-  loading = signal(false);
-  addressDialog = signal(false);
-  editingAddress = signal(false);
-  selectedAddressId = signal<number | null>(null);
 
   user = this.userService.user;
-  addresses = this.addressService.addresses;
   loadingUser = this.userService.loading;
+  addresses = this.addressService.addresses;
   loadingAddresses = this.addressService.loading;
 
-  profileForm = this.fb.group({
-    username: ['', [Validators.required, Validators.maxLength(100)]],
-    email: ['', [Validators.required, Validators.email]],
-    phone: [null as number | null, [Validators.required, Validators.min(1000000000)]],
-    birth_date: [null as Date | null, [Validators.required]]
-  });
 
-  passwordForm = this.fb.group({
-    current_password: ['', [Validators.required, Validators.minLength(6)]],
-    new_password: ['', [Validators.required, Validators.minLength(6)]],
-    confirm_password: ['', [Validators.required]]
-  }, { validators: this.passwordMatchValidator });
+  profileModel = {
+    username: '',
+    email: '',
+    phone: '',
+    birth_date: null as Date | null
+  };
 
-  addressForm = this.fb.group({
-    recipient_name: ['', [Validators.required, Validators.maxLength(100)]],
-    recipient_phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-    street: ['', [Validators.required, Validators.maxLength(255)]],
-    ext_number: ['', [Validators.required, Validators.maxLength(20)]],
-    int_number: ['', [Validators.maxLength(20)]],
-    neighborhood: ['', [Validators.required, Validators.maxLength(100)]],
-    city: ['', [Validators.required, Validators.maxLength(100)]],
-    state: ['', [Validators.required, Validators.maxLength(100)]],
-    postal_code: ['', [Validators.required, Validators.pattern(/^\d{5}$/)]],
-    references: ['', [Validators.maxLength(500)]],
-    is_default: [false]
-  });
+  passwordModel = {
+    current_password: '',
+    new_password: '',
+    confirm_password: ''
+  };
+
+  addressModel = {
+    id: null as number | null,
+    recipient_name: '',
+    recipient_phone: '',
+    street: '',
+    ext_number: '',
+    int_number: '',
+    neighborhood: '',
+    city: '',
+    state: '',
+    postal_code: '',
+    references: '',
+    is_default: false
+  };
+
+
+  addressDialog = signal(false);
+  editingAddress = signal(false);
+  loading = signal(false);
+  loadingPassword = signal(false);
+
+  maxBirthDate = new Date(new Date().setFullYear(new Date().getFullYear() - 18));
 
   ngOnInit(): void {
     this.loadUserData();
-  }
-
-  passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
-    const password = group.get('new_password')?.value;
-    const confirm = group.get('confirm_password')?.value;
-    return password === confirm ? null : { mismatch: true };
+    this.loadAddresses();
   }
 
   loadUserData(): void {
     this.userService.getProfile().subscribe({
       next: (user) => {
-        this.profileForm.patchValue({
-          username: user.username,
-          email: user.email,
-          phone: user.phone,
-          birth_date: new Date(user.birth_date)
-        });
+        this.populateProfileForm(user);
       },
       error: () => {
         this.alertService.error('Error', 'No se pudo cargar la información del perfil');
       }
     });
-    this.addressService.getMyAddresses().subscribe();
+  }
+
+  populateProfileForm(user: User): void {
+    this.profileModel = {
+      username: user.username || '',
+      email: user.email || '',
+      phone: user.phone ? user.phone.toString() : '',
+      birth_date: user.birth_date ? new Date(user.birth_date) : null
+    };
+  }
+
+  userInitials(): string {
+    const username = this.user()?.username;
+    return username ? username.substring(0, 2).toUpperCase() : '??';
   }
 
   updateProfile(): void {
-    if (this.profileForm.invalid) {
-      this.profileForm.markAllAsTouched();
-      return;
-    }
-
     this.loading.set(true);
-    const formValue = this.profileForm.value;
-    const data = {
-      username: formValue.username!,
-      email: formValue.email!,
-      phone: formValue.phone!,
-      birth_date: formValue.birth_date!.toISOString().split('T')[0]
+
+    const updateData: UpdateProfileRequest = {
+      username: this.profileModel.username,
+      email: this.profileModel.email,
     };
 
-    this.userService.updateProfile(data).subscribe({
+    if (this.profileModel.phone) {
+      const numericPhone = parseInt(this.profileModel.phone.replace(/\D/g, ''), 10);
+      if (!isNaN(numericPhone)) updateData.phone = numericPhone;
+    }
+
+    if (this.profileModel.birth_date) {
+      updateData.birth_date = this.profileModel.birth_date.toISOString().split('T')[0];
+    }
+
+    this.userService.updateProfile(updateData).subscribe({
       next: () => {
         this.loading.set(false);
-        this.alertService.success('Perfil actualizado', 'Tus datos han sido actualizados correctamente');
+        this.alertService.success('Éxito', 'Perfil actualizado');
       },
-      error: (error) => {
+      error: (err) => {
         this.loading.set(false);
-        this.alertService.error('Error', error.error?.message || 'Error al actualizar perfil');
+        this.alertService.error('Error', err.error?.message || 'Error al actualizar');
       }
     });
   }
 
   changePassword(): void {
-    if (this.passwordForm.invalid) {
-      this.passwordForm.markAllAsTouched();
+    if (this.passwordModel.new_password !== this.passwordModel.confirm_password) {
+      this.alertService.error('Error','Las contraseñas no coinciden');
       return;
     }
 
-    this.loading.set(true);
+    this.loadingPassword.set(true);
     this.userService.changePassword({
-      current_password: this.passwordForm.value.current_password!,
-      new_password: this.passwordForm.value.new_password!
+      current_password: this.passwordModel.current_password,
+      new_password: this.passwordModel.new_password
     }).subscribe({
       next: () => {
-        this.loading.set(false);
-        this.passwordForm.reset();
-        this.alertService.success('Contraseña actualizada', 'Tu contraseña ha sido cambiada correctamente');
+        this.loadingPassword.set(false);
+        this.passwordModel = { current_password: '', new_password: '', confirm_password: '' };
+        this.alertService.success('Éxito', 'Contraseña actualizada');
       },
-      error: (error) => {
-        this.loading.set(false);
-        this.alertService.error('Error', error.error?.message || 'Error al cambiar contraseña');
+      error: (err) => {
+        this.loadingPassword.set(false);
+        this.alertService.error('Error', err.error?.message || 'Error al cambiar contraseña');
       }
     });
   }
 
-  openAddressDialog(address?: any): void {
+  resetPasswordForm(): void {
+    this.passwordModel = {
+      current_password: '',
+      new_password: '',
+      confirm_password: ''
+    };
+  }
+
+  loadAddresses(): void {
+    this.addressService.getMyAddresses().subscribe({
+      error: (error) => {
+        this.alertService.error('Error', 'No se pudieron cargar las direcciones.');
+      }
+    });
+  }
+
+  openAddressDialog(address?: Address): void {
     if (address) {
       this.editingAddress.set(true);
-      this.selectedAddressId.set(address.id);
-      this.addressForm.patchValue({
+      this.addressModel = {
+        id: address.id,
         recipient_name: address.recipient_name,
         recipient_phone: address.recipient_phone,
         street: address.street,
         ext_number: address.ext_number,
-        int_number: address.int_number,
+        int_number: address.int_number || '',
         neighborhood: address.neighborhood,
         city: address.city,
         state: address.state,
         postal_code: address.postal_code,
-        references: address.references,
+        references: address.references || '',
         is_default: address.is_default
-      });
+      };
     } else {
       this.editingAddress.set(false);
-      this.selectedAddressId.set(null);
-      this.addressForm.reset({
-        recipient_name: '',
-        recipient_phone: '',
-        street: '',
-        ext_number: '',
-        int_number: '',
-        neighborhood: '',
-        city: '',
-        state: '',
-        postal_code: '',
-        references: '',
-        is_default: false
-      });
+      this.resetAddressForm();
     }
     this.addressDialog.set(true);
   }
 
-  saveAddress(): void {
-    if (this.addressForm.invalid) {
-      this.addressForm.markAllAsTouched();
-      return;
-    }
-
-    this.loading.set(true);
-    const formValue = this.addressForm.value;
-
-    const data: any = {
-      recipient_name: formValue.recipient_name!,
-      recipient_phone: formValue.recipient_phone!,
-      street: formValue.street!,
-      ext_number: formValue.ext_number!,
-      neighborhood: formValue.neighborhood!,
-      city: formValue.city!,
-      state: formValue.state!,
-      postal_code: formValue.postal_code!,
-      is_default: formValue.is_default || false
-    };
-
-    if (formValue.int_number) {
-      data.int_number = formValue.int_number;
-    }
-    if (formValue.references) {
-      data.references = formValue.references;
-    }
-
-    if (this.editingAddress() && this.selectedAddressId()) {
-      this.addressService.updateAddress(this.selectedAddressId()!, data).subscribe({
-        next: () => {
-          this.loading.set(false);
-          this.addressDialog.set(false);
-          this.alertService.success('Dirección actualizada', 'La dirección ha sido actualizada correctamente');
-          this.addressService.refresh();
-        },
-        error: (error) => {
-          this.loading.set(false);
-          this.alertService.error('Error', error.error?.message || 'Error al actualizar dirección');
-        }
-      });
-    } else {
-      this.addressService.createAddress(data).subscribe({
-        next: () => {
-          this.loading.set(false);
-          this.addressDialog.set(false);
-          this.alertService.success('Dirección creada', 'La dirección ha sido creada correctamente');
-          this.addressService.refresh();
-        },
-        error: (error) => {
-          this.loading.set(false);
-          this.alertService.error('Error', error.error?.message || 'Error al crear dirección');
-        }
-      });
-    }
-  }
-
-  deleteAddress(id: number, recipientName: string): void {
-    this.confirmationService.confirmDelete(
-      `¿Estás seguro de eliminar la dirección de ${recipientName}?`,
-      () => {
-        this.addressService.deleteAddress(id).subscribe({
-          next: () => {
-            this.alertService.success('Dirección eliminada', 'La dirección ha sido eliminada correctamente');
-          },
-          error: (error) => {
-            this.alertService.error('Error', error.error?.message || 'Error al eliminar dirección');
-          }
-        });
-      }
-    );
-  }
-
-  setDefaultAddress(id: number): void {
-    this.addressService.updateAddress(id, { is_default: true }).subscribe({
-      next: () => {
-        this.alertService.success('Dirección predeterminada', 'La dirección ha sido establecida como predeterminada');
-      },
-      error: (error) => {
-        this.alertService.error('Error', error.error?.message || 'Error al establecer dirección predeterminada');
-      }
-    });
-  }
-
   closeAddressDialog(): void {
     this.addressDialog.set(false);
-    this.addressForm.reset({
+    this.resetAddressForm();
+  }
+
+  resetAddressForm(): void {
+    this.addressModel = {
+      id: null,
       recipient_name: '',
       recipient_phone: '',
       street: '',
@@ -294,6 +229,152 @@ export class Profile implements OnInit {
       postal_code: '',
       references: '',
       is_default: false
+    };
+  }
+
+  saveAddress(): void {
+    if (!this.isAddressFormValid()) {
+      return;
+    }
+
+    this.loading.set(true);
+
+    const addressData = {
+      recipient_name: this.addressModel.recipient_name,
+      recipient_phone: this.addressModel.recipient_phone,
+      street: this.addressModel.street,
+      ext_number: this.addressModel.ext_number,
+      int_number: this.addressModel.int_number || undefined,
+      neighborhood: this.addressModel.neighborhood,
+      city: this.addressModel.city,
+      state: this.addressModel.state,
+      postal_code: this.addressModel.postal_code,
+      references: this.addressModel.references || undefined,
+      is_default: this.addressModel.is_default
+    };
+
+    const request = this.editingAddress() && this.addressModel.id
+      ? this.addressService.updateAddress(this.addressModel.id, addressData)
+      : this.addressService.createAddress(addressData);
+
+    request.subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.closeAddressDialog();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: this.editingAddress()
+            ? 'Dirección actualizada correctamente'
+            : 'Dirección creada correctamente'
+        });
+      },
+      error: (error) => {
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.error?.message || 'Error al guardar la dirección'
+        });
+      }
+    });
+  }
+
+  isValidPhone(phone: string): boolean {
+    return /^\d{10}$/.test(phone);
+  }
+
+  isValidPostalCode(postalCode: string): boolean {
+    return /^\d{5}$/.test(postalCode);
+  }
+
+  isAddressFormValidForSubmit(): boolean {
+    // Verificar campos requeridos
+    if (!this.addressModel.recipient_name) return false;
+    if (!this.addressModel.recipient_phone) return false;
+    if (!this.addressModel.street) return false;
+    if (!this.addressModel.ext_number) return false;
+    if (!this.addressModel.neighborhood) return false;
+    if (!this.addressModel.city) return false;
+    if (!this.addressModel.state) return false;
+    if (!this.addressModel.postal_code) return false;
+
+    // Verificar formato de teléfono
+    if (!/^\d{10}$/.test(this.addressModel.recipient_phone)) return false;
+
+    // Verificar formato de código postal
+    if (!/^\d{5}$/.test(this.addressModel.postal_code)) return false;
+
+    return true;
+  }
+
+  // Modifica el método isAddressFormValid() existente para que sea más simple
+  isAddressFormValid(): boolean {
+    if (!this.isAddressFormValidForSubmit()) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Por favor completa todos los campos requeridos correctamente'
+      });
+      return false;
+    }
+    return true;
+  }
+
+  setDefaultAddress(addressId: number): void {
+    this.loading.set(true);
+
+    this.addressService.updateAddress(addressId, { is_default: true }).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: 'Dirección predeterminada actualizada'
+        });
+      },
+      error: (error) => {
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.error?.message || 'Error al establecer dirección predeterminada'
+        });
+      }
+    });
+  }
+
+  deleteAddress(addressId: number, addressName: string): void {
+    this.messageService.add({
+      key: 'confirm',
+      severity: 'warn',
+      summary: 'Confirmar eliminación',
+      detail: `¿Estás seguro de eliminar la dirección de ${addressName}?`,
+      sticky: true,
+      data: { addressId }
+    });
+  }
+
+  confirmDelete(addressId: number): void {
+    this.loading.set(true);
+
+    this.addressService.deleteAddress(addressId).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: 'Dirección eliminada correctamente'
+        });
+      },
+      error: (error) => {
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.error?.message || 'Error al eliminar la dirección'
+        });
+      }
     });
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, catchError, throwError } from 'rxjs';
 import {
   Address,
   CreateAddressRequest,
@@ -40,6 +40,11 @@ export class AddressService {
           this.errorSignal.set(error.error?.message || 'Error al cargar direcciones');
           this.loadingSignal.set(false);
         }
+      }),
+      catchError((err) => {
+        this.errorSignal.set(err.error?.message || 'Error al cargar direcciones');
+        this.loadingSignal.set(false);
+        return throwError(() => err);
       })
     );
   }
@@ -61,6 +66,11 @@ export class AddressService {
           this.errorSignal.set(error.error?.message || 'Error al crear dirección');
           this.loadingSignal.set(false);
         }
+      }),
+      catchError((err) => {
+        this.errorSignal.set(err.error?.message || 'Error al crear dirección');
+        this.loadingSignal.set(false);
+        return throwError(() => err);
       })
     );
   }
@@ -72,7 +82,7 @@ export class AddressService {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.http.patch<Address>(`${API_URL}/addresses/${id}`, data).pipe(
+    return this.http.put<Address>(`${API_URL}/addresses/${id}`, data).pipe(
       tap({
         next: (updatedAddress) => {
           this.addressesSignal.update(addresses =>
@@ -84,6 +94,11 @@ export class AddressService {
           this.errorSignal.set(error.error?.message || 'Error al actualizar dirección');
           this.loadingSignal.set(false);
         }
+      }),
+      catchError((err) => {
+        this.errorSignal.set(err.error?.message || 'Error al actualizar dirección');
+        this.loadingSignal.set(false);
+        return throwError(() => err);
       })
     );
   }
@@ -105,6 +120,11 @@ export class AddressService {
           this.errorSignal.set(error.error?.message || 'Error al eliminar dirección');
           this.loadingSignal.set(false);
         }
+      }),
+      catchError((err) => {
+        this.errorSignal.set(err.error?.message || 'Error al eliminar dirección');
+        this.loadingSignal.set(false);
+        return throwError(() => err);
       })
     );
   }

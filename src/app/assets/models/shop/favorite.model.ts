@@ -1,13 +1,4 @@
-export interface Product {
-  id: number;
-  title: string;
-  description: string;
-  price: number;
-  stock: number;
-  image: string;
-  created_at: Date;
-  updated_at: Date;
-}
+import { Product } from "./product.model";
 
 export interface Favorite {
   id: number;

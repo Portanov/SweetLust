@@ -22,6 +22,7 @@ import { PanelModule } from 'primeng/panel';
 import { debounceTime, distinctUntilChanged, Subject, forkJoin } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PaginatorState } from 'primeng/paginator';
+import { PopoverModule } from 'primeng/popover';
 
 @Component({
   selector: 'app-shop',
@@ -31,7 +32,7 @@ import { PaginatorState } from 'primeng/paginator';
     ButtonModule, CardModule, InputTextModule,
     SkeletonModule, TagModule, TooltipModule,
     PaginatorModule, IconFieldModule, InputIconModule,
-    SliderModule, ChipModule, CarouselModule, PanelModule,
+    SliderModule, ChipModule, CarouselModule, PanelModule, PopoverModule
   ],
   templateUrl: './shop.html',
   styleUrls: ['./shop.css'],
@@ -76,6 +77,7 @@ export class Shop implements OnInit {
   private isLoadingProducts = false;
   private initialized = false;
   private searchSubject = new Subject<string>();
+  OfferType = OfferType;
 
   constructor() {
     this.searchSubject.pipe(
@@ -135,6 +137,17 @@ export class Shop implements OnInit {
         this.alertService.error('Error', 'Error al cargar los productos');
       },
     });
+  }
+
+  hasActiveFilters(): boolean {
+    return (
+      this.selectedCategory() !== 'all' ||
+      this.minPrice() !== null ||
+      this.maxPrice() !== null ||
+      this.onSaleOnly() ||
+      this.inStockOnly() ||
+      this.searchTerm() !== ''
+    );
   }
 
   loadProducts(): void {
@@ -247,7 +260,7 @@ export class Shop implements OnInit {
     if (!product.offer?.is_active) return '';
     switch (product.offer.type) {
       case OfferType.PERCENTAGE: return `${product.offer.discount_value}% OFF`;
-      case OfferType.FIXED_PRICE: return `$${product.offer.discount_value}`;
+      case OfferType.FIXED_PRICE: return `Liquidación`;
       case OfferType.TWO_FOR_ONE: return '2x1';
       case OfferType.BUNDLE: return `${product.offer.bundle_quantity} x $${product.offer.discount_value}`;
       default: return product.offer.label || 'Oferta';

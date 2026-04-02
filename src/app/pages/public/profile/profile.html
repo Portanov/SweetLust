@@ -1,272 +1,335 @@
-<div class="profile-container mx-auto mt-16">
-  <div class="profile-header">
-    <h1 class="profile-title">
-      <i class="pi pi-user"></i>
-      Mi Perfil
-    </h1>
-    <p class="profile-subtitle">Gestiona tu información personal y direcciones de envío</p>
-  </div>
+<div class="min-h-screen bg-gray-50">
 
-  <div class="profile-grid">
-    <div class="profile-section">
-      <p-card>
-        <ng-template pTemplate="header">
-          <div class="section-header">
-            <i class="pi pi-id-card"></i>
-            <h2>Información Personal</h2>
-          </div>
-        </ng-template>
-
-        <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
-          <div class="form-grid">
-            <div class="field">
-              <label for="username">Nombre de usuario</label>
-              <input pInputText id="username" formControlName="username" class="w-full" />
-              @if (profileForm.get('username')?.invalid && profileForm.get('username')?.touched) {
-              <small class="error-text">El nombre de usuario es requerido</small>
-              }
-            </div>
-
-            <div class="field">
-              <label for="email">Correo electrónico</label>
-              <input pInputText id="email" type="email" formControlName="email" class="w-full" />
-              @if (profileForm.get('email')?.invalid && profileForm.get('email')?.touched) {
-              <small class="error-text">Ingresa un correo válido</small>
-              }
-            </div>
-
-            <div class="field">
-              <label for="phone">Teléfono</label>
-              <p-inputNumber id="phone" formControlName="phone" [useGrouping]="false" class="w-full" />
-              @if (profileForm.get('phone')?.invalid && profileForm.get('phone')?.touched) {
-              <small class="error-text">Ingresa un teléfono de 10 dígitos</small>
-              }
-            </div>
-
-            <div class="field">
-              <label for="birth_date">Fecha de nacimiento</label>
-              <p-date-picker id="birth_date" formControlName="birth_date" dateFormat="dd/mm/yy" class="w-full" />
-              @if (profileForm.get('birth_date')?.invalid && profileForm.get('birth_date')?.touched) {
-              <small class="error-text">La fecha de nacimiento es requerida</small>
-              }
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <p-button type="submit" label="Guardar cambios" icon="pi pi-save" [loading]="loading()"
-              [disabled]="loading() || profileForm.pristine"></p-button>
-          </div>
-        </form>
-      </p-card>
-    </div>
-
-    <div class="profile-section">
-      <p-card>
-        <ng-template pTemplate="header">
-          <div class="section-header">
-            <i class="pi pi-lock"></i>
-            <h2>Cambiar Contraseña</h2>
-          </div>
-        </ng-template>
-
-        <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
-          <div class="form-group">
-            <label for="current_password">Contraseña actual</label>
-            <p-password id="current_password" formControlName="current_password" [toggleMask]="true" feedback="false"
-              class="w-full"></p-password>
-            @if (passwordForm.get('current_password')?.invalid && passwordForm.get('current_password')?.touched) {
-            <small class="error-text">La contraseña actual es requerida</small>
-            }
-          </div>
-
-          <div class="form-group">
-            <label for="new_password">Nueva contraseña</label>
-            <p-password id="new_password" formControlName="new_password" [toggleMask]="true"
-              class="w-full"></p-password>
-            @if (passwordForm.get('new_password')?.invalid && passwordForm.get('new_password')?.touched) {
-            <small class="error-text">Mínimo 6 caracteres</small>
-            }
-          </div>
-
-          <div class="form-group">
-            <label for="confirm_password">Confirmar nueva contraseña</label>
-            <p-password id="confirm_password" formControlName="confirm_password" [toggleMask]="true" feedback="false"
-              class="w-full"></p-password>
-            @if (passwordForm.errors?.['mismatch'] && passwordForm.get('confirm_password')?.touched) {
-            <small class="error-text">Las contraseñas no coinciden</small>
-            }
-          </div>
-
-          <div class="form-actions">
-            <p-button type="submit" label="Cambiar contraseña" icon="pi pi-key" [loading]="loading()"
-              [disabled]="loading() || passwordForm.invalid || passwordForm.pristine"></p-button>
-          </div>
-        </form>
-      </p-card>
+  <!-- Header con avatar -->
+  <div class="bg-white border-b border-gray-100 px-8 py-8">
+    <div class="max-w-4xl mx-auto flex items-center gap-6">
+      <p-avatar [label]="userInitials()" size="xlarge" shape="circle"
+        class="text-2xl font-bold bg-rose-100 text-rose-700 border-2 border-rose-200" />
+      <div>
+        @if (loadingUser()) {
+        <p-skeleton width="180px" height="28px" class="mb-2" />
+        <p-skeleton width="220px" height="18px" />
+        } @else {
+        <h1 class="text-2xl font-semibold text-gray-900 tracking-tight">
+          {{ user()?.username ?? '—' }}
+        </h1>
+        <p class="text-gray-500 text-sm mt-0.5">{{ user()?.email }}</p>
+        }
+      </div>
     </div>
   </div>
 
-  <div class="addresses-section">
-    <p-card>
-      <ng-template pTemplate="header">
-        <div class="section-header">
-          <i class="pi pi-map-marker"></i>
-          <h2>Mis Direcciones</h2>
-          <p-button label="Nueva dirección" icon="pi pi-plus" styleClass="ml-auto"
-            (onClick)="openAddressDialog()"></p-button>
+  <div class="max-w-4xl mx-auto px-8 py-8 space-y-6">
+
+    <!-- ── DATOS PERSONALES ───────────────────────────────────────────────── -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm">
+      <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-semibold text-gray-900">Datos personales</h2>
+          <p class="text-xs text-gray-400 mt-0.5">Tu información de cuenta</p>
         </div>
-      </ng-template>
+        <i class="pi pi-user text-gray-300 text-xl"></i>
+      </div>
 
-      @if (loadingAddresses()) {
-      <div class="loading-spinner">
-        <i class="pi pi-spin pi-spinner"></i>
-        <p>Cargando direcciones...</p>
-      </div>
-      } @else if (addresses().length === 0) {
-      <div class="empty-state">
-        <i class="pi pi-map-marker"></i>
-        <p>No tienes direcciones guardadas</p>
-        <p-button label="Agregar dirección" icon="pi pi-plus" (onClick)="openAddressDialog()"></p-button>
-      </div>
-      } @else {
-      <div class="addresses-grid">
-        @for (address of addresses(); track address.id) {
-        <div class="address-card" [class.default]="address.is_default">
-          <div class="address-card-header">
-            <div class="recipient-info">
-              <i class="pi pi-user"></i>
-              <span>{{ address.recipient_name }}</span>
-            </div>
-            <div class="phone-info">
-              <i class="pi pi-phone"></i>
-              <span>{{ address.recipient_phone }}</span>
-            </div>
+      <form (ngSubmit)="updateProfile()" class="p-6 space-y-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+          <!-- Username -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Usuario</label>
+            <input pInputText [(ngModel)]="profileModel.username" name="username" placeholder="mi_usuario"
+              class="w-full rounded-xl border-gray-200 focus:border-rose-300 focus:ring-rose-100" />
           </div>
 
-          <div class="address-details">
-            <p>{{ address.street }} {{ address.ext_number }} {{ address.int_number ? 'Int ' + address.int_number : '' }}
-            </p>
-            <p>{{ address.neighborhood }}</p>
-            <p>{{ address.city }}, {{ address.state }}</p>
-            <p>C.P. {{ address.postal_code }}</p>
-            @if (address.references) {
-            <p class="references">Ref: {{ address.references }}</p>
+          <!-- Email -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Correo</label>
+            <input pInputText [(ngModel)]="profileModel.email" name="email" type="email"
+              placeholder="correo@ejemplo.com" class="w-full rounded-xl border-gray-200 focus:border-rose-300" />
+          </div>
+
+          <!-- Teléfono -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Teléfono</label>
+            <p-inputmask [(ngModel)]="profileModel.phone" name="phone" mask="(999) 999-9999" [unmask]="true"
+              placeholder="(555) 123-4567" styleClass="w-full rounded-xl border-gray-200" />
+          </div>
+
+          <!-- Fecha de nacimiento -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Fecha de nacimiento</label>
+            <p-datepicker [(ngModel)]="profileModel.birth_date" name="birth_date" dateFormat="dd/mm/yy"
+              placeholder="dd/mm/aaaa" [iconDisplay]="'input'" [showIcon]="true" [maxDate]="maxBirthDate" fluid
+              inputStyleClass="rounded-xl border-gray-200 w-full" />
+          </div>
+
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <p-button type="submit" label="Guardar cambios" icon="pi pi-check" [loading]="loading()"
+            [disabled]="loading()" styleClass="rounded-xl bg-rose-600 border-rose-600 hover:bg-rose-700 px-6" />
+        </div>
+      </form>
+    </div>
+
+    <!-- ── CAMBIAR CONTRASEÑA ─────────────────────────────────────────────── -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-semibold text-gray-900">Contraseña</h2>
+          <p class="text-xs text-gray-400 mt-0.5">Cambia tu contraseña de acceso</p>
+        </div>
+        <i class="pi pi-lock text-gray-300 text-xl"></i>
+      </div>
+
+      <form (ngSubmit)="changePassword()" class="p-6 space-y-5">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+
+          <div class="space-y-1.5">
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Contraseña actual</label>
+            <p-password [(ngModel)]="passwordModel.current_password" name="current_password" [feedback]="false"
+              [toggleMask]="true" fluid inputStyleClass="w-full rounded-xl border-gray-200"
+              placeholder="••••••••" />
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Nueva contraseña</label>
+            <p-password [(ngModel)]="passwordModel.new_password" name="new_password" [feedback]="true"
+              [toggleMask]="true" fluid inputStyleClass="w-full rounded-xl border-gray-200"
+              placeholder="••••••••" />
+            @if (passwordModel.new_password && passwordModel.new_password.length < 6) { <p class="text-xs text-red-500">
+              Mínimo 6 caracteres</p>
+              }
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Confirmar contraseña</label>
+            <p-password [(ngModel)]="passwordModel.confirm_password" name="confirm_password" [feedback]="false"
+              [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full rounded-xl border-gray-200"
+              placeholder="••••••••" />
+            @if (passwordModel.confirm_password && passwordModel.new_password !== passwordModel.confirm_password) {
+            <p class="text-xs text-red-500">Las contraseñas no coinciden</p>
             }
           </div>
 
-          <div class="address-actions">
-            @if (address.is_default) {
-            <p-tag value="Predeterminada" severity="success" icon="pi pi-check"></p-tag>
-            } @else {
-            <p-button label="Establecer como predeterminada" icon="pi pi-star" text size="small"
-              (onClick)="setDefaultAddress(address.id)"></p-button>
-            }
-            <div class="action-buttons">
-              <p-button icon="pi pi-pencil" text severity="info" size="small" (onClick)="openAddressDialog(address)"
-                pTooltip="Editar"></p-button>
-              <p-button icon="pi pi-trash" text severity="danger" size="small"
-                (onClick)="deleteAddress(address.id, address.recipient_name)" pTooltip="Eliminar"></p-button>
-            </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <p-button type="submit" label="Cambiar contraseña" icon="pi pi-shield" [loading]="loadingPassword()"
+            [disabled]="loadingPassword() || !passwordModel.current_password || !passwordModel.new_password || !passwordModel.confirm_password || passwordModel.new_password !== passwordModel.confirm_password"
+            styleClass="rounded-xl bg-gray-800 border-gray-800 hover:bg-gray-900 px-6" />
+        </div>
+      </form>
+    </div>
+
+    <!-- ── DIRECCIONES DE ENTREGA ─────────────────────────────────────────── -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-semibold text-gray-900">Direcciones de entrega</h2>
+          <p class="text-xs text-gray-400 mt-0.5">Gestiona tus direcciones guardadas</p>
+        </div>
+        <p-button icon="pi pi-plus" label="Agregar" size="small" (onClick)="openAddressDialog()"
+          styleClass="rounded-xl bg-rose-600 border-rose-600 hover:bg-rose-700" />
+      </div>
+
+      <div class="p-6">
+        @if (loadingAddresses()) {
+        <div class="space-y-3">
+          @for (i of [1,2]; track i) {
+          <div class="border border-gray-100 rounded-xl p-4">
+            <p-skeleton width="60%" height="18px" class="mb-2" />
+            <p-skeleton width="80%" height="14px" />
           </div>
+          }
+        </div>
+        } @else if (!addresses().length) {
+        <div class="text-center py-10">
+          <i class="pi pi-map-marker text-4xl text-gray-200 mb-3 block"></i>
+          <p class="text-gray-400 text-sm">No tienes direcciones guardadas</p>
+          <p-button label="Agregar primera dirección" icon="pi pi-plus" size="small" [outlined]="true"
+            (onClick)="openAddressDialog()"
+            styleClass="mt-4 rounded-xl border-rose-300 text-rose-600 hover:bg-rose-50" />
+        </div>
+        } @else {
+        <div class="space-y-3">
+          @for (address of addresses(); track address.id) {
+          <div class="group border rounded-xl p-4 transition-all duration-200" [class]="address.is_default
+                  ? 'border-rose-200 bg-rose-50/50'
+                  : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50/50'">
+
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="font-medium text-gray-900 text-sm truncate">
+                    {{ address.recipient_name }}
+                  </span>
+                  @if (address.is_default) {
+                  <p-tag value="Predeterminada" severity="danger" styleClass="text-xs rounded-full" />
+                  }
+                </div>
+                <p class="text-xs text-gray-500 leading-relaxed">
+                  {{ address.street }} {{ address.ext_number }}
+                  @if (address.int_number) { Int. {{ address.int_number }}, }
+                  {{ address.neighborhood }}, {{ address.city }}, {{ address.state }} C.P. {{ address.postal_code }}
+                </p>
+                <p class="text-xs text-gray-400 mt-1">
+                  <i class="pi pi-phone mr-1"></i>{{ address.recipient_phone }}
+                </p>
+                @if (address.references) {
+                <p class="text-xs text-gray-400 mt-0.5 italic">
+                  <i class="pi pi-info-circle mr-1"></i>{{ address.references }}
+                </p>
+                }
+              </div>
+
+              <div class="flex items-center gap-1 shrink-0">
+                @if (!address.is_default) {
+                <p-button icon="pi pi-star" size="small" [text]="true" severity="secondary"
+                  pTooltip="Establecer como predeterminada" tooltipPosition="top"
+                  (onClick)="setDefaultAddress(address.id)" styleClass="text-gray-400 hover:text-rose-500" />
+                }
+                <p-button icon="pi pi-pencil" size="small" [text]="true" severity="secondary" pTooltip="Editar"
+                  tooltipPosition="top" (onClick)="openAddressDialog(address)"
+                  styleClass="text-gray-400 hover:text-gray-700" />
+                <p-button icon="pi pi-trash" size="small" [text]="true" severity="danger" pTooltip="Eliminar"
+                  tooltipPosition="top" (onClick)="deleteAddress(address.id, address.recipient_name)"
+                  styleClass="text-gray-300 hover:text-red-500" />
+              </div>
+            </div>
+
+          </div>
+          }
         </div>
         }
       </div>
-      }
-    </p-card>
+    </div>
+
   </div>
-
-  <p-dialog [header]="editingAddress() ? 'Editar Dirección' : 'Nueva Dirección'" [(visible)]="addressDialog"
-    [modal]="true" [style]="{ width: '600px' }" (onHide)="closeAddressDialog()">
-    <form [formGroup]="addressForm" (ngSubmit)="saveAddress()">
-      <div class="address-form-grid">
-        <div class="field">
-          <label for="recipient_name">Nombre del destinatario *</label>
-          <input pInputText id="recipient_name" formControlName="recipient_name" class="w-full" />
-          @if (addressForm.get('recipient_name')?.invalid && addressForm.get('recipient_name')?.touched) {
-          <small class="error-text">El nombre es requerido</small>
-          }
-        </div>
-
-        <div class="field">
-          <label for="recipient_phone">Teléfono del destinatario *</label>
-          <input pInputText id="recipient_phone" formControlName="recipient_phone" class="w-full" />
-          @if (addressForm.get('recipient_phone')?.invalid && addressForm.get('recipient_phone')?.touched) {
-          <small class="error-text">Ingresa un teléfono de 10 dígitos</small>
-          }
-        </div>
-
-        <div class="field">
-          <label for="street">Calle *</label>
-          <input pInputText id="street" formControlName="street" class="w-full" />
-          @if (addressForm.get('street')?.invalid && addressForm.get('street')?.touched) {
-          <small class="error-text">La calle es requerida</small>
-          }
-        </div>
-
-        <div class="field-row">
-          <div class="field">
-            <label for="ext_number">Número exterior *</label>
-            <input pInputText id="ext_number" formControlName="ext_number" class="w-full" />
-            @if (addressForm.get('ext_number')?.invalid && addressForm.get('ext_number')?.touched) {
-            <small class="error-text">Requerido</small>
-            }
-          </div>
-          <div class="field">
-            <label for="int_number">Número interior</label>
-            <input pInputText id="int_number" formControlName="int_number" class="w-full" />
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="neighborhood">Colonia *</label>
-          <input pInputText id="neighborhood" formControlName="neighborhood" class="w-full" />
-          @if (addressForm.get('neighborhood')?.invalid && addressForm.get('neighborhood')?.touched) {
-          <small class="error-text">La colonia es requerida</small>
-          }
-        </div>
-
-        <div class="field-row">
-          <div class="field">
-            <label for="city">Ciudad *</label>
-            <input pInputText id="city" formControlName="city" class="w-full" />
-            @if (addressForm.get('city')?.invalid && addressForm.get('city')?.touched) {
-            <small class="error-text">Requerido</small>
-            }
-          </div>
-          <div class="field">
-            <label for="state">Estado *</label>
-            <input pInputText id="state" formControlName="state" class="w-full" />
-            @if (addressForm.get('state')?.invalid && addressForm.get('state')?.touched) {
-            <small class="error-text">Requerido</small>
-            }
-          </div>
-          <div class="field">
-            <label for="postal_code">Código Postal *</label>
-            <input pInputText id="postal_code" formControlName="postal_code" class="w-full" />
-            @if (addressForm.get('postal_code')?.invalid && addressForm.get('postal_code')?.touched) {
-            <small class="error-text">5 dígitos</small>
-            }
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="references">Referencias (opcional)</label>
-          <textarea pInputTextarea id="references" formControlName="references" rows="3" class="w-full"
-            placeholder="Casa de color azul, cerca del parque, etc."></textarea>
-        </div>
-
-        <div class="field-checkbox">
-          <p-checkbox id="is_default" formControlName="is_default" [binary]="true"
-            label="Establecer como dirección predeterminada"></p-checkbox>
-        </div>
-      </div>
-
-      <div class="dialog-actions">
-        <p-button label="Cancelar" severity="secondary" (onClick)="closeAddressDialog()"
-          [disabled]="loading()"></p-button>
-        <p-button type="submit" label="Guardar" [loading]="loading()"
-          [disabled]="loading() || addressForm.invalid"></p-button>
-      </div>
-    </form>
-  </p-dialog>
 </div>
+
+<!-- ── DIALOG DIRECCIÓN ──────────────────────────────────────────────────── -->
+<p-dialog [header]="editingAddress() ? 'Editar dirección' : 'Nueva dirección'" [visible]="addressDialog()"
+  (visibleChange)="addressDialog.set($event)" [modal]="true" [closable]="true" [style]="{ width: '560px' }"
+   styleClass="rounded-2xl">
+  <form (ngSubmit)="saveAddress()" class="space-y-1">
+
+    <div class="grid grid-cols-2 gap-4">
+      <!-- Nombre del destinatario -->
+      <div class="col-span-2 space-b-1.5">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Nombre de quien recibe</label>
+        <input pInputText [(ngModel)]="addressModel.recipient_name" name="recipient_name" placeholder="Nombre completo"
+          class="w-full rounded-xl border-gray-200" />
+        @if (!addressModel.recipient_name) {
+        <p class="text-xs text-red-500">Requerido</p>
+        }
+      </div>
+
+      <!-- Teléfono de contacto -->
+      <div class="col-span-2 space-y-1.5">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Teléfono de contacto (10
+          dígitos)</label>
+        <input pInputText [(ngModel)]="addressModel.recipient_phone" name="recipient_phone" placeholder="5512345678"
+          class="w-full rounded-xl border-gray-200" maxlength="10" />
+        @if (addressModel.recipient_phone && !isValidPhone(addressModel.recipient_phone)) {
+        <p class="text-xs text-red-500">Ingresa 10 dígitos</p>
+        }
+      </div>
+
+      <!-- Calle -->
+      <div class="col-span-2 space-y-1.5">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Calle</label>
+        <input pInputText [(ngModel)]="addressModel.street" name="street" placeholder="Nombre de la calle"
+          class="w-full rounded-xl border-gray-200" />
+        @if (!addressModel.street) {
+        <p class="text-xs text-red-500">Requerido</p>
+        }
+      </div>
+
+      <!-- Número exterior -->
+      <div class="space-y-1.5">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Núm. exterior</label>
+        <input pInputText [(ngModel)]="addressModel.ext_number" name="ext_number" placeholder="123"
+          class="w-full rounded-xl border-gray-200" />
+        @if (!addressModel.ext_number) {
+        <p class="text-xs text-red-500">Requerido</p>
+        }
+      </div>
+
+      <!-- Número interior -->
+      <div class="space-y-1.5">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Núm. interior <span
+            class="text-gray-300">(opcional)</span></label>
+        <input pInputText [(ngModel)]="addressModel.int_number" name="int_number" placeholder="A, 2B..."
+          class="w-full rounded-xl border-gray-200" />
+      </div>
+
+      <!-- Colonia -->
+      <div class="col-span-2 space-y-1.5">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Colonia</label>
+        <input pInputText [(ngModel)]="addressModel.neighborhood" name="neighborhood" placeholder="Nombre de la colonia"
+          class="w-full rounded-xl border-gray-200" />
+        @if (!addressModel.neighborhood) {
+        <p class="text-xs text-red-500">Requerido</p>
+        }
+      </div>
+
+      <!-- Ciudad -->
+      <div class="space-y-1.5">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Ciudad</label>
+        <input pInputText [(ngModel)]="addressModel.city" name="city" placeholder="Ciudad"
+          class="w-full rounded-xl border-gray-200" />
+        @if (!addressModel.city) {
+        <p class="text-xs text-red-500">Requerido</p>
+        }
+      </div>
+
+      <!-- Estado -->
+      <div class="space-y-1.5">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Estado</label>
+        <input pInputText [(ngModel)]="addressModel.state" name="state" placeholder="Estado"
+          class="w-full rounded-xl border-gray-200" />
+        @if (!addressModel.state) {
+        <p class="text-xs text-red-500">Requerido</p>
+        }
+      </div>
+
+      <!-- CP -->
+      <div class="space-y-1.5">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Código postal</label>
+        <input pInputText [(ngModel)]="addressModel.postal_code" name="postal_code" placeholder="00000" maxlength="5"
+          class="w-full rounded-xl border-gray-200" />
+        @if (addressModel.postal_code && !isValidPostalCode(addressModel.postal_code)) {
+        <p class="text-xs text-red-500">5 dígitos</p>
+        }
+      </div>
+
+      <!-- Referencias -->
+      <div class="col-span-2 space-y-1.5">
+        <label class="text-xs font-medium text-gray-600 uppercase tracking-wider">Referencias <span
+            class="text-gray-300">(opcional)</span></label>
+        <textarea pTextarea [(ngModel)]="addressModel.references" name="references" rows="2"
+          placeholder="Entre calles, color de fachada, indicaciones..."
+          class="w-full rounded-xl border-gray-200 resize-none"></textarea>
+      </div>
+
+      <!-- Predeterminada -->
+      <div class="col-span-2 flex items-center gap-2">
+        <p-checkbox [(ngModel)]="addressModel.is_default" name="is_default" [binary]="true" inputId="is_default" />
+        <label for="is_default" class="text-sm text-gray-600 cursor-pointer">
+          Establecer como dirección predeterminada
+        </label>
+      </div>
+
+    </div>
+
+    <div class="flex justify-end gap-3 pt-2 border-t border-gray-100">
+      <p-button type="button" label="Cancelar" severity="secondary" [outlined]="true" (onClick)="closeAddressDialog()"
+        styleClass="rounded-xl" />
+      <p-button type="submit" [label]="editingAddress() ? 'Guardar cambios' : 'Crear dirección'" [loading]="loading()"
+        [disabled]="loading() || !isAddressFormValidForSubmit()"
+        styleClass="rounded-xl bg-rose-600 border-rose-600 hover:bg-rose-700" />
+    </div>
+
+  </form>
+</p-dialog>

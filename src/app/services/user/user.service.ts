@@ -1,225 +1,123 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, catchError, throwError } from 'rxjs';
 import {
   User,
   UpdateProfileRequest,
   ChangePasswordRequest,
-  ChangePasswordResponse,
   CreateUserRequest,
-  UpdateRoleRequest
+  UpdateRoleRequest,
+  UserRole
 } from '../../assets/models/user/user.model';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'http://localhost:3000/api/users';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class UserService {
-  private http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
 
-  private userSignal = signal<User | null>(null);
-  private loadingSignal = signal(false);
-  private errorSignal = signal<string | null>(null);
+  private readonly _user = signal<User | null>(null);
+  private readonly _users = signal<User[]>([]);
+  private readonly _loading = signal(false);
+  private readonly _error = signal<string | null>(null);
 
-  readonly user = this.userSignal.asReadonly();
-  readonly loading = this.loadingSignal.asReadonly();
-  readonly error = this.errorSignal.asReadonly();
+  readonly user = this._user.asReadonly();
+  readonly users = this._users.asReadonly();
+  readonly loading = this._loading.asReadonly();
+  readonly error = this._error.asReadonly();
 
-  private usersSignal = signal<User[]>([]);
-  private loadingUsersSignal = signal(false);
+  // ── Perfil (Rutas 'me') ──────────────────────────────────────────
 
-  readonly users = this.usersSignal.asReadonly();
-  readonly loadingUsers = this.loadingUsersSignal.asReadonly();
-
-  /**
-   * Obtener perfil del usuario
-   * Endpoint correcto: /users/me (no /users/profile)
-   */
   getProfile(): Observable<User> {
-    this.loadingSignal.set(true);
-    this.errorSignal.set(null);
-
-    return this.http.get<User>(`${API_URL}/users/me`).pipe(
-      tap({
-        next: (user) => {
-          this.userSignal.set(user);
-          this.loadingSignal.set(false);
-        },
-        error: (error) => {
-          this.errorSignal.set(error.error?.message || 'Error al cargar perfil');
-          this.loadingSignal.set(false);
-        }
-      })
+    this._loading.set(true);
+    return this.http.get<User>(`${API_URL}/me`).pipe(
+      tap(user => {
+        this._user.set(user);
+        this._loading.set(false);
+      }),
+      catchError(err => this.handleError(err, 'Error al cargar perfil'))
     );
   }
 
-  /**
-   * Actualizar perfil
-   * Endpoint correcto: /users/me (PUT)
-   */
   updateProfile(data: UpdateProfileRequest): Observable<User> {
-    this.loadingSignal.set(true);
-    this.errorSignal.set(null);
-
-    return this.http.put<User>(`${API_URL}/users/me`, data).pipe(
-      tap({
-        next: (user) => {
-          this.userSignal.set(user);
-          this.loadingSignal.set(false);
-        },
-        error: (error) => {
-          this.errorSignal.set(error.error?.message || 'Error al actualizar perfil');
-          this.loadingSignal.set(false);
-        }
-      })
+    this._loading.set(true);
+    return this.http.put<User>(`${API_URL}/me`, data).pipe(
+      tap(updated => this._user.set(updated)),
+      tap(() => this._loading.set(false)),
+      catchError(err => this.handleError(err, 'Error al actualizar perfil'))
     );
   }
 
-  /**
-   * Cambiar contraseña
-   * Endpoint correcto: /users/me/password (PATCH)
-   */
-  changePassword(data: ChangePasswordRequest): Observable<ChangePasswordResponse> {
-    this.loadingSignal.set(true);
-    this.errorSignal.set(null);
-
-    return this.http.patch<ChangePasswordResponse>(`${API_URL}/users/me/password`, data).pipe(
-      tap({
-        next: () => {
-          this.loadingSignal.set(false);
-        },
-        error: (error) => {
-          this.errorSignal.set(error.error?.message || 'Error al cambiar contraseña');
-          this.loadingSignal.set(false);
-        }
-      })
+  changePassword(data: ChangePasswordRequest): Observable<{ message: string }> {
+    this._loading.set(true);
+    // NestJS devuelve { message: '...' }
+    return this.http.patch<{ message: string }>(`${API_URL}/me/password`, data).pipe(
+      tap(() => this._loading.set(false)),
+      catchError(err => this.handleError(err, 'Error al cambiar contraseña'))
     );
   }
 
-  // ==================== Gestión de Usuarios (Admin) ====================
+  // ── Admin (Gestión de usuarios) ──────────────────────────────────
 
-  /**
-   * Obtener todos los usuarios (solo admin)
-   * GET /users
-   */
   getAllUsers(): Observable<User[]> {
-    this.loadingUsersSignal.set(true);
-
-    return this.http.get<User[]>(`${API_URL}/users`).pipe(
-      tap({
-        next: (users) => {
-          this.usersSignal.set(users);
-          this.loadingUsersSignal.set(false);
-        },
-        error: (error) => {
-          console.error('Error loading users:', error);
-          this.loadingUsersSignal.set(false);
-        }
-      })
+    this._loading.set(true);
+    return this.http.get<User[]>(API_URL).pipe(
+      tap(users => {
+        this._users.set(users);
+        this._loading.set(false);
+      }),
+      catchError(err => this.handleError(err, 'Error al obtener usuarios'))
     );
   }
 
-  /**
-   * Obtener un usuario por ID (solo admin)
-   * GET /users/:id
-   */
-  getUserById(id: number): Observable<User> {
-    return this.http.get<User>(`${API_URL}/users/${id}`);
-  }
-
-  /**
-   * Crear un nuevo usuario (solo admin)
-   * POST /users
-   */
   createUser(data: CreateUserRequest): Observable<User> {
-    this.loadingUsersSignal.set(true);
-
-    return this.http.post<User>(`${API_URL}/users`, data).pipe(
-      tap({
-        next: () => {
-          this.loadingUsersSignal.set(false);
-          this.getAllUsers().subscribe(); // Recargar lista
-        },
-        error: (error) => {
-          console.error('Error creating user:', error);
-          this.loadingUsersSignal.set(false);
-        }
-      })
+    this._loading.set(true);
+    return this.http.post<User>(API_URL, data).pipe(
+      tap(newUser => {
+        this._users.update(list => [newUser, ...list]);
+        this._loading.set(false);
+      }),
+      catchError(err => this.handleError(err, 'Error al crear usuario'))
     );
   }
 
-  /**
-   * Actualizar rol de usuario (solo admin)
-   * PATCH /users/:id/role
-   */
-  updateUserRole(id: number, role: 'admin' | 'client'): Observable<User> {
-    this.loadingUsersSignal.set(true);
+  updateUserRole(id: number, role: UserRole): Observable<User> {
+    this._loading.set(true);
+    const body: UpdateRoleRequest = { role };
 
-    const request: UpdateRoleRequest = { role };
-
-    return this.http.patch<User>(`${API_URL}/users/${id}/role`, request).pipe(
-      tap({
-        next: () => {
-          this.loadingUsersSignal.set(false);
-          this.getAllUsers().subscribe(); // Recargar lista
-        },
-        error: (error) => {
-          console.error('Error updating user role:', error);
-          this.loadingUsersSignal.set(false);
-        }
-      })
+    return this.http.patch<User>(`${API_URL}/${id}/role`, body).pipe(
+      tap(updatedUser => {
+        this._users.update(list => list.map(u => u.id === id ? updatedUser : u));
+        this._loading.set(false);
+      }),
+      catchError(err => this.handleError(err, 'Error al actualizar rol'))
     );
   }
 
-  /**
-   * Eliminar usuario (solo admin)
-   * DELETE /users/:id
-   */
   deleteUser(id: number): Observable<{ message: string }> {
-    this.loadingUsersSignal.set(true);
-
-    return this.http.delete<{ message: string }>(`${API_URL}/users/${id}`).pipe(
-      tap({
-        next: () => {
-          this.loadingUsersSignal.set(false);
-          this.getAllUsers().subscribe(); // Recargar lista
-        },
-        error: (error) => {
-          console.error('Error deleting user:', error);
-          this.loadingUsersSignal.set(false);
-        }
-      })
+    this._loading.set(true);
+    return this.http.delete<{ message: string }>(`${API_URL}/${id}`).pipe(
+      tap(() => {
+        this._users.update(list => list.filter(u => u.id !== id));
+        this._loading.set(false);
+      }),
+      catchError(err => this.handleError(err, 'Error al eliminar usuario'))
     );
   }
 
-  // ==================== Helpers ====================
+  // ── Helpers ──────────────────────────────────────────────────────
 
-  /**
-   * Limpiar error
-   */
-  clearError(): void {
-    this.errorSignal.set(null);
+  private handleError(err: any, defaultMsg: string) {
+    this._loading.set(false);
+    const msg = err.error?.message || defaultMsg;
+    this._error.set(Array.isArray(msg) ? msg[0] : msg); // Maneja errores de class-validator
+    return throwError(() => err);
   }
 
-  /**
-   * Refrescar perfil
-   */
-  refreshProfile(): void {
-    this.getProfile().subscribe();
-  }
+  clearError() { this._error.set(null); }
 
-  /**
-   * Refrescar lista de usuarios
-   */
-  refreshUsers(): void {
-    this.getAllUsers().subscribe();
-  }
-
-  /**
-   * Refrescar perfil
-   */
-  refresh(): void {
-    this.getProfile().subscribe();
+  clearUser() {
+    this._user.set(null);
+    this._users.set([]);
   }
 }

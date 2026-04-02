@@ -1,18 +1,23 @@
+export enum UserRole {
+  ADMIN = 'admin',
+  CLIENT = 'client',
+}
+
 export interface User {
   id: number;
   username: string;
   email: string;
   phone: number;
-  birth_date: Date;
-  role: 'admin' | 'client';
-  created_at: Date;
+  birth_date: string;
+  role: UserRole;
+  created_at?: string;
 }
 
 export interface UpdateProfileRequest {
   username?: string;
   email?: string;
   phone?: number;
-  birth_date?: Date | string;
+  birth_date?: string;
 }
 
 export interface ChangePasswordRequest {
@@ -20,29 +25,15 @@ export interface ChangePasswordRequest {
   new_password: string;
 }
 
-export interface ChangePasswordResponse {
-  message: string;
-}
-
 export interface CreateUserRequest {
   username: string;
   email: string;
   password: string;
   phone: number;
-  birth_date: Date | string;
-  role?: 'admin' | 'client';
+  birth_date: string;
+  role?: UserRole;
 }
 
 export interface UpdateRoleRequest {
-  role: 'admin' | 'client';
-}
-
-export interface UserResponse {
-  id: number;
-  username: string;
-  email: string;
-  phone: number;
-  birth_date: Date;
-  role: string;
-  created_at: Date;
+  role: UserRole;
 }

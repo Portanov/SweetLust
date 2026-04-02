@@ -1,4 +1,3 @@
-// src/assets/models/auth/auth.model.ts
 export interface User {
   id: number;
   username: string;

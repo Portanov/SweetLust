@@ -1,73 +1,118 @@
-<div class="favorites-container mx-auto mt-16">
-  <div class="favorites-header">
-    <h1 class="favorites-title">
-      <i class="pi pi-heart"></i>
-      Mis Favoritos
-    </h1>
-    <p class="favorites-subtitle">
-      {{ favoriteCount() }} {{ favoriteCount() === 1 ? 'producto' : 'productos' }} guardados
-    </p>
-  </div>
-
-  @if (loading()) {
-  <div class="favorites-grid">
-    @for (item of [1,2,3,4]; track item) {
-    <p-card>
-      <ng-template pTemplate="header">
-        <div class="skeleton-image"></div>
-      </ng-template>
-      <div class="skeleton-content">
-        <div class="skeleton-title"></div>
-        <div class="skeleton-price"></div>
-        <div class="skeleton-button"></div>
-      </div>
-    </p-card>
-    }
-  </div>
-  } @else if (favorites().length === 0) {
-  <div class="empty-favorites">
-    <i class="pi pi-heart empty-icon"></i>
-    <h2>No tienes favoritos aún</h2>
-    <p>¡Explora nuestra tienda y guarda tus productos favoritos!</p>
-    <a routerLink="/shop" class="shop-link">
-      <p-button label="Ir a la tienda" icon="pi pi-shopping-bag"></p-button>
-    </a>
-  </div>
-  } @else {
-  <div class="favorites-grid">
-    @for (favorite of favorites(); track favorite.id) {
-    <p-card class="favorite-card">
-      <ng-template pTemplate="header">
-        <div class="product-image-container">
-          <img [src]="favorite.product.image" [alt]="favorite.product.title" (error)="onImageError($event)"
-            class="product-image">
-          <button class="remove-favorite-btn" (click)="removeFavorite(favorite.productId, favorite.product.title)"
-            pTooltip="Eliminar de favoritos">
-            <i class="pi pi-heart-fill"></i>
-          </button>
+<div class="w-full mt-24">
+  <div class="w-3/4 mx-auto mb-8">
+    <div class="mb-3">
+      <p class="text-xl cinzel">
+        <i class="pi pi-heart-fill me-2"></i>
+        Tus Favoritos
+      </p>
+    </div>
+    <div class="shadow-lg w-full p-4 mb-16">
+      @if (loading()) {
+        <div class="grid grid-cols-5 gap-2">
+          @for (item of [1, 2, 3, 4, 5]; track item) {
+            <p-card class="border-none shadow-none bg-transparent rounded-none">
+              <ng-template #header>
+                <div class="p-2 pb-0">
+                  <p-skeleton size="13rem" />
+                </div>
+              </ng-template>
+              <ng-template #title>
+                <p-skeleton height="4rem" />
+              </ng-template>
+              <ng-template #subtitle>
+                <p-skeleton height="4rem" />
+              </ng-template>
+            </p-card>
+          }
         </div>
-      </ng-template>
-
-      <div class="product-info">
-        <h3 class="product-title">{{ favorite.product.title }}</h3>
-        <p class="product-description">{{ favorite.product.description | slice:0:80 }}...</p>
-
-        <div class="product-footer">
-          <div class="product-price">
-            {{ favorite.product.price | currency }}
-          </div>
-          <div class="product-stock" [class.low-stock]="favorite.product.stock < 10">
-            Stock: {{ favorite.product.stock }} unidades
+      } @else if (favoriteCount() === 0) {
+        <div class="w-full p-16">
+          <div class="flex flex-col items-center justify-center">
+            <div class="relative inline-block">
+              <i class="pi pi-heart-fill text-8xl text-red-300 relative z-10"></i>
+            </div>
+            <h2 class="text-3xl cinzel text-gray-800 mt-6 mb-2">No se encontraron productos</h2>
+            <p class="text-gray-500 mb-6 poiret-one text-xl">
+              No tienes productos en favoritos agrega productos desde la tienda.
+            </p>
+            <a routerLink="/shop">
+              <p-button
+                icon="pi pi-arrow-left"
+                label="Ir a la tienda"
+                size="large"
+                styleClass="poiret-one"
+              ></p-button>
+            </a>
           </div>
         </div>
-
-        <div class="product-actions">
-          <p-button label="Agregar al carrito" icon="pi pi-shopping-cart" [disabled]="favorite.product.stock === 0"
-            (onClick)="addToCart(favorite.productId, favorite.product.title)" styleClass="w-full"></p-button>
+      } @else {
+        <div class="grid grid-cols-5 gap-3">
+          @for (item of paginatedFavorites(); track item) {
+            <p-card class="border-none shadow-none bg-transparent rounded-none">
+              <ng-template #header>
+                <div class="p-4 pb-0 relative">
+                  <img [src]="item.product.image" alt="" class="h-44 rounded-lg" />
+                  @if (item.product.offer) {
+                    <div
+                      class="absolute top-5 left-4 z-10 px-3 bg-blue-500 text-white rounded-e-md text-sm tracking-wide"
+                    >
+                      <i class="pi pi-tag text-xs"></i> {{ getOfferLabel(item.product) }}
+                    </div>
+                  }
+                  <div class="absolute top-5 right-6">
+                    <p-button
+                      icon="pi pi-times"
+                      size="small"
+                      severity="secondary"
+                      [rounded]="true"
+                      (onClick)="removeFavorite(item.product.id, item.product.title)"
+                      outlined
+                    ></p-button>
+                  </div>
+                </div>
+              </ng-template>
+              <ng-template #title>
+                <div class="">
+                  <p class="text-[10px] uppercase font-light">{{ item.product.category }}</p>
+                  <h1 class="text-sm">{{ item.product.title }}</h1>
+                </div>
+              </ng-template>
+              <ng-template #subtitle>
+                @if (item.product.offer) {
+                  <p class="text-md text-center text-black">
+                    ${{ item.product.offer.discount_value || item.product.final_price }} MXN
+                  </p>
+                } @else {
+                  <p class="text-md text-center text-black">${{ item.product.price }} MXN</p>
+                }
+              </ng-template>
+              <ng-template #footer>
+                <div class="flex gap-2">
+                  <p-button
+                    icon="pi pi-shopping-cart"
+                    label="Agregar"
+                    class="flex-auto whitespace-nowrap"
+                    size="small"
+                    [rounded]="true"
+                    (onClick)="addToCart(item.product.id, item.product.title)"
+                    fluid
+                    styleClass="poiret-one"
+                  >
+                  </p-button>
+                </div>
+              </ng-template>
+            </p-card>
+          }
         </div>
-      </div>
-    </p-card>
-    }
+
+        <p-paginator
+          [first]="currentPage() * itemsPerPage"
+          [rows]="itemsPerPage"
+          [totalRecords]="favoriteCount()"
+          (onPageChange)="onPageChange($event)"
+          responsiveOptions="[{breakpoint: '1100px', numVisible: 3}, {breakpoint: '575px', numVisible: 1}]"
+        ></p-paginator>
+      }
+    </div>
   </div>
-  }
 </div>

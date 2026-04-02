@@ -1,202 +1,190 @@
 <div class="w-full">
-  <div
-    class="relative overflow-hidden bg-linear-to-br from-[#0f0507] via-[#2d1119] to-[#461B27] pt-20 pb-8 mb-8 rounded-b-3xl">
-    <div class="grid grid-cols-2 gap-1 px-8">
-      <div>
-        <h1
-          class="cinzel text-5xl bg-linear-to-r from-[#ffb7b7] via-[#ff9a9a] to-[#ffb7b7] bg-clip-text text-transparent">
-          Catálogo</h1>
-        <div class="w-32 h-px bg-linear-to-r from-transparent via-[#ff8a8a] to-transparent mx-16 mb-1"></div>
+  <div class="w-11/12 header-banner h-96 mx-auto mt-16 px-16 mb-6 flex flex-col relative bg-cover bg-center">
+    <div class="absolute inset-0 bg-black/50 z-0 backdrop-blur-xs"></div>
+
+    <div class="relative z-10 flex flex-col h-full">
+      <div class="text-center flex-1 flex flex-col justify-center">
+        <h1 class="text-9xl mb-3 font-logo tracking-wide text-white">Sexy Shop</h1>
+        <p class="poiret-one text-2xl text-white">Visita nuestro catalogo de articulos</p>
       </div>
-      <div>
-        <p-iconfield>
-          <p-inputicon class="pi pi-search text-[#ffb7b7]" />
-          <input pInputText type="text" placeholder="Buscar piezas únicas..." (input)="onSearch($event)" fluid
-            class="py-3 pl-12 pr-12 rounded-full bg-black/40 backdrop-blur-xl text-white placeholder:text-gray-300 border-2 border-[#b55a6b]/40 focus:border-[#ff8a8a] transition-all" />
-          @if (searchTerm()) {
-          <button type="button" (click)="clearSearch()"
-            class="absolute right-4 top-1/2 -translate-y-1/2 text-[#ff8a8a] hover:text-white transition">
-            <i class="pi pi-times-circle"></i>
-          </button>
+      <div class="shrink-0 mb-2">
+        @if (categoriesReady()) {
+        <p-carousel headerText="Categorías" [value]="categoriesWithAll()" [showIndicators]="false" [numVisible]="6"
+          [numScroll]="1">
+          <ng-template let-category #item>
+            <p-button [icon]="
+                  category.category === 'all' ? 'pi pi-sparkles' : getCategoryIcon(category.category)
+                " [label]="category.category + ' (' + category.count + ')'" [rounded]="true" [outlined]="true"
+              (onClick)="onCategorySelect(category.category)" [styleClass]="
+                  selectedCategory() === category.category
+                    ? 'text-white bg-linear-to-r from-[#b55a6b] to-[#8b3a48] w-11/12 font-caviar tracking-wider uppercase text-xs border-[#b55a6b]/30'
+                    : 'text-[#f3d0d7] w-11/12 font-caviar tracking-wider uppercase text-xs hover:bg-[#b55a6b]/50 hover:border-[#b55a6b]/30'
+                " />
+          </ng-template>
+        </p-carousel>
+        } @else {
+        <div class="grid grid-cols-6 gap-4">
+          @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+          <p-skeleton height="2rem" borderRadius="16px" />
           }
-        </p-iconfield>
+        </div>
+        }
       </div>
     </div>
   </div>
-
-  <div class="container mx-auto px-8 pb-16">
-    <div class="grid grid-cols-4 gap-8 mb-5 text-white">
-
-      <div>
-        <p-panel class="p-4 border-gray-300">
-          <ng-template #header>
-            <h1 class="poiret-one text-2xl tracking-wide">
-              <i class="pi pi-filter" style="font-size: large"></i>
-              Filtrar por...
-            </h1>
-          </ng-template>
-
-          <div class="mt-3">
-            <label class="block text-gray-600 text-sm font-normal mb-3 uppercase tracking-wider">
-              <i class="pi pi-dollar mr-2"></i>Rango de Precio
-            </label>
-            <div class="space-y-3">
-              <p-slider [(ngModel)]="priceRange" [range]="true" [min]="0" [max]="maxPossiblePrice()"
-                (onChange)="onPriceRangeChange()" class="w-full" />
-              <div class="flex justify-between text-sm text-gray-600">
-                <span>${{ priceRange()[0] | number }}</span>
-                <span>${{ priceRange()[1] | number }}</span>
-              </div>
+  <div class="w-3/4 mx-auto mb-8">
+    <div class="flex justify-between px-2 mb-6">
+      <p class="text-2xl poiret-one">
+        <i class="pi pi-filter"></i>
+        Filtrar por...
+      </p>
+      <div class="">
+        <p-button
+          icon="pi pi-dollar"
+          label="Por precio"
+          size="small"
+          [rounded]="true"
+          [outlined]="true"
+          styleClass="me-4"
+          (onClick)="op.toggle($event)"
+        >
+        </p-button>
+        <p-popover #op>
+          <div class="space-y-3 w-72">
+            <p-slider
+              [(ngModel)]="priceRange"
+              [range]="true"
+              [min]="0"
+              [max]="maxPossiblePrice()"
+              (onChange)="onPriceRangeChange()"
+              class="w-full"
+            />
+            <div class="flex justify-between text-sm text-gray-600">
+              <span>${{ priceRange()[0] | number }}</span>
+              <span>${{ priceRange()[1] | number }}</span>
             </div>
           </div>
-
-          <div class="mt-8">
-            <label class="block text-gray-600 text-sm font-normal mb-3 uppercase tracking-wider">
-              <i class="pi pi-objects-column mr-2"></i>Categorias
-            </label>
-            <div class="space-y-3">
-              <p-button icon="pi pi-sparkles"
-                [styleClass]="selectedCategory() === 'all' ? 'bg-linear-to-r from-[#b55a6b] to-[#8b3a48] border-0 mb-2 me-2 font-caviar tracking-wider' : 'mb-2 me-2 font-caviar tracking-wider'"
-                size="small" [rounded]="true" [outlined]="selectedCategory() !== 'all'"
-                (onClick)="onCategorySelect('all')" label="Todos" />
-
-              @for (category of categories(); track category.category) {
-              <p-button [icon]="getCategoryIcon(category.category)"
-                [label]="category.category + ' (' + category.count + ')'"
-                [styleClass]="selectedCategory() === category.category ? 'bg-linear-to-r from-[#b55a6b] to-[#8b3a48] border-0 mb-2 me-2 font-caviar tracking-wider' : 'mb-2 me-2 font-caviar tracking-wider'"
-                size="small" [rounded]="true" [outlined]="selectedCategory() !== category.category"
-                (onClick)="onCategorySelect(category.category)" />
-              }
+        </p-popover>
+        <p-button
+          icon="pi pi-filter"
+          label="Filtros rápidos"
+          size="small"
+          [rounded]="true"
+          [outlined]="true"
+          (onClick)="fil.toggle($event)"
+        >
+        </p-button>
+        <p-popover #fil>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="inStock"
+                [checked]="inStockOnly()"
+                (change)="inStockOnly.set($any($event.target).checked)"
+                class="w-4 h-4 accent-[#b55a6b]"
+              />
+              <label for="inStock" class="text-gray-500 font-normal cursor-pointer"
+                >Disponibles ahora</label
+              >
             </div>
           </div>
-
-          <div class="mt-8">
-            <label class="block text-gray-600 text-sm font-normal mb-3 uppercase tracking-wider">
-              <i class="pi pi-filter mr-2"></i>Filtros Rápidos
-            </label>
-            <div class="space-y-3">
-              <div class="flex items-center gap-3">
-                <input type="checkbox" id="inStock" [checked]="inStockOnly()"
-                  (change)="inStockOnly.set($any($event.target).checked)" class="w-4 h-4 accent-[#b55a6b]" />
-                <label for="inStock" class="text-gray-500 font-normal cursor-pointer">Disponibles ahora</label>
-              </div>
-
-              <p-button icon="pi pi-filter-slash" label="Restablecer filtros" [rounded]="true" [raised]="true"
-                severity="secondary" (onClick)="resetFilters()" styleClass="mt-4 font-caviar" fluid />
-            </div>
-          </div>
-        </p-panel>
+        </p-popover>
+        <p-button
+          icon="pi pi-filter-slash"
+          label="Restablecer filtros"
+          [rounded]="true"
+          [raised]="true"
+          severity="secondary"
+          size="small"
+          (onClick)="resetFilters()"
+          styleClass="mt-4 font-caviar ms-4"
+        />
       </div>
-
-      <!-- Grid de productos -->
-      <div class="col-span-3 products-grid">
-        @if (loading()) {
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          @for (item of [1,2,3,4,5,6,7,8]; track item) {
-          <p-card class="bg-transparent">
+    </div>
+    @if (loading()) {
+      <div class="grid lg:grid-cols-5 sm:grid-cols-3 gap-4">
+        @for (item of [1,2,3,4,5]; track item) {
+          <p-card class="rounded-none bg-transparent border-none shadow-none">
             <ng-template #header>
-              <div style="height: 280px" class="p-skeleton"></div>
+              <div class="p-2 pb-0">
+                <p-skeleton size="13rem" />
+              </div>
             </ng-template>
             <ng-template #title>
-              <div class="h-6 w-3/4 mx-auto p-skeleton rounded"></div>
+              <p-skeleton height="4rem" />
             </ng-template>
             <ng-template #subtitle>
-              <div class="h-5 w-1/2 mx-auto p-skeleton rounded"></div>
-            </ng-template>
-            <div class="p-4">
-              <div class="h-16 w-full p-skeleton rounded"></div>
-            </div>
-            <ng-template #footer>
-              <div class="h-10 w-full p-skeleton rounded"></div>
+              <p-skeleton height="4rem" />
             </ng-template>
           </p-card>
-          }
-        </div>
-        } @else if (allProducts().length === 0) {
-        <div class="flex flex-col items-center justify-center py-20">
-          <i class="pi pi-search text-6xl text-[#b55a6b] mb-4"></i>
-          <h3 class="text-2xl font-semibold text-[#f3d0d7]">No se encontraron productos</h3>
-          <p class="text-gray-400 mt-2 text-center max-w-md">
+        }
+      </div>
+    } @else if (totalProducts() === 0) {
+      <div class="w-full shadow-2xl p-16">
+        <div class="flex flex-col items-center justify-center">
+          <div class="relative inline-block">
+            <i class="pi pi-search text-8xl text-red-300 relative z-10"></i>
+          </div>
+          <h2 class="text-3xl cinzel text-gray-800 mt-6 mb-2">No se encontraron productos</h2>
+          <p class="text-gray-500 mb-6 poiret-one text-xl">
             @if (searchTerm()) {
             No encontramos productos que coincidan con "{{ searchTerm() }}"
             } @else {
             No hay productos disponibles en este momento
             }
           </p>
-          @if (searchTerm() || selectedCategory() !== 'all') {
-          <button (click)="resetFilters()"
-            class="mt-6 px-6 py-2 bg-[#b55a6b] hover:bg-[#8b3a48] text-white rounded-full transition">
-            <i class="pi pi-refresh mr-2"></i>Limpiar filtros
-          </button>
-          }
         </div>
-        } @else {
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          @for (product of pagedProducts(); track product.id) {
-          <p-card class="h-full border border-white/5 duration-500 rounded-md overflow-hidden group">
-
-            <ng-template #header>
-              <div class="relative h-62 overflow-hidden">
-                <img [src]="product.image" [alt]="product.title"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  (error)="onImageError($event)" loading="lazy" />
-
-                @if (product.offer?.is_active) {
-                <div class="absolute top-3 right-0 z-10">
-                  <div class="bg-blue-500 ps-2 pe-2 text-white font-semibold py-1 rounded-s-md">
-                    <i class="pi pi-tag"></i> {{ getOfferLabel(product) }}
-                  </div>
-                </div>
-                }
-
-                <div class="absolute bottom-3 left-3 z-10">
-                  <p-button [icon]="isFavorite(product.id) ? 'pi pi-heart-fill' : 'pi pi-heart'" [rounded]="true"
-                    (onClick)="toggleFavorite(product.id, $event)"
-                    [pTooltip]="isFavorite(product.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'"
-                    tooltipPosition="top" styleClass="bg-white border-none text-black" size="large" />
-                </div>
-
-                @if (product.stock === 0) {
-                <div class="absolute inset-0 bg-black/70 flex items-center justify-center z-10 backdrop-blur-sm">
-                  <p-tag severity="danger" value="Agotado" size="large" icon="pi pi-ban" />
-                </div>
-                }
+      </div>
+    } @else {
+      <div class="grid lg:grid-cols-5 sm:grid-cols-3 gap-4">
+        @for (item of allProducts(); track item) {
+        <p-card class="rounded-none bg-transparent border-none shadow-none">
+          <ng-template #header>
+            <div class="relative p-2 pb-0">
+              <img [src]="item.image" class="h-52 rounded-2xl" />
+              @if (item.offer) {
+              <div class="absolute top-5 left-2 z-10 px-3 bg-blue-500 text-white rounded-e-md text-sm tracking-wide">
+                <i class="pi pi-tag text-xs"></i> {{ getOfferLabel(item) }}
               </div>
-            </ng-template>
-
-            <ng-template #title>
-              <h3 class="text-sm line-clamp-2 text-black">{{ product.title }}</h3>
-            </ng-template>
-
-            <div class="ms-2">
-              @if (hasDiscount(product)) {
-              <span class="text-xs line-through text-gray-600 mr-2">${{ product.price | number }}</span>
-              <span class="text-sm text-zinc-600 font-semibold">${{ getDisplayPrice(product) | number }} MXN</span>
-              } @else {
-              <span class="text-sm text-zinc-600 font-semibold">${{ getDisplayPrice(product) | number }} MXN</span>
               }
             </div>
-
-            <ng-template #footer>
-              <p-button icon="pi pi-shopping-cart" size="small" label="Agregar al carrito" styleClass="font-caviar"
-                (onClick)="addToCart(product)" [disabled]="product.stock === 0" fluid />
-            </ng-template>
-
-          </p-card>
-          }
-        </div>
-
-        @if (totalProducts() > pageSize) {
-        <div class="flex justify-center mt-12">
-          <p-paginator [rows]="pageSize" [totalRecords]="totalProducts()" [first]="currentPage() * pageSize"
-            (onPageChange)="onPageChange($event)" [rowsPerPageOptions]="[]" [showCurrentPageReport]="true"
-            currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} productos"
-            class="bg-black/40 rounded-full border border-[#b55a6b]/30" />
-        </div>
-        }
+          </ng-template>
+          <ng-template #title>
+            <div class="">
+              <p class="text-[10px] uppercase font-light">{{item.category}}</p>
+              <p class="text-sm">{{ item.title }}</p>
+            </div>
+          </ng-template>
+          <ng-template #subtitle>
+            <div class="">
+              @if (
+              item.offer?.type === OfferType.FIXED_PRICE ||
+              item.offer?.type === OfferType.PERCENTAGE
+              ) {
+              <p class="text-xs text-center line-through">${{ item.price }}</p>
+              <p class="text-md text-center text-black">
+                ${{ item.final_price || item.offer?.discount_value }} MXN
+              </p>
+              } @else {
+              <p class="text-md text-center text-black">${{item.price}} MXN</p>
+              }
+            </div>
+          </ng-template>
+        </p-card>
         }
       </div>
-
+    }
+    <div class="mt-8">
+      <p-paginator
+        [rows]="pageSize"
+        [totalRecords]="totalProducts()"
+        [first]="currentPage() * pageSize"
+        (onPageChange)="onPageChange($event)"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} productos"
+        [showPageLinks]="true"
+      ></p-paginator>
     </div>
   </div>
 </div>
