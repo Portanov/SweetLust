@@ -14,7 +14,7 @@ import {
   CategoryWithCount,
   ProductCategory
 } from '../../assets/models/shop/product.model';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 
 const API_URL = environment.apiUrl;
 

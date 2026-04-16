@@ -9,7 +9,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, map, throwError } from 'rxjs';
 import { AuthService } from '../../../services/auth/auth.service';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 const PUBLIC_AUTH_ROUTES = [
   '/auth/register',

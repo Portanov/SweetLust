@@ -10,7 +10,7 @@ import {
   CheckoutRequest,
   CheckoutResponse
 } from '../../assets/models/shop/cart.model';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 
 const API_URL = environment.apiUrl;
 
