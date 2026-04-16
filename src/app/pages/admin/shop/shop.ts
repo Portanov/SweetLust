@@ -68,6 +68,8 @@ export class Shop implements OnInit {
   selectedProductId = signal<number | null>(null);
   selectedProduct = signal<Product | null>(null);
   selectedOffer = signal<Offer | null>(null);
+  existingOffers = signal<Offer[]>([]);
+  showOffersList = signal(false);
   first = signal(0);
   rows = signal(10);
 
@@ -88,13 +90,15 @@ export class Shop implements OnInit {
 
   offerForm = this.fb.group({
     type: [OfferType.PERCENTAGE, [Validators.required]],
-    label: ['', [Validators.required, Validators.maxLength(100)]],
+    label: ['', [Validators.required, Validators.maxLength(200)]],
     discount_value: [null as number | null],
     bundle_quantity: [null as number | null],
-    is_active: [true],
     starts_at: [null as Date | null],
     ends_at: [null as Date | null]
   });
+
+  // Exponer OfferType para usar en el template
+  protected readonly OfferType = OfferType;
 
   ngOnInit(): void {
     this.loadProducts();
@@ -106,18 +110,76 @@ export class Shop implements OnInit {
     return this.products().slice(start, end);
   });
 
+  /**
+   * Carga productos - el backend ya devuelve offer = null si no hay oferta activa
+   */
   loadProducts(): void {
     this.loading.set(true);
     this.productService.getProducts().subscribe({
       next: (response) => {
         this.products.set(response.products);
-        this.total.set(response.products.length);
-
+        this.total.set(response.total || response.products.length);
         this.loading.set(false);
       },
       error: (error) => {
         this.loading.set(false);
         this.alertService.error('Error', 'No se pudieron cargar los productos');
+        console.error(error);
+      }
+    });
+  }
+
+  /**
+   * Verifica si un producto tiene oferta activa
+   */
+  hasActiveOffer(product: Product): boolean {
+    return product.offer !== null && product.offer !== undefined;
+  }
+
+  /**
+   * Obtiene la oferta activa del producto (puede ser null)
+   */
+  getActiveOffer(product: Product): Offer | null {
+    return product.offer || null;
+  }
+
+  /**
+   * Verifica si una oferta es permanente
+   */
+  isPermanentOffer(offer: Offer | null | undefined): boolean {
+    if (!offer) return false;
+    return offer.is_active === true && !offer.ends_at;
+  }
+
+  /**
+   * Verifica si una oferta es temporal (con fecha de expiración)
+   */
+  isTemporaryOffer(offer: Offer | null | undefined): boolean {
+    if (!offer) return false;
+    return offer.is_active === null && !!offer.ends_at;
+  }
+
+  /**
+   * Verifica si una oferta temporal está vigente
+   */
+  isTemporaryOfferActive(offer: Offer): boolean {
+    if (!this.isTemporaryOffer(offer)) return false;
+    const now = new Date();
+    const started = !offer.starts_at || new Date(offer.starts_at) <= now;
+    const notEnded = new Date(offer.ends_at!) >= now;
+    return started && notEnded;
+  }
+
+  /**
+   * Recarga las ofertas de un producto específico
+   */
+  loadProductOffers(productId: number): void {
+    this.productService.getOffersByProduct(productId).subscribe({
+      next: (offers) => {
+        this.existingOffers.set(offers);
+      },
+      error: (error) => {
+        console.error('Error al cargar ofertas del producto:', error);
       }
     });
   }
@@ -127,19 +189,19 @@ export class Shop implements OnInit {
     this.rows.set(event.rows);
   }
 
-  loadProductsLazy(event: any): void {
-    this.loadProducts();
-  }
-
   onSearch(event: any): void {
     const query = event.target.value;
     this.loading.set(true);
-    this.productService.getProducts(query).subscribe({
+    this.productService.getProducts({ search: query }).subscribe({
       next: (response) => {
         this.products.set(response.products);
         this.total.set(response.total);
         this.first.set(0);
         this.loading.set(false);
+      },
+      error: (error) => {
+        this.loading.set(false);
+        this.alertService.error('Error', 'Error al buscar productos');
       }
     });
   }
@@ -178,8 +240,8 @@ export class Shop implements OnInit {
       title: formValue.title!,
       description: formValue.description!,
       image: formValue.image!,
-      price: formValue.price!,
-      stock: formValue.stock!
+      price: Number(formValue.price!),
+      stock: Number(formValue.stock!)
     };
 
     if (this.isEditing() && this.selectedProductId()) {
@@ -207,30 +269,50 @@ export class Shop implements OnInit {
     }
   }
 
+  /**
+   * Abre el diálogo para crear una nueva oferta
+   */
   openOfferDialog(product: Product): void {
     this.selectedProduct.set(product);
     this.selectedOffer.set(null);
+    this.showOffersList.set(false);
+
+    this.productService.getOffersByProduct(product.id).subscribe({
+      next: (offers) => {
+        this.existingOffers.set(offers);
+        if (offers.length > 0) {
+          this.showOffersList.set(true);
+        }
+      },
+      error: (error) => {
+        console.error('Error al cargar ofertas:', error);
+      }
+    });
+
     this.offerForm.reset({
       type: OfferType.PERCENTAGE,
       label: '',
       discount_value: null,
       bundle_quantity: null,
-      is_active: true,
       starts_at: null,
       ends_at: null
     });
     this.offerDialog.set(true);
   }
 
+  /**
+   * Abre el diálogo para editar una oferta existente
+   */
   editOffer(offer: Offer, product: Product): void {
     this.selectedProduct.set(product);
     this.selectedOffer.set(offer);
+    this.showOffersList.set(false);
+
     this.offerForm.patchValue({
       type: offer.type,
       label: offer.label,
       discount_value: offer.discount_value,
       bundle_quantity: offer.bundle_quantity,
-      is_active: offer.is_active,
       starts_at: offer.starts_at ? new Date(offer.starts_at) : null,
       ends_at: offer.ends_at ? new Date(offer.ends_at) : null
     });
@@ -241,46 +323,87 @@ export class Shop implements OnInit {
     if (this.offerForm.invalid || !this.selectedProduct()) return;
 
     const formValue = this.offerForm.value;
+    const hasEndDate = !!formValue.ends_at;
 
+    // Validar fechas
+    if (formValue.starts_at && formValue.ends_at) {
+      if (new Date(formValue.starts_at) >= new Date(formValue.ends_at)) {
+        this.alertService.error('Error', 'La fecha de inicio debe ser anterior a la fecha de fin');
+        return;
+      }
+    }
+
+    // Construir el objeto según la lógica del backend
     const offerData: any = {
       type: formValue.type!,
       label: formValue.label!,
-      is_active: !!formValue.is_active,
       discount_value: formValue.discount_value ?? undefined,
       bundle_quantity: formValue.bundle_quantity ?? undefined,
-      starts_at: formValue.starts_at ?? undefined,
-      ends_at: formValue.ends_at ?? undefined
+      starts_at: formValue.starts_at ? this.formatDateToISO(formValue.starts_at) : undefined,
     };
 
+    // Si tiene fecha de fin -> oferta temporal (is_active = null)
+    if (hasEndDate) {
+      offerData.ends_at = this.formatDateToISO(formValue.ends_at!);
+      offerData.is_active = null;
+    } else {
+      // Oferta permanente (is_active = true, ends_at = null)
+      offerData.ends_at = null;
+      offerData.is_active = true;
+    }
+
     if (this.selectedOffer()) {
+      // Actualizar oferta existente
       this.productService.updateOffer(this.selectedOffer()!.id, offerData).subscribe({
         next: () => {
-          this.alertService.success('Éxito', 'Oferta actualizada');
+          this.alertService.success('Éxito', 'Oferta actualizada correctamente');
           this.loadProducts();
           this.offerDialog.set(false);
+          this.selectedOffer.set(null);
+        },
+        error: (error) => {
+          this.alertService.error('Error', error.error?.message || 'Error al actualizar la oferta');
         }
       });
     } else {
+      // Crear nueva oferta
       this.productService.createOffer(this.selectedProduct()!.id, offerData).subscribe({
         next: () => {
-          this.alertService.success('Éxito', 'Oferta creada');
+          this.alertService.success('Éxito', 'Oferta creada correctamente');
           this.loadProducts();
           this.offerDialog.set(false);
+        },
+        error: (error) => {
+          this.alertService.error('Error', error.error?.message || 'Error al crear la oferta');
         }
       });
     }
   }
 
+  /**
+   * Formatea una fecha a ISO string para enviar al backend
+   */
+  private formatDateToISO(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+  }
+
   deactivateOffer(offer: Offer, product: Product): void {
     this.confirmationService.confirm({
-      message: `¿Estás seguro de desactivar esta oferta?`,
-      header: 'Confirmar',
+      message: `¿Estás seguro de desactivar la oferta "${offer.label}"?`,
+      header: 'Confirmar desactivación',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.productService.deactivateOffer(offer.id).subscribe({
           next: () => {
             this.alertService.success('Éxito', 'Oferta desactivada correctamente');
             this.loadProducts();
+            this.offerDialog.set(false);
           },
           error: (error) => {
             this.alertService.error('Error', error.error?.message || 'Error al desactivar la oferta');
@@ -292,7 +415,7 @@ export class Shop implements OnInit {
 
   deleteOffer(offer: Offer): void {
     this.confirmationService.confirm({
-      message: `¿Estás seguro de eliminar esta oferta?`,
+      message: `¿Estás seguro de eliminar permanentemente la oferta "${offer.label}"?`,
       header: 'Confirmar eliminación',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
@@ -300,6 +423,7 @@ export class Shop implements OnInit {
           next: () => {
             this.alertService.success('Éxito', 'Oferta eliminada correctamente');
             this.loadProducts();
+            this.offerDialog.set(false);
           },
           error: (error) => {
             this.alertService.error('Error', error.error?.message || 'Error al eliminar la oferta');
@@ -353,6 +477,31 @@ export class Shop implements OnInit {
     }
   }
 
+  getOfferSeverity(offer: Offer): 'success' | 'secondary' | 'info' | 'warn' | 'danger' {
+    if (this.isPermanentOffer(offer)) return 'success';
+    if (this.isTemporaryOffer(offer)) {
+      const now = new Date();
+      const endsAt = new Date(offer.ends_at!);
+      const daysLeft = Math.ceil((endsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysLeft <= 3) return 'danger';
+      if (daysLeft <= 7) return 'warn';
+      return 'info';
+    }
+    return 'secondary';
+  }
+
+  formatOfferDate(date: Date | string | null): string {
+    if (!date) return 'Sin fecha límite';
+    const d = new Date(date);
+    return d.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     img.src = 'assets/images/placeholder.png';
@@ -361,5 +510,7 @@ export class Shop implements OnInit {
   hideDialogs(): void {
     this.productDialog.set(false);
     this.offerDialog.set(false);
+    this.selectedOffer.set(null);
+    this.showOffersList.set(false);
   }
 }

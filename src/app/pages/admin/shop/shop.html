@@ -12,34 +12,20 @@
   <div class="products-card">
     <p-toolbar>
       <div class="p-toolbar-group-start">
-        <p-button
-          label="Nuevo Producto"
-          icon="pi pi-plus"
-          styleClass="p-button-success"
-          (onClick)="openNewProduct()"
-        ></p-button>
+        <p-button label="Nuevo Producto" icon="pi pi-plus" styleClass="p-button-success"
+          (onClick)="openNewProduct()"></p-button>
       </div>
       <div class="p-toolbar-group-end">
         <p-iconfield>
           <p-inputIcon class="pi pi-search"></p-inputIcon>
-          <input pInputText type="text" placeholder="Buscar producto..." />
+          <input pInputText type="text" placeholder="Buscar producto..." (input)="onSearch($event)" />
         </p-iconfield>
       </div>
     </p-toolbar>
 
-    <p-table
-      #dt
-      [value]="products()"
-      [loading]="loading()"
-      [paginator]="true"
-      [rows]="rows()"
-      [first]="first()"
-      [rowsPerPageOptions]="[5, 10, 20]"
-      [totalRecords]="total()"
-      [lazy]="false"
-      (onPage)="onPageChange($event)"
-      class="p-datatable-striped"
-    >
+    <p-table #dt [value]="pagedProducts()" [loading]="loading()" [paginator]="true" [rows]="rows()" [first]="first()"
+      [rowsPerPageOptions]="[5, 10, 20]" [totalRecords]="total()" [lazy]="false" (onPage)="onPageChange($event)"
+      class="p-datatable-striped">
       <ng-template pTemplate="caption">
         <div class="table-caption">
           <span class="font-semibold">Lista de Productos</span>
@@ -64,73 +50,62 @@
           <td>{{ product.id }}</td>
           <td>
             <div class="product-image-cell">
-              <img
-                [src]="product.image"
-                [alt]="product.title"
-                class="product-thumbnail"
-                (error)="onImageError($event)"
-              />
+              <img [src]="product.image" [alt]="product.title" class="product-thumbnail"
+                (error)="onImageError($event)" />
             </div>
           </td>
           <td>
             <div class="product-info-cell">
               <span class="product-title-cell">{{ product.title }}</span>
-              <span class="product-description-cell"
-                >{{ product.description | slice: 0 : 60 }}...</span
-              >
+              <span class="product-description-cell">{{ product.description | slice: 0 : 60 }}...</span>
             </div>
           </td>
           <td>
             <div class="price-cell">
-              @if (product.offer?.is_active && product.final_price < product.price) {
-                <span class="original-price-cell text-xs line-through opacity-50">{{
-                  product.price | currency
+              @if (product.offer && product.final_price && product.final_price < product.price) {
+              <span
+                class="original-price-cell text-xs line-through opacity-50">{{
+                product.price | currency
                 }}</span>
                 <span class="final-price-cell font-bold text-[#ffa9a9]">{{
                   product.final_price | currency
-                }}</span>
-              } @else {
+                  }}</span>
+                } @else {
                 <span class="price-cell-value">{{ product.price | currency }}</span>
-              }
+                }
             </div>
           </td>
           <td>
             <span [class.low-stock-cell]="product.stock < 10"> {{ product.stock }} unidades </span>
           </td>
           <td>
-            @if (product.offer && product.offer.is_active) {
-              <div class="offer-cell">
-                <p-tag
-                  [value]="getOfferTypeLabel(product.offer.type)"
-                  severity="warn"
-                  [pTooltip]="getOfferDescription(product.offer)"
-                ></p-tag>
-                <span class="offer-label">{{ product.offer.label }}</span>
-              </div>
+            @if (product.offer) {
+            <div class="offer-cell">
+            <p-tag [value]="getOfferTypeLabel(product.offer.type)" [severity]="getOfferSeverity(product.offer)"
+                [pTooltip]="getOfferDescription(product.offer)"></p-tag>
+              <span class="offer-label">{{ product.offer.label }}</span>
+              @if (isTemporaryOffer(product.offer)) {
+              <span class="offer-label text-xs text-gray-400">
+                hasta {{ formatOfferDate(product.offer.ends_at) }}
+              </span>
+              } @else if (isPermanentOffer(product.offer)) {
+              <span class="offer-label text-xs text-green-600">
+                (Permanente)
+              </span>
+              }
+            </div>
             } @else {
-              <p-tag value="Sin oferta" severity="secondary"></p-tag>
+            <p-tag value="Sin oferta" severity="secondary"></p-tag>
             }
           </td>
           <td>
             <div class="action-buttons-cell">
-              <p-button
-                icon="pi pi-tag"
-                styleClass="p-button-rounded p-button-warning p-button-text"
-                (onClick)="openOfferDialog(product)"
-                pTooltip="Gestionar oferta"
-              ></p-button>
-              <p-button
-                icon="pi pi-pencil"
-                styleClass="p-button-rounded p-button-info p-button-text"
-                (onClick)="editProduct(product)"
-                pTooltip="Editar producto"
-              ></p-button>
-              <p-button
-                icon="pi pi-trash"
-                styleClass="p-button-rounded p-button-danger p-button-text"
-                (onClick)="deleteProduct(product)"
-                pTooltip="Eliminar producto"
-              ></p-button>
+              <p-button icon="pi pi-tag" styleClass="p-button-rounded p-button-warning p-button-text"
+                (onClick)="openOfferDialog(product)" pTooltip="Gestionar oferta"></p-button>
+              <p-button icon="pi pi-pencil" styleClass="p-button-rounded p-button-info p-button-text"
+                (onClick)="editProduct(product)" pTooltip="Editar producto"></p-button>
+              <p-button icon="pi pi-trash" styleClass="p-button-rounded p-button-danger p-button-text"
+                (onClick)="deleteProduct(product)" pTooltip="Eliminar producto"></p-button>
             </div>
           </td>
         </tr>
@@ -142,12 +117,8 @@
             <div class="empty-table">
               <i class="pi pi-box text-4xl text-gray-400 mb-2"></i>
               <p class="text-gray-500">No se encontraron productos</p>
-              <p-button
-                label="Crear primer producto"
-                icon="pi pi-plus"
-                styleClass="p-button-outlined mt-3"
-                (onClick)="openNewProduct()"
-              ></p-button>
+              <p-button label="Crear primer producto" icon="pi pi-plus" styleClass="p-button-outlined mt-3"
+                (onClick)="openNewProduct()"></p-button>
             </div>
           </td>
         </tr>
@@ -156,35 +127,23 @@
   </div>
 
   <!-- Dialog de Producto (Crear/Editar) -->
-  <p-dialog
-    [header]="isEditing() ? 'Editar Producto' : 'Nuevo Producto'"
-    [(visible)]="productDialog"
-    [modal]="true"
-    [style]="{ width: '600px' }"
-    [closable]="!loading()"
-    (onHide)="hideDialogs()"
-  >
+  <p-dialog [header]="isEditing() ? 'Editar Producto' : 'Nuevo Producto'" [(visible)]="productDialog" [modal]="true"
+    [style]="{ width: '600px' }" [closable]="!loading()" (onHide)="hideDialogs()">
     <form [formGroup]="productForm" (ngSubmit)="saveProduct()">
       <div class="form-grid">
         <div class="field">
           <label for="title">Título del producto *</label>
           <input pInputText id="title" formControlName="title" class="w-full" />
           @if (productForm.get('title')?.invalid && productForm.get('title')?.touched) {
-            <small class="error-text">El título es requerido (máximo 255 caracteres)</small>
+          <small class="error-text">El título es requerido (máximo 255 caracteres)</small>
           }
         </div>
 
         <div class="field">
           <label for="description">Descripción *</label>
-          <textarea
-            pInputTextarea
-            id="description"
-            formControlName="description"
-            rows="4"
-            class="w-full"
-          ></textarea>
+          <textarea pInputTextarea id="description" formControlName="description" rows="4" class="w-full"></textarea>
           @if (productForm.get('description')?.invalid && productForm.get('description')?.touched) {
-            <small class="error-text">La descripción es requerida</small>
+          <small class="error-text">La descripción es requerida</small>
           }
         </div>
 
@@ -192,269 +151,179 @@
           <label for="image">URL de la imagen *</label>
           <input pInputText id="image" formControlName="image" class="w-full" />
           @if (productForm.get('image')?.invalid && productForm.get('image')?.touched) {
-            <small class="error-text">Ingresa una URL válida de imagen (https://...)</small>
+          <small class="error-text">Ingresa una URL válida de imagen (https://...)</small>
           }
           @if (productForm.get('image')?.value) {
-            <div class="image-preview">
-              <img [src]="productForm.get('image')?.value" alt="Preview" class="preview-image" />
-            </div>
+          <div class="image-preview">
+            <img [src]="productForm.get('image')?.value" alt="Preview" class="preview-image" />
+          </div>
           }
         </div>
 
         <div class="field-row">
           <div class="field">
             <label for="price">Precio *</label>
-            <p-inputNumber
-              id="price"
-              formControlName="price"
-              mode="currency"
-              currency="USD"
-              locale="en-US"
-              class="w-full"
-            ></p-inputNumber>
+            <p-inputNumber id="price" formControlName="price" mode="currency" currency="USD" locale="en-US"
+              class="w-full"></p-inputNumber>
             @if (productForm.get('price')?.invalid && productForm.get('price')?.touched) {
-              <small class="error-text">El precio debe ser mayor o igual a 0</small>
+            <small class="error-text">El precio debe ser mayor o igual a 0</small>
             }
           </div>
 
           <div class="field">
             <label for="stock">Stock *</label>
-            <p-inputNumber
-              id="stock"
-              formControlName="stock"
-              [min]="0"
-              class="w-full"
-            ></p-inputNumber>
+            <p-inputNumber id="stock" formControlName="stock" [min]="0" class="w-full"></p-inputNumber>
             @if (productForm.get('stock')?.invalid && productForm.get('stock')?.touched) {
-              <small class="error-text">El stock debe ser mayor o igual a 0</small>
+            <small class="error-text">El stock debe ser mayor o igual a 0</small>
             }
           </div>
         </div>
       </div>
 
       <div class="dialog-actions">
-        <p-button
-          label="Cancelar"
-          severity="secondary"
-          (onClick)="hideDialogs()"
-          [disabled]="loading()"
-        ></p-button>
-        <p-button
-          type="submit"
-          label="Guardar"
-          [loading]="loading()"
-          [disabled]="productForm.invalid"
-        ></p-button>
+        <p-button label="Cancelar" severity="secondary" (onClick)="hideDialogs()" [disabled]="loading()"></p-button>
+        <p-button type="submit" label="Guardar" [loading]="loading()" [disabled]="productForm.invalid"></p-button>
       </div>
     </form>
   </p-dialog>
 
   <!-- Dialog de Ofertas -->
-  <p-dialog
-    [header]="selectedOffer() ? 'Editar Oferta' : 'Nueva Oferta'"
-    [(visible)]="offerDialog"
-    [modal]="true"
-    [style]="{ width: '550px' }"
-    [closable]="!loading()"
-    (onHide)="hideDialogs()"
-  >
+  <p-dialog [header]="selectedOffer() ? 'Editar Oferta' : 'Nueva Oferta'" [(visible)]="offerDialog" [modal]="true"
+    [style]="{ width: '650px' }" [closable]="!loading()" (onHide)="hideDialogs()">
     <div class="offer-product-info" *ngIf="selectedProduct()">
       <div class="product-badge">
-        <img
-          [src]="selectedProduct()!.image"
-          [alt]="selectedProduct()!.title"
-          class="badge-image"
-        />
+        <img [src]="selectedProduct()!.image" [alt]="selectedProduct()!.title" class="badge-image" />
         <div>
           <h4>{{ selectedProduct()!.title }}</h4>
           <p>Precio actual: {{ selectedProduct()!.price | currency }}</p>
+          <p *ngIf="selectedProduct()!.offer" class="text-sm text-amber-600">
+            Oferta activa: {{ selectedProduct()!.offer?.label }}
+            @if (selectedProduct()!.offer && isPermanentOffer(selectedProduct()!.offer)) {
+            (Permanente)
+            } @else if (selectedProduct()!.offer?.ends_at) {
+            (Hasta {{ formatOfferDate(selectedProduct()!.offer?.ends_at!) }})
+            } @else {
+            (Sin fecha de expiración)
+            }
+          </p>
         </div>
       </div>
     </div>
 
-    <form [formGroup]="offerForm" (ngSubmit)="saveOffer()">
+    <!-- Lista de ofertas existentes -->
+    <div *ngIf="showOffersList() && existingOffers().length > 0 && !selectedOffer()" class="mb-4">
+      <h5 class="text-sm font-semibold mb-2">Ofertas existentes:</h5>
+      <div class="border rounded-lg divide-y max-h-64 overflow-y-auto">
+        <div *ngFor="let offer of existingOffers()" class="p-3 flex justify-between items-center">
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <span class="font-medium">{{ offer.label }}</span>
+              <p-tag *ngIf="offer" [value]="getOfferTypeLabel(offer.type)" [severity]="getOfferSeverity(offer)" size="small"></p-tag>
+            </div>
+            <div class="text-xs text-gray-500">
+              {{ getOfferDescription(offer) }}
+            </div>
+            <div class="text-xs text-gray-400">
+              @if (isPermanentOffer(offer)) {
+              <span class="text-green-600">✓ Oferta permanente</span>
+              } @else {
+              Vigencia: {{ formatOfferDate(offer.starts_at) }} → {{ formatOfferDate(offer.ends_at) }}
+              }
+            </div>
+          </div>
+          <div class="flex gap-1 ml-2">
+            <p-button icon="pi pi-pencil" styleClass="p-button-rounded p-button-info p-button-text p-button-sm"
+              (onClick)="editOffer(offer, selectedProduct()!)" pTooltip="Editar oferta"></p-button>
+            <p-button *ngIf="offer.is_active !== false" icon="pi pi-ban"
+              styleClass="p-button-rounded p-button-warning p-button-text p-button-sm"
+              (onClick)="deactivateOffer(offer, selectedProduct()!)" pTooltip="Desactivar"></p-button>
+            <p-button icon="pi pi-trash" styleClass="p-button-rounded p-button-danger p-button-text p-button-sm"
+              (onClick)="deleteOffer(offer)" pTooltip="Eliminar"></p-button>
+          </div>
+        </div>
+      </div>
+      <hr class="my-3" />
+      <p-button label="+ Crear nueva oferta" icon="pi pi-plus" styleClass="p-button-outlined p-button-sm w-full"
+        (onClick)="showOffersList.set(false); selectedOffer.set(null); offerForm.reset({ type: OfferType.PERCENTAGE, label: '', discount_value: null, bundle_quantity: null, starts_at: null, ends_at: null })"></p-button>
+    </div>
+
+    <!-- Formulario de oferta (nueva o edición) -->
+    <form [formGroup]="offerForm" (ngSubmit)="saveOffer()" *ngIf="!showOffersList() || selectedOffer()">
       <div class="form-grid">
         <div class="field">
           <label for="type">Tipo de oferta *</label>
-          <p-select
-            id="type"
-            formControlName="type"
-            [options]="offerTypes"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Selecciona un tipo"
-            class="w-full"
-          ></p-select>
-          @if (offerForm.get('type')?.invalid && offerForm.get('type')?.touched) {
-            <small class="error-text">El tipo de oferta es requerido</small>
-          }
+          <p-select id="type" formControlName="type" [options]="offerTypes" optionLabel="label" optionValue="value"
+            placeholder="Selecciona un tipo" class="w-full"></p-select>
         </div>
 
         <div class="field">
           <label for="label">Etiqueta *</label>
-          <input
-            pInputText
-            id="label"
-            formControlName="label"
-            class="w-full"
-            placeholder="Ej: Oferta de verano, 2x1 especial"
-          />
+          <input pInputText id="label" formControlName="label" class="w-full"
+            placeholder="Ej: Oferta de verano, 2x1 especial" />
           <small class="help-text">Nombre visible para los clientes</small>
-          @if (offerForm.get('label')?.invalid && offerForm.get('label')?.touched) {
-            <small class="error-text">La etiqueta es requerida</small>
-          }
         </div>
 
         <!-- Campos según tipo de oferta -->
         @if (offerForm.get('type')?.value === 'percentage') {
-          <div class="field">
-            <label for="discount_value">Porcentaje de descuento *</label>
-            <p-inputNumber
-              id="discount_value"
-              formControlName="discount_value"
-              [min]="1"
-              [max]="99"
-              [suffix]="'%'"
-              class="w-full"
-              placeholder="Ej: 20"
-            ></p-inputNumber>
-            <small class="help-text">El descuento se aplicará sobre el precio original</small>
-            @if (
-              offerForm.get('discount_value')?.invalid && offerForm.get('discount_value')?.touched
-            ) {
-              <small class="error-text">Ingresa un porcentaje entre 1 y 99</small>
-            }
-          </div>
+        <div class="field">
+          <label for="discount_value">Porcentaje de descuento *</label>
+          <p-inputNumber id="discount_value" formControlName="discount_value" [min]="1" [max]="99" [suffix]="'%'"
+            class="w-full" placeholder="Ej: 20"></p-inputNumber>
+        </div>
         }
 
         @if (offerForm.get('type')?.value === 'fixed_price') {
-          <div class="field">
-            <label for="discount_value">Precio fijo *</label>
-            <p-inputNumber
-              id="discount_value"
-              formControlName="discount_value"
-              [min]="0"
-              mode="currency"
-              currency="USD"
-              locale="en-US"
-              class="w-full"
-              placeholder="Ej: 29.99"
-            ></p-inputNumber>
-            <small class="help-text">El producto se venderá a este precio durante la oferta</small>
-            @if (
-              offerForm.get('discount_value')?.invalid && offerForm.get('discount_value')?.touched
-            ) {
-              <small class="error-text">El precio fijo es requerido</small>
-            }
-          </div>
+        <div class="field">
+          <label for="discount_value">Precio fijo *</label>
+          <p-inputNumber id="discount_value" formControlName="discount_value" [min]="0" mode="currency" currency="USD"
+            locale="en-US" class="w-full" placeholder="Ej: 29.99"></p-inputNumber>
+        </div>
         }
 
         @if (offerForm.get('type')?.value === 'bundle') {
-          <div class="field-row">
-            <div class="field">
-              <label for="bundle_quantity">Cantidad en bundle *</label>
-              <p-inputNumber
-                id="bundle_quantity"
-                formControlName="bundle_quantity"
-                [min]="2"
-                class="w-full"
-                placeholder="Ej: 3"
-              ></p-inputNumber>
-              <small class="help-text">Número de productos en el paquete</small>
-              @if (
-                offerForm.get('bundle_quantity')?.invalid &&
-                offerForm.get('bundle_quantity')?.touched
-              ) {
-                <small class="error-text">Mínimo 2 productos</small>
-              }
-            </div>
-            <div class="field">
-              <label for="discount_value">Precio del bundle *</label>
-              <p-inputNumber
-                id="discount_value"
-                formControlName="discount_value"
-                [min]="0"
-                mode="currency"
-                currency="USD"
-                locale="en-US"
-                class="w-full"
-                placeholder="Ej: 49.99"
-              ></p-inputNumber>
-              <small class="help-text">Precio total del paquete</small>
-              @if (
-                offerForm.get('discount_value')?.invalid && offerForm.get('discount_value')?.touched
-              ) {
-                <small class="error-text">El precio del bundle es requerido</small>
-              }
-            </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="bundle_quantity">Cantidad en bundle *</label>
+            <p-inputNumber id="bundle_quantity" formControlName="bundle_quantity" [min]="2" class="w-full"
+              placeholder="Ej: 3"></p-inputNumber>
           </div>
+          <div class="field">
+            <label for="discount_value">Precio del bundle *</label>
+            <p-inputNumber id="discount_value" formControlName="discount_value" [min]="0" mode="currency" currency="USD"
+              locale="en-US" class="w-full" placeholder="Ej: 49.99"></p-inputNumber>
+          </div>
+        </div>
         }
 
         <div class="field-row">
           <div class="field">
             <label for="starts_at">Fecha de inicio</label>
-            <p-datepicker
-              id="starts_at"
-              formControlName="starts_at"
-              dateFormat="dd/mm/yy"
-              hourFormat="24"
-              class="w-full"
-              placeholder="dd/mm/yyyy hh:mm"
-            ></p-datepicker>
+            <p-datepicker id="starts_at" formControlName="starts_at" dateFormat="dd/mm/yy" hourFormat="24" [showTime]="true"
+              class="w-full" placeholder="dd/mm/yyyy hh:mm"></p-datepicker>
             <small class="help-text">Dejar vacío para inicio inmediato</small>
           </div>
           <div class="field">
             <label for="ends_at">Fecha de fin</label>
-            <p-datepicker
-              id="ends_at"
-              formControlName="ends_at"
-              dateFormat="dd/mm/yy"
-              hourFormat="24"
-              class="w-full"
-              placeholder="dd/mm/yyyy hh:mm"
-            ></p-datepicker>
-            <small class="help-text">Dejar vacío para oferta sin fecha de fin</small>
+            <p-datepicker id="ends_at" formControlName="ends_at" dateFormat="dd/mm/yy" hourFormat="24" [showTime]="true"
+              class="w-full" placeholder="dd/mm/yyyy hh:mm"></p-datepicker>
+            <small class="help-text">
+              {{ offerForm.get('ends_at')?.value ? 'Oferta temporal (expira)' : 'Oferta permanente (sin expiración)' }}
+            </small>
           </div>
         </div>
 
-        <div class="field-checkbox">
-          <p-checkbox
-            inputId="is_active"
-            formControlName="is_active"
-            label="Oferta activa"
-          ></p-checkbox>
+        <div class="offer-warning" *ngIf="selectedOffer()">
+          <i class="pi pi-info-circle"></i>
+          <span>Al actualizar esta oferta, los cambios se aplicarán inmediatamente</span>
         </div>
-
-        @if (selectedOffer()) {
-          <div class="offer-warning" *ngIf="selectedOffer()?.is_active">
-            <i class="pi pi-info-circle"></i>
-            <span>Al actualizar esta oferta, los cambios se aplicarán inmediatamente</span>
-          </div>
-        }
       </div>
 
       <div class="dialog-actions">
-        <p-button
-          label="Cancelar"
-          severity="secondary"
-          (onClick)="hideDialogs()"
-          [disabled]="loading()"
-        ></p-button>
-        @if (selectedOffer() && selectedOffer()?.is_active) {
-          <p-button
-            label="Desactivar oferta"
-            icon="pi pi-ban"
-            severity="danger"
-            (onClick)="deactivateOffer(selectedOffer()!, selectedProduct()!)"
-            [disabled]="loading()"
-          ></p-button>
-        }
-        <p-button
-          type="submit"
-          label="Guardar oferta"
-          [loading]="loading()"
-          [disabled]="offerForm.invalid"
-        ></p-button>
+        <p-button label="Cancelar" severity="secondary" (onClick)="hideDialogs()" [disabled]="loading()"></p-button>
+        <p-button label="Volver a ofertas" *ngIf="selectedOffer()" severity="secondary" icon="pi pi-arrow-left"
+          (onClick)="selectedOffer.set(null); showOffersList.set(true); offerForm.reset({ type: OfferType.PERCENTAGE, label: '', discount_value: null, bundle_quantity: null, starts_at: null, ends_at: null })"></p-button>
+        <p-button type="submit" [label]="selectedOffer() ? 'Actualizar oferta' : 'Guardar oferta'" [loading]="loading()"
+          [disabled]="offerForm.invalid"></p-button>
       </div>
     </form>
   </p-dialog>

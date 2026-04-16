@@ -9,8 +9,9 @@ import {
   UpdateRoleRequest,
   UserRole
 } from '../../assets/models/user/user.model';
+import { environment } from '../../environments/environment';
 
-const API_URL = 'http://localhost:3000/api/users';
+const API_URL = environment.apiUrl+'/users';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {

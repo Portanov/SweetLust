@@ -98,7 +98,7 @@ export class Landing implements OnInit {
   }
 
   getOfferLabel(product: Product): string | undefined {
-    if (!product.offer || !product.offer.is_active) return undefined;
+    if (!product.offer) return undefined;
 
     switch (product.offer.type) {
       case OfferType.PERCENTAGE:

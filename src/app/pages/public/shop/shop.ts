@@ -257,7 +257,7 @@ export class Shop implements OnInit {
   onImageError(event: Event): void { (event.target as HTMLImageElement).src = 'assets/images/placeholder.png'; }
 
   getOfferLabel(product: Product): string {
-    if (!product.offer?.is_active) return '';
+    if (!product.offer) return '';
     switch (product.offer.type) {
       case OfferType.PERCENTAGE: return `${product.offer.discount_value}% OFF`;
       case OfferType.FIXED_PRICE: return `Liquidación`;
@@ -268,7 +268,7 @@ export class Shop implements OnInit {
   }
 
   getOfferSeverity(product: Product): 'success' | 'danger' | 'warn' | 'info' | 'secondary' {
-    if (!product.offer?.is_active) return 'info';
+    if (!product.offer) return 'info';
     switch (product.offer.type) {
       case OfferType.PERCENTAGE: return 'danger';
       case OfferType.TWO_FOR_ONE: return 'success';

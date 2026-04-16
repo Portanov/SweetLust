@@ -45,7 +45,7 @@ export class Favorite implements OnInit {
   favoriteCount = this.favoritesService.favoriteCount;
 
   // Paginación
-  itemsPerPage = 10; // 2 filas × 5 productos
+  itemsPerPage = 12; // 2 filas × 6 productos
   currentPage = signal(0);
 
   paginatedFavorites = computed(() => {
@@ -96,7 +96,7 @@ export class Favorite implements OnInit {
   }
 
   getOfferLabel(product: Product): string {
-    if (!product.offer?.is_active) return '';
+    if (!product.offer) return '';
     switch (product.offer.type) {
       case OfferType.PERCENTAGE: return `${product.offer.discount_value}% OFF`;
       case OfferType.FIXED_PRICE: return `Liquidación`;

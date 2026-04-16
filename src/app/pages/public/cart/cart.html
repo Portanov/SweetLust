@@ -1,249 +1,258 @@
-<div class="w-11/12 mx-auto mt-20 mb-8">
-  <!-- Header con estilo mejorado -->
-  <div class="mb-2 relative">
-    <h1 class="text-xl cinzel inline-flex items-center">
-      Carrito de Compras
-    </h1>
-  </div>
-
-  @if (items().length === 0) {
-  <div
-    class="rounded-2xl p-12 text-center shadow-2xl">
-    <div class="relative inline-block">
-      <i class="pi pi-shopping-cart text-8xl text-red-300 relative z-10"></i>
+<div class="grid grid-cols-3 gap-0">
+  <!--Carrito de compras-->
+  <div class="col-span-2 p-8 pt-18 pb-16 bg-white">
+    <div class="flex justify-between mb-2">
+      <p class="cinzel">Mi carrito</p>
+      <p-button
+        icon="pi pi-trash"
+        label="Vaciar Carrito"
+        variant="outlined"
+        size="small"
+        [rounded]="true"
+        styleClass="font-caviar"
+        (onClick)="clearCart()"
+        severity="danger"
+      >
+      </p-button>
     </div>
-    <h2 class="text-4xl cinzel text-gray-800 mt-6 mb-2">Tu carrito está vacío</h2>
-    <p class="text-gray-500 mb-6 poiret-one text-xl">¡Explora nuestra tienda y encuentra productos increíbles!</p>
-    <a routerLink="/shop" class="shop-link inline-block">
-      <p-button label="Ir a la tienda" icon="pi pi-shopping-bag" size="large"
-        styleClass="bg-linear-to-br from-[#0f0507] via-[#2d1119] to-[#461B27] poiret-one !border-none !px-6 !py-2 !font-semibold hover:!shadow-lg hover:!scale-105 transition-all duration-300"></p-button>
-    </a>
-  </div>
-  } @else {
-  <div class="grid grid-cols-3 gap-6">
-    <div class="col-span-2">
-      <p-panel class="shadow-xl rounded-2xl overflow-hidden">
-        <ng-template #header>
-          <div class="flex items-center gap-2">
-            <span class="text-lg cinzel text-[#461B27]"><i class="pi pi-shopping-cart text-red-900"></i> Mi Carrito</span>
-          </div>
-        </ng-template>
-        <ng-template #icons>
-          <p-button icon="pi pi-trash" label="Vaciar Carrito" size="small" [outlined]="true" [rounded]="true"
-            (onClick)="clearCart()"></p-button>
-        </ng-template>
-        <p-scrollpanel [style]="{ width: '100%', height: '550px' }" class="custom-scrollbar p-4 pt-0">
-          @for (item of items(); track item.id) {
-          <div
-            class="group relative border border-gray-300 p-5 grid grid-cols-6 gap-4 items-center rounded-xl mb-2">
-
-            <!-- Imagen del producto -->
-            <div
-              class="col-span-1 aspect-square rounded-xl overflow-hidden border-2 border-red-100 shadow-md group-hover:border-red-300 transition-all duration-300">
-              <img [src]="item.product.image" [alt]="item.product.title"
-                class="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500"
-                (error)="onImageError($event)" />
+    <div class="min-h-138.75">
+      @if (itemCount() === 0) {
+        <div class="w-full p-16">
+          <div class="flex flex-col items-center justify-center">
+            <div class="relative inline-block">
+              <i class="pi pi-shopping-cart text-8xl text-red-300 relative z-10"></i>
             </div>
-
-            <!-- Información del producto -->
-            <div class="col-span-4 flex flex-col justify-center gap-2">
-              <h3 class="text-lg font-bold text-gray-800 leading-tight mb-1 group-hover:text-red-700 transition-colors">
-                {{ item.product.title }}
-              </h3>
-              <span class="text-sm text-gray-500">
-                <span class="ml-2 text-red-600 font-semibold">${{ item.product.price }} MXN</span>
-              </span>
-
-              <!-- Selector de cantidad -->
-              <div class="mt-2 flex items-center gap-3">
-                <div class="flex items-center gap-2">
-                  <p-inputnumber [showButtons]="true" buttonLayout="horizontal" spinnerMode="horizontal"
-                    [inputStyle]="{ width: '3rem', textAlign: 'center' }" class="scale-90 origin-left" size="small"
-                    [min]="1" [max]="item.product.stock" [(ngModel)]="item.quantity"
-                    (onBlur)="updateQuantity(item.id, item.quantity)" [disabled]="loading()"
-                    class="bg-transparent">
-                    <ng-template #incrementbuttonicon>
-                      <span class="pi pi-plus text-xs"></span>
-                    </ng-template>
-                    <ng-template #decrementbuttonicon>
-                      <span class="pi pi-minus text-xs"></span>
-                    </ng-template>
-                  </p-inputnumber>
-                </div>
-                <small class="text-xs text-gray-400">{{ item.product.stock }} disponibles</small>
-              </div>
-            </div>
-
-            <!-- Acciones y subtotal -->
-            <div class="col-span-1 flex flex-col items-end justify-between h-full gap-3">
-              <p-button icon="pi pi-times" severity="contrast" [text]="true" size="small" [rounded]="true" (onClick)="removeItem(item.id)"
-                styleClass="hover:!text-red-600 transition-all" />
-              <div class="text-right">
-                <span class="text-xs text-gray-400 block">Subtotal</span>
-                <span class="text-lg font-bold text-zinc-700">{{ item.subtotal | currency:'MXN':'symbol-narrow':'1.2-2'
-                  }}</span>
-              </div>
-            </div>
-          </div>
-          }
-        </p-scrollpanel>
-      </p-panel>
-    </div>
-
-    <!-- Resumen de Compra - Columna Derecha -->
-    <div class="col-span-1">
-      <p-panel class="shadow-xl rounded-2xl sticky top-24 bg-linear-to-br from-white to-gray-50">
-        <ng-template #header>
-          <div class="flex items-center gap-2">
-            <span class="text-lg cinzel text-[#461B27]"><i class="pi pi-wallet text-red-900"></i> Resumen de Compra</span>
-          </div>
-        </ng-template>
-
-        <div class="p-5 pt-0">
-          <!-- Detalles de la compra -->
-          <div class="space-y-4">
-            <div class="flex justify-between items-center py-3 border-b border-gray-100">
-              <span class="text-gray-600 flex items-center gap-2">
-                <i class="pi pi-box text-[#461B27] text-sm"></i>
-                Cantidad de artículos
-              </span>
-              <span class="font-semibold text-gray-800 text-lg">{{itemCount()}}</span>
-            </div>
-
-            <div class="flex justify-between items-center py-3 border-b border-gray-100">
-              <span class="text-gray-600 flex items-center gap-2">
-                <i class="pi pi-tag text-[#461B27] text-sm"></i>
-                Subtotal
-              </span>
-              <span class="font-semibold text-gray-800">{{total() | currency:'MXN':'symbol-narrow':'1.2-2'}}</span>
-            </div>
-
-            <div class="flex justify-between items-center py-3 border-b border-gray-100">
-              <span class="text-gray-600 flex items-center gap-2">
-                <i class="pi pi-truck text-[#461B27] text-sm"></i>
-                Costo de Envío
-              </span>
-              <span class="text-green-600 font-semibold">¡GRATIS!</span>
-            </div>
-
-            <!-- Descuento promocional (opcional) -->
-            <div class="bg-[#ebdbdb] rounded-lg p-3 border border-[#461B27]">
-              <div class="flex justify-between items-center">
-                <span class="text-sm text-[#461B27] flex items-center gap-2">
-                  <i class="pi pi-gift"></i>
-                  ¿Tienes un cupón?
-                </span>
-                <button class="text-xs text-[#461B27] font-semibold">
-                  Aplicar cupón →
-                </button>
-              </div>
-            </div>
-
-            <!-- Total final -->
-            <div class="flex justify-between items-center pt-4 mt-2 border-t-2 border-red-200">
-              <span class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <i class="pi pi-credit-card text-[#461B27]"></i>
-                Total
-              </span>
-              <span class="text-2xl font-bold bg-linear-to-r from-[#461B27] to-red-700 bg-clip-text text-transparent">
-                {{total() | currency:'MXN':'symbol-narrow':'1.2-2'}}
-              </span>
-            </div>
-          </div>
-
-          <!-- Botón de finalizar compra -->
-          <div class="mt-6">
-            <p-button icon="pi pi-cart-arrow-down" label="Finalizar Compra" (onClick)="openCheckoutDialog()"
-              [loading]="loading()"
-              styleClass="!w-full bg-linear-to-br from-[#0f0507] via-[#2d1119] to-[#461B27] !border-none !py-3 !font-bold !shadow-lg hover:!shadow-xl hover:!scale-[1.02] transition-all duration-300"
-              [disabled]="items().length === 0" />
-            <p class="text-xs text-center text-gray-400 mt-3">
-              <i class="pi pi-lock text-xs mr-1"></i>
-              Compra segura con Mercado Pago
+            <h2 class="text-3xl cinzel text-gray-800 mt-6 mb-2">No se encontraron Productos</h2>
+            <p class="text-gray-500 mb-6 poiret-one text-xl">
+              Agrega productos a tu carrito desde nuestra tienda.
             </p>
+            <a routerLink="/shop">
+              <p-button icon="pi pi-arrow-left" label="Ir a la tienda" size="large" styleClass="poiret-one"></p-button>
+            </a>
           </div>
         </div>
-      </p-panel>
+      } @else {
+        <p-table
+          [value]="items()"
+          [scrollable]="true"
+          scrollHeight="555px"
+          [tableStyle]="{ 'min-width': '50rem' }"
+        >
+          <ng-template pTemplate="header">
+            <tr class="hubballi-regular uppercase">
+              <th></th>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Total</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-item>
+            <tr>
+              <td class="text-center">
+                <p-button
+                  icon="pi pi-times"
+                  variant="text"
+                  (onClick)="removeItem(item.id)"
+                  severity="secondary"
+                  rounded="true">
+                </p-button>
+              </td>
+              <td>
+                <div class="grid grid-cols-3">
+                  <div class="">
+                    <img [src]="item.product.image" alt="" class="h-24" />
+                  </div>
+                  <div class="col-span-2">
+                    <h1 class="font-bold text-xl">{{ item.product.title }}</h1>
+                    <p class="font-light text-md">${{ item.product.price }} MXN</p>
+                  </div>
+                </div>
+              </td>
+              <td class="text-center">
+                <p-inputnumber
+                  [(ngModel)]="item.quantity"
+                  (ngModelChange)="updateQuantity(item.id, $event)"
+                  [showButtons]="true"
+                  buttonLayout="horizontal"
+                  spinnerMode="horizontal"
+                  inputId="vertical"
+                  [inputStyle]="{ width: '3rem' }"
+                  inputStyleClass="text-center"
+                  [min]="1"
+                  [max]="item.product.stock"
+                >
+                  <ng-template #incrementbuttonicon>
+                    <span class="pi pi-plus"></span>
+                  </ng-template>
+                  <ng-template #decrementbuttonicon>
+                    <span class="pi pi-minus"></span>
+                  </ng-template>
+                </p-inputnumber>
+                <p class="text-xs font-light text-gray-400 mt-1">
+                  Disponibles: {{ item.product.stock }}
+                </p>
+              </td>
+              <td class="text-center">{{ item.subtotal | currency:'MXN':'symbol-narrow':'1.2-2'}} MXN</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      }
     </div>
   </div>
-  }
 
-  <!-- Dialog de Checkout Mejorado -->
-  <p-dialog header="Confirmar dirección de envío" [(visible)]="checkoutDialog" [modal]="true"
-    [style]="{ width: '550px', maxWidth: '90vw' }" [closable]="!loading()" [styleClass]="'rounded-2xl checkout-dialog'">
-    <ng-template pTemplate="header">
-      <div class="flex items-center gap-2 text-[#282828]">
-        <span class="text-lg cinzel">
-          <i class="pi pi-map-marker text-zinc-500 text-xl"></i>
-        Confirmar dirección de envío</span>
+  <!--Detalles de compra-->
+  <div class="p-14 pt-24 bg-zinc-700 text-white">
+    <h1 class="text-2xl cinzel mb-10">Detalles de compra</h1>
+    <div class="alumni-sans text-xl">
+      <div class="flex justify-between">
+        <p>Cantidad de artículos:</p>
+        <p>{{ itemCount() }}</p>
       </div>
-    </ng-template>
+      <p-divider />
+      <div class="flex justify-between">
+        <p>SubTotal:</p>
+        <p>{{total() | currency:'MXN':'symbol-narrow':'1.2-2'}} MXN</p>
+      </div>
+      <p-divider />
+      <div class="flex justify-between">
+        <p>Costo de envío:</p>
+        <p class="text-green-200">¡Gratis!</p>
+      </div>
+      <p-divider />
+      <div class="flex justify-between">
+        <p>Total:</p>
+        <p>{{total() | currency:'MXN':'symbol-narrow':'1.2-2'}} MXN</p>
+      </div>
 
-    <div class="checkout-dialog">
-      @if (loadingAddresses()) {
+      <div class="mt-4 bg-white/15 p-4 rounded-sm border-s-4 flex items-center justify-between">
+        <p class="poiret-one text-sm flex items-center gap-2 m-0">
+          <i class="pi pi-gift"></i>
+          ¿Tienes un código promocional?
+        </p>
+        <p-button
+          label="Aplicar cupón →"
+          variant="text"
+          size="small"
+          styleClass="text-white poiret-one text-xs hover:bg-transparent underline underline-offset-4"
+        >
+        </p-button>
+      </div>
+
+      <div class="mt-6">
+        <p-button
+          icon="pi pi-arrow-right"
+          label="Continuar con la compra"
+          iconPos="right"
+          variant="outlined"
+          severity="secondary"
+          [disabled]="items().length === 0"
+          (onClick)="openCheckoutDialog()"
+          styleClass="text-white text-md poiret-one hover:bg-gray-600"
+          fluid
+        ></p-button>
+        <p class="text-xs text-center text-gray-300 mt-3 poiret-one tracking-wide">
+          <i class="pi pi-lock text-xs mr-1"></i>
+          Compra segura con Stripe
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p-dialog
+  header="Confirmar dirección de envío"
+  [(visible)]="checkoutDialog"
+  [modal]="true"
+  [style]="{ width: '550px', maxWidth: '90vw' }"
+  [closable]="!loading()"
+  [styleClass]="'rounded-2xl checkout-dialog'"
+>
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-2 text-[#282828]">
+      <span class="text-lg cinzel">
+        <i class="pi pi-map-marker text-zinc-500 text-xl"></i>
+        Confirmar dirección de envío</span
+      >
+    </div>
+  </ng-template>
+  <div class="checkout-dialog">
+    @if (loadingAddresses()) {
       <div class="flex flex-col items-center justify-center p-8">
         <i class="pi pi-spin pi-spinner text-3xl text-[#461B27] mb-3"></i>
         <p class="text-gray-500">Cargando tus direcciones...</p>
       </div>
-      } @else {
+    } @else {
       <div class="address-list max-h-100 overflow-y-auto custom-scrollbar pr-2">
         <h3 class="text-gray-700 font-normal mb-3 text-sm">Selecciona una dirección de envío</h3>
-
         @for (address of addresses(); track address.id) {
-        <div
-          class="address-option relative cursor-pointer mb-3 p-4 rounded-xl border transition-all duration-200 hover:shadow-md"
-          [class.border-zinc-500]="selectedAddress()?.id === address.id"
-          [class.border-gray-200]="selectedAddress()?.id !== address.id">
-          <div class="flex items-start gap-3">
-            <div class="mt-1">
-              <i [class]="
-                      selectedAddress()?.id === address.id
-                        ? 'pi pi-check-circle text-[#461B27] text-xl'
-                        : 'pi pi-circle text-gray-300 text-xl'
-                    "></i>
-            </div>
-            <div class="flex-1">
-              <div class="flex items-center gap-2 mb-1">
-                <strong class="text-gray-800">{{ address.recipient_name }}</strong>
-                @if (address.is_default) {
-                <span class="px-2 py-0.5 bg-red-100 text-red-600 text-xs rounded-full font-semibold">
-                  Predeterminada
-                </span>
+          <div
+            class="address-option relative cursor-pointer mb-3 p-4 rounded-xl border transition-all duration-200 hover:shadow-md"
+            [class.border-zinc-500]="selectedAddress()?.id === address.id"
+            [class.border-gray-200]="selectedAddress()?.id !== address.id"
+          >
+            <div class="flex items-start gap-3">
+              <div class="mt-1">
+                <i
+                  [class]="
+                    selectedAddress()?.id === address.id
+                      ? 'pi pi-check-circle text-[#461B27] text-xl'
+                      : 'pi pi-circle text-gray-300 text-xl'
+                  "
+                ></i>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <strong class="text-gray-800">{{ address.recipient_name }}</strong>
+                  @if (address.is_default) {
+                    <span
+                      class="px-2 py-0.5 bg-red-100 text-red-600 text-xs rounded-full font-semibold"
+                    >
+                      Predeterminada
+                    </span>
+                  }
+                </div>
+                <p class="text-gray-600 text-sm mb-1">{{ address.recipient_phone }}</p>
+                <p class="text-gray-600 text-sm">
+                  {{ address.street }} {{ address.ext_number }}
+                  {{ address.int_number ? 'Int ' + address.int_number : '' }}
+                </p>
+                <p class="text-gray-600 text-sm">{{ address.neighborhood }}</p>
+                <p class="text-gray-600 text-sm">{{ address.city }}, {{ address.state }}</p>
+                <p class="text-gray-600 text-sm">C.P. {{ address.postal_code }}</p>
+                @if (address.references) {
+                  <p class="text-gray-400 text-xs mt-1 italic">Ref: {{ address.references }}</p>
                 }
               </div>
-              <p class="text-gray-600 text-sm mb-1">{{ address.recipient_phone }}</p>
-              <p class="text-gray-600 text-sm">
-                {{ address.street }} {{ address.ext_number }}
-                {{ address.int_number ? 'Int ' + address.int_number : '' }}
-              </p>
-              <p class="text-gray-600 text-sm">{{ address.neighborhood }}</p>
-              <p class="text-gray-600 text-sm">{{ address.city }}, {{ address.state }}</p>
-              <p class="text-gray-600 text-sm">C.P. {{ address.postal_code }}</p>
-              @if (address.references) {
-              <p class="text-gray-400 text-xs mt-1 italic">Ref: {{ address.references }}</p>
-              }
             </div>
           </div>
-        </div>
         }
-
         <div class="add-address-link mt-4 pt-3 border-t border-gray-100">
-          <a (click)="goToAddAddress()"
-            class="cursor-pointer text-[#461B27]  font-semibold flex items-center gap-2 justify-center py-2 rounded-lg hover:bg-gray-50 transition-all">
+          <a
+            (click)="goToAddAddress()"
+            class="cursor-pointer text-[#461B27] font-semibold flex items-center gap-2 justify-center py-2 rounded-lg hover:bg-gray-50 transition-all"
+          >
             <i class="pi pi-plus-circle"></i>
             Agregar nueva dirección
           </a>
         </div>
       </div>
-
       <div class="checkout-actions flex gap-3 mt-6 pt-4 border-t border-gray-100">
-        <p-button label="Cancelar" severity="secondary" (onClick)="checkoutDialog.set(false)" [disabled]="loading()"
-          styleClass="!flex-1 !border-gray-300" [text]="true"></p-button>
-        <p-button label="Confirmar compra" (onClick)="confirmCheckout()" [loading]="loading()"
+        <p-button
+          label="Cancelar"
+          severity="secondary"
+          (onClick)="checkoutDialog.set(false)"
+          [disabled]="loading()"
+          styleClass="!flex-1 !border-gray-300"
+          [text]="true"
+        ></p-button>
+        <p-button
+          label="Confirmar compra"
+          (onClick)="confirmCheckout()"
+          [loading]="loading()"
           [disabled]="!selectedAddress()"
-          styleClass="!flex-1 bg-linear-to-br from-[#0f0507] via-[#2d1119] to-[#461B27] !border-none"></p-button>
+          styleClass="!flex-1 bg-linear-to-br from-[#0f0507] via-[#2d1119] to-[#461B27] !border-none"
+        ></p-button>
       </div>
-      }
-    </div>
-  </p-dialog>
-</div>
+    }
+  </div>
+</p-dialog>

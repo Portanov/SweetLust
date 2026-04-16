@@ -27,13 +27,13 @@ export interface Offer {
   productId: number;
   type: OfferType;
   label: string;
-  discount_value?: number;
-  bundle_quantity?: number;
-  is_active: boolean;
-  starts_at?: Date | string;
-  ends_at?: Date | string;
-  created_at: Date | string;
-  updated_at: Date | string;
+  discount_value: number | null;
+  bundle_quantity: number | null;
+  is_active: boolean | null;
+  starts_at: Date | string | null;
+  ends_at: Date | string | null;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface Product {

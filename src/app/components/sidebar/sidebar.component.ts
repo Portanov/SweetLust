@@ -12,7 +12,6 @@ import { AuthService } from '../../services/auth/auth.service';
 import { CartService } from '../../services/cart/cart.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 
-
 interface MenuItem {
   icon: string;
   label: string;
@@ -52,36 +51,16 @@ interface MenuItem {
         <div
           class="flex flex-col h-full bg-linear-to-tr from-[#0f0507] via-[#2d1119] to-[#461B27] text-white"
         >
-          <div class="relative px-5 pt-8 pb-6 shrink-0 border-b border-white/10">
+          <div class="relative px-5 pt-4 pb-4 shrink-0 border-b border-white/10">
             <div
               class="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-3xl"
             ></div>
-            <div class="flex items-center gap-3 group cursor-pointer relative">
-              <div class="relative">
-                <div
-                  class="absolute inset-0 bg-pink-400/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500"
-                ></div>
-                <img
-                  src="images/SweetyLustLogowhite.png"
-                  class="w-12 h-12 object-contain transition-all duration-500 group-hover:scale-110 group-hover:rotate-3"
-                />
-                <div
-                  class="absolute -inset-1 bg-pink-400/30 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                ></div>
-              </div>
-              <div class="flex flex-col">
-                <span
-                  class="text-4xl font-light tracking-widest bg-linear-to-r from-white via-pink-100 to-white bg-clip-text text-transparent font-logo"
-                >
-                  Sweety<span
-                    class="bg-linear-to-r from-pink-300 to-pink-100 bg-clip-text text-transparent font-tropical"
-                    >Lust</span
-                  >
-                </span>
-                <span class="text-[10px] text-white/50 tracking-wider mt-0.5 nova-round-regular"
-                  >Placer, dulce y pecado</span
-                >
-              </div>
+            <div class="">
+              <span
+                class="text-4xl pb-1 font-light tracking-widest bg-linear-to-r from-white via-pink-100 to-white bg-clip-text text-transparent font-logo"
+              >
+                  Sweety Lust
+              </span>
             </div>
             <p-button
               type="button"
@@ -90,166 +69,193 @@ interface MenuItem {
               rounded="true"
               text="true"
               severity="secondary"
-              styleClass="absolute top-6 right-2 !text-white/40 hover:!text-white/80 hover:!bg-white/10 !transition-all !w-8 !h-8"
+              styleClass="absolute top-2 right-2 !text-white/40 hover:!text-white/80 hover:!bg-white/10 !transition-all !w-8 !h-8"
             ></p-button>
           </div>
 
           <div class="flex-1 overflow-y-auto custom-scrollbar px-3 py-6 font-caviar">
-            <div class="space-y-2">
-              <div class="px-4 mb-3 flex items-center gap-2">
-                <i class="pi pi-home text-pink-400/60 text-xs"></i>
-                <span class="text-xs font-medium text-white/50 tracking-wide uppercase"
-                  >Navegación</span
-                >
-                <div class="flex-1 h-px bg-linear-to-r from-white/10 to-transparent"></div>
-              </div>
-              @for (item of publicItems; track item.label) {
-                <a
-                  pRipple
-                  [class.active]="isActive(item.link)"
-                  class="relative flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer group overflow-hidden"
-                  routerLink="{{ item.link }}"
-                  routerLinkActive="active"
-                >
-                  <div
-                    class="absolute inset-0 bg-linear-to-r from-pink-500/0 via-pink-500/0 to-pink-500/0 group-hover:from-pink-500/5 group-hover:via-pink-400/5 group-hover:to-transparent transition-all duration-500"
-                  ></div>
-                  <div class="relative">
+            <!--links para navegación general-->
+            @if (!authService.isAdmin()) {
+              <div class="space-y-2">
+                <div class="px-4 mb-3 flex items-center gap-2">
+                  <i class="pi pi-home text-pink-400/60 text-xs"></i>
+                  <span class="text-xs font-medium text-white/50 tracking-wide uppercase"
+                    >Navegación</span
+                  >
+                  <div class="flex-1 h-px bg-linear-to-r from-white/10 to-transparent"></div>
+                </div>
+                @for (item of publicItems; track item.label) {
+                  <a
+                    pRipple
+                    [class.active]="isActive(item.link)"
+                    class="relative flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer group overflow-hidden"
+                    routerLink="{{ item.link }}"
+                    routerLinkActive="active"
+                  >
                     <div
-                      class="absolute inset-0 bg-pink-400/20 rounded-lg blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      class="absolute inset-0 bg-linear-to-r from-pink-500/0 via-pink-500/0 to-pink-500/0 group-hover:from-pink-500/5 group-hover:via-pink-400/5 group-hover:to-transparent transition-all duration-500"
                     ></div>
-                    <i
-                      [class]="
-                        item.icon +
-                        ' text-lg group-hover:text-pink-300 transition-all duration-300 group-hover:scale-110'
-                      "
-                    ></i>
-                  </div>
-                  <span
-                    class="font-medium text-sm group-hover:translate-x-0.5 transition-transform duration-300"
-                    >{{ item.label }}</span
-                  >
-                  <span
-                    *ngIf="item.badge"
-                    class="ml-auto bg-linear-to-r from-pink-500/30 to-pink-400/20 text-pink-200 text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10"
-                    >{{ item.badge }}</span
-                  >
-                  <div
-                    *ngIf="isActive(item.link)"
-                    class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-linear-to-b from-pink-400 to-pink-300 rounded-r-full"
-                  ></div>
-                </a>
-              }
-            </div>
-
-            <div *ngIf="authService.isLoggedIn() && !authService.isAdmin()" class="mt-6 space-y-2">
-              <div class="px-4 mb-3 flex items-center gap-2">
-                <i class="pi pi-user text-pink-400/60 text-xs"></i>
-                <span class="text-xs font-medium text-white/50 tracking-wide uppercase"
-                  >Mi cuenta</span
-                >
-                <div class="flex-1 h-px bg-linear-to-r from-white/10 to-transparent"></div>
+                    <div class="relative">
+                      <div
+                        class="absolute inset-0 bg-pink-400/20 rounded-lg blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      ></div>
+                      <i
+                        [class]="
+                          item.icon +
+                          ' text-lg group-hover:text-pink-300 transition-all duration-300 group-hover:scale-110'
+                        "
+                      ></i>
+                    </div>
+                    <span
+                      class="font-medium text-sm group-hover:translate-x-0.5 transition-transform duration-300"
+                      >{{ item.label }}</span
+                    >
+                    @if (item.badge) {
+                      <span
+                        class="ml-auto bg-linear-to-r from-pink-500/30 to-pink-400/20 text-pink-200 text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10"
+                        >{{ item.badge }}</span
+                      >
+                    }
+                    @if (isActive(item.link)) {
+                      <div
+                        class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-linear-to-b from-pink-400 to-pink-300 rounded-r-full"
+                      ></div>
+                    }
+                  </a>
+                }
               </div>
-              <a
-                *ngFor="let item of getAuthenticatedItems()"
-                pRipple
-                [class.active]="isActive(item.link)"
-                class="relative flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer group overflow-hidden"
-                routerLink="{{ item.link }}"
-                routerLinkActive="active"
-              >
-                <div
-                  class="absolute inset-0 bg-linear-to-r from-pink-500/0 via-pink-500/0 to-pink-500/0 group-hover:from-pink-500/5 group-hover:via-pink-400/5 group-hover:to-transparent transition-all duration-500"
-                ></div>
-                <div class="relative">
-                  <div
-                    class="absolute inset-0 bg-pink-400/20 rounded-lg blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  ></div>
-                  <i
-                    [class]="
-                      item.icon +
-                      ' text-lg group-hover:text-pink-300 transition-all duration-300 group-hover:scale-110'
-                    "
-                  ></i>
-                </div>
-                <span
-                  class="font-medium text-sm group-hover:translate-x-0.5 transition-transform duration-300"
-                  >{{ item.label }}</span
-                >
-                <span
-                  *ngIf="item.badge"
-                  class="ml-auto bg-linear-to-r from-pink-500/30 to-pink-400/20 text-pink-200 text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10"
-                  >{{ item.badge }}</span
-                >
-                <div
-                  *ngIf="isActive(item.link)"
-                  class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-linear-to-b from-pink-400 to-pink-300 rounded-r-full"
-                ></div>
-              </a>
-            </div>
+            }
 
-            <div *ngIf="authService.isLoggedIn() && authService.isAdmin()" class="mt-6 space-y-2">
-              <div class="px-4 mb-3 flex items-center gap-2">
-                <i class="pi pi-cog text-pink-400/60 text-xs"></i>
-                <span class="text-xs font-medium text-white/50 tracking-wide uppercase"
-                  >Administración</span
-                >
-                <div class="flex-1 h-px bg-linear-to-r from-white/10 to-transparent"></div>
-              </div>
-              <a
-                *ngFor="let item of adminItems"
-                pRipple
-                [class.active]="isActive(item.link)"
-                class="relative flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer group overflow-hidden"
-                routerLink="{{ item.link }}"
-                routerLinkActive="active"
-              >
-                <div
-                  class="absolute inset-0 bg-linear-to-r from-pink-500/0 via-pink-500/0 to-pink-500/0 group-hover:from-pink-500/5 group-hover:via-pink-400/5 group-hover:to-transparent transition-all duration-500"
-                ></div>
-                <div class="relative">
-                  <div
-                    class="absolute inset-0 bg-pink-400/20 rounded-lg blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  ></div>
-                  <i
-                    [class]="
-                      item.icon +
-                      ' text-lg group-hover:text-pink-300 transition-all duration-300 group-hover:scale-110'
-                    "
-                  ></i>
+            <!--links de clientes-->
+            @if (authService.isLoggedIn() && !authService.isAdmin()) {
+              <div class="mt-6 space-y-2">
+                <div class="px-4 mb-3 flex items-center gap-2">
+                  <i class="pi pi-user text-pink-400/60 text-xs"></i>
+                  <span class="text-xs font-medium text-white/50 tracking-wide uppercase"
+                    >Mi cuenta</span
+                  >
+                  <div class="flex-1 h-px bg-linear-to-r from-white/10 to-transparent"></div>
                 </div>
-                <span
-                  class="font-medium text-sm group-hover:translate-x-0.5 transition-transform duration-300"
-                  >{{ item.label }}</span
-                >
-                <div
-                  *ngIf="isActive(item.link)"
-                  class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-linear-to-b from-pink-400 to-pink-300 rounded-r-full"
-                ></div>
-              </a>
-            </div>
+                @for (item of getAuthenticatedItems(); track item.label) {
+                  <a
+                    pRipple
+                    [class.active]="isActive(item.link)"
+                    class="relative flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer group overflow-hidden"
+                    routerLink="{{ item.link }}"
+                    routerLinkActive="active"
+                  >
+                    <div
+                      class="absolute inset-0 bg-linear-to-r from-pink-500/0 via-pink-500/0 to-pink-500/0 group-hover:from-pink-500/5 group-hover:via-pink-400/5 group-hover:to-transparent transition-all duration-500"
+                    ></div>
+                    <div class="relative">
+                      <div
+                        class="absolute inset-0 bg-pink-400/20 rounded-lg blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      ></div>
+                      <i
+                        [class]="
+                          item.icon +
+                          ' text-lg group-hover:text-pink-300 transition-all duration-300 group-hover:scale-110'
+                        "
+                      ></i>
+                    </div>
+                    <span
+                      class="font-medium text-sm group-hover:translate-x-0.5 transition-transform duration-300"
+                      >{{ item.label }}</span
+                    >
+                    @if (item.badge) {
+                      <span
+                        class="ml-auto bg-linear-to-r from-pink-500/30 to-pink-400/20 text-pink-200 text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10"
+                        >{{ item.badge }}</span
+                      >
+                    }
+                    @if (isActive(item.link)) {
+                      <div
+                        class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-linear-to-b from-pink-400 to-pink-300 rounded-r-full"
+                      ></div>
+                    }
+                  </a>
+                }
+              </div>
+            }
+
+            <!--links de administradores-->
+            @if (authService.isLoggedIn() && authService.isAdmin()) {
+              <div class="space-y-2">
+                <div class="px-4 mb-3 flex items-center gap-2">
+                  <i class="pi pi-cog text-pink-400/60 text-xs"></i>
+                  <span class="text-xs font-medium text-white/50 tracking-wide uppercase"
+                    >Administración</span
+                  >
+                  <div class="flex-1 h-px bg-linear-to-r from-white/10 to-transparent"></div>
+                </div>
+                @for (item of adminItems; track item.label) {
+                  <a
+                    pRipple
+                    [class.active]="isActive(item.link)"
+                    class="relative flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer group overflow-hidden"
+                    routerLink="{{ item.link }}"
+                    routerLinkActive="active"
+                  >
+                    <div
+                      class="absolute inset-0 bg-linear-to-r from-pink-500/0 via-pink-500/0 to-pink-500/0 group-hover:from-pink-500/5 group-hover:via-pink-400/5 group-hover:to-transparent transition-all duration-500"
+                    ></div>
+                    <div class="relative">
+                      <div
+                        class="absolute inset-0 bg-pink-400/20 rounded-lg blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      ></div>
+                      <i
+                        [class]="
+                          item.icon +
+                          ' text-lg group-hover:text-pink-300 transition-all duration-300 group-hover:scale-110'
+                        "
+                      ></i>
+                    </div>
+                    <span
+                      class="font-medium text-sm group-hover:translate-x-0.5 transition-transform duration-300"
+                      >{{ item.label }}</span
+                    >
+                    @if (item.badge) {
+                      <span
+                        class="ml-auto bg-linear-to-r from-pink-500/30 to-pink-400/20 text-pink-200 text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10"
+                        >{{ item.badge }}</span
+                      >
+                    }
+                    @if (isActive(item.link)) {
+                      <div
+                        class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-linear-to-b from-pink-400 to-pink-300 rounded-r-full"
+                      ></div>
+                    }
+                  </a>
+                }
+              </div>
+            }
 
             <div class="my-6 px-4"></div>
 
-            <div class="space-y-2">
-              <div class="px-4 mb-3 flex items-center gap-2">
-                <i class="pi pi-share-alt text-pink-400/60 text-xs"></i>
-                <span class="text-xs font-medium text-white/50 tracking-wide uppercase"
-                  >Enlaces Externos</span
-                >
-                <div class="flex-1 h-px bg-linear-to-r from-white/10 to-transparent"></div>
+            @if (!authService.isAdmin()) {
+              <div class="space-y-2">
+                <div class="px-4 mb-3 flex items-center gap-2">
+                  <i class="pi pi-share-alt text-pink-400/60 text-xs"></i>
+                  <span class="text-xs font-medium text-white/50 tracking-wide uppercase"
+                    >Enlaces Externos</span
+                  >
+                  <div class="flex-1 h-px bg-linear-to-r from-white/10 to-transparent"></div>
+                </div>
+                @for (item of collectionItems; track item.label) {
+                  <a
+                    [href]="item.link"
+                    target="_blank"
+                    pRipple
+                    class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer group"
+                  >
+                    <i
+                      [class]="item.icon + ' group-hover:text-pink-300 transition-colors text-sm'"
+                    ></i>
+                    <span class="text-sm">{{ item.label }}</span>
+                  </a>
+                }
               </div>
-              <a
-                *ngFor="let item of collectionItems"
-                [href]="item.link"
-                target="_blank"
-                pRipple
-                class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer group"
-              >
-                <i [class]="item.icon + ' group-hover:text-pink-300 transition-colors text-sm'"></i>
-                <span class="text-sm">{{ item.label }}</span>
-              </a>
-            </div>
+            }
           </div>
 
           <div class="mt-auto relative">
@@ -257,55 +263,59 @@ interface MenuItem {
               class="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-pink-400/30 to-transparent"
             ></div>
 
-            <div
-              *ngIf="authService.isLoggedIn()"
-              class="m-4 p-1 flex items-center gap-3 rounded-full bg-white/10 backdrop-blur-md border border-white/10 hover:border-pink-400/30 transition-all duration-300 cursor-pointer group"
-            >
-              <p-avatar
-                [label]="getUserInitials()"
-                shape="circle"
-                styleClass="border-2 border-pink-400/40"
-                class="w-10 h-10"
-              />
-              <div class="flex-1">
-                <div class="text-md group-hover:text-pink-200 transition-colors font-caviar">
-                  {{ getUserName() }}
-                </div>
-                <div class="text-xs text-white/50">{{ getUserRole() }}</div>
-              </div>
-              <div class="flex gap-1 me-2">
-                <i
-                  class="pi pi-sign-out text-white/30 group-hover:text-white/60 transition-colors text-sm cursor-pointer hover:text-pink-300"
-                  pTooltip="Cerrar sesión"
-                  tooltipPosition="top"
-                  (click)="onLogout()"
-                ></i>
-              </div>
-            </div>
-
-            <div
-              *ngIf="!authService.isLoggedIn()"
-              class="m-4 p-3 flex flex-col gap-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/10"
-            >
-              <div class="text-center">
-                <i class="pi pi-user text-3xl text-white/40 mb-2"></i>
-                <p class="text-white/60 text-sm mb-3">Inicia sesión para acceder a más funciones</p>
-                <div class="flex gap-2">
-                  <a routerLink="/login" class="flex-1">
-                    <p-button
-                      label="Iniciar sesión"
-                      styleClass="w-full !bg-pink-500/20 !border-pink-400/30 !text-pink-300 hover:!bg-pink-500/30"
-                    />
-                  </a>
-                  <a routerLink="/register" class="flex-1">
-                    <p-button
-                      label="Registrarse"
-                      styleClass="w-full !bg-white/10 !border-white/20 !text-white hover:!bg-white/20"
-                    />
+            @if (authService.isLoggedIn()) {
+              <div
+                class="m-4 p-1 flex items-center gap-3 rounded-full bg-white/10 backdrop-blur-md border border-white/10 hover:border-pink-400/30 transition-all duration-300 cursor-pointer group"
+              >
+                <p-avatar
+                  [label]="getUserInitials()"
+                  shape="circle"
+                  class="border-2 border-pink-400/40"
+                  class="w-10 h-10"
+                />
+                <div class="flex-1">
+                  <a routerLink="/profile">
+                    <div class="text-md group-hover:text-pink-200 transition-colors font-caviar">
+                      {{ getUserName() }}
+                    </div>
+                    <div class="text-xs text-white/50">{{ getUserRole() }}</div>
                   </a>
                 </div>
+                <div class="flex gap-1 me-2">
+                  <i
+                    class="pi pi-sign-out text-white/30 group-hover:text-white/60 transition-colors text-sm cursor-pointer hover:text-pink-300"
+                    pTooltip="Cerrar sesión"
+                    tooltipPosition="top"
+                    (click)="onLogout()"
+                  ></i>
+                </div>
               </div>
-            </div>
+            } @else {
+              <div
+                class="m-4 p-3 flex flex-col gap-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/10"
+              >
+                <div class="text-center">
+                  <i class="pi pi-user text-3xl text-white/40 mb-2"></i>
+                  <p class="text-white/60 text-sm mb-3">
+                    Inicia sesión para acceder a más funciones
+                  </p>
+                  <div class="flex gap-2">
+                    <a routerLink="/login" class="flex-1">
+                      <p-button
+                        label="Iniciar sesión"
+                        styleClass="w-full !bg-pink-500/20 !border-pink-400/30 !text-pink-300 hover:!bg-pink-500/30"
+                      />
+                    </a>
+                    <a routerLink="/register" class="flex-1">
+                      <p-button
+                        label="Registrarse"
+                        styleClass="w-full !bg-white/10 !border-white/20 !text-white hover:!bg-white/20"
+                      />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
         </div>
       </ng-template>
@@ -405,7 +415,6 @@ export class SidebarComponent implements OnInit {
   authenticatedItems: MenuItem[] = [
     { icon: 'pi pi-shopping-cart', label: 'Mi Carrito', link: '/cart', badge: 0 },
     { icon: 'pi pi-heart', label: 'Mis Favoritos', link: '/favorites' },
-    { icon: 'pi pi-user', label: 'Mi Perfil', link: '/profile' },
     { icon: 'pi pi-history', label: 'Mis Pedidos', link: '/orders' },
   ];
 
@@ -466,8 +475,8 @@ export class SidebarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.cartItemCount$.subscribe(count => {
-      const cartItem = this.authenticatedItems.find(item => item.link === '/cart');
+    this.cartItemCount$.subscribe((count) => {
+      const cartItem = this.authenticatedItems.find((item) => item.link === '/cart');
       if (cartItem) {
         cartItem.badge = count;
       }

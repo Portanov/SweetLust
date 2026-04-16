@@ -16,7 +16,7 @@ import { PanelModule } from 'primeng/panel';
       <div class="flex flex-col md:flex-row justify-between items-center gap-6 py-4 px-6">
         <div class="text-center md:text-left">
           <h1 class="font-logo text-3xl tracking-widest text-white m-0">Sweety Lust</h1>
-          <p class="text-zinc-200 text-md mt-2 alumni-sans">Dulces momentos, recuerdos eternos</p>
+          <p class="text-zinc-200 text-md mt-2 alumni-sans">Tu refugio de placer y fantasias.</p>
         </div>
 
         <div class="flex gap-6">

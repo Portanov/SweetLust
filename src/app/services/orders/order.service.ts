@@ -7,9 +7,11 @@ import {
   CancelOrderResponse,
   PublicTrackingResponse,
   OrderStatus,
+  UpdateTrackingRequest,
 } from '../../assets/models/shop/order.model';
+import { environment } from '../../environments/environment';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = environment.apiUrl;
 
 @Injectable({
   providedIn: 'root',
@@ -38,7 +40,11 @@ export class OrderService {
     return this.http.get<Order[]>(`${API_URL}/orders/my`).pipe(
       tap({
         next: (orders) => {
-          this.ordersSignal.set(orders);
+          const normalizedOrders = orders.map(order => ({
+            ...order,
+            status: (order.status as string).toLowerCase() as OrderStatus
+          }));
+          this.ordersSignal.set(normalizedOrders);
           this.loadingSignal.set(false);
         },
         error: (error) => {
@@ -60,7 +66,11 @@ export class OrderService {
     return this.http.get<OrderResponse>(`${API_URL}/orders/my/${orderId}`).pipe(
       tap({
         next: (response) => {
-          this.currentOrderSignal.set(response);
+          const normalizeOrder = {
+            ...response,
+            status: (response.status as string).toLowerCase() as OrderStatus
+          }
+          this.currentOrderSignal.set(normalizeOrder);
           this.loadingSignal.set(false);
         },
         error: (error) => {
@@ -122,5 +132,73 @@ export class OrderService {
    */
   refresh(): void {
     this.getMyOrders().subscribe();
+  }
+
+  // ── MÉTODOS DE ADMINISTRACIÓN (Nuevos) ──────────────────────
+
+  /** Obtiene TODAS las órdenes del sistema (Solo Admin) */
+  getAllOrders(): Observable<Order[]> {
+    this.loadingSignal.set(true);
+    return this.http.get<Order[]>(`${API_URL}/orders`).pipe(
+      tap({
+        next: (orders) => {
+          this.ordersSignal.set(orders);
+          this.loadingSignal.set(false);
+        },
+        error: (err) => this.handleError(err)
+      })
+    );
+  }
+
+  updateOrderStatus(orderId: number, data: UpdateTrackingRequest): Observable<any> {
+    this.loadingSignal.set(true);
+
+    return this.http.patch(`${API_URL}/orders/${orderId}/tracking`, data).pipe(
+      tap({
+        next: () => {
+          this.loadingSignal.set(false);
+          this.getAllOrders().subscribe();
+        },
+        error: (err) => {
+          this.loadingSignal.set(false);
+          this.handleError(err);
+        }
+      })
+    );
+  }
+
+  // ── MÉTODOS DE SEGUIMIENTO (Públicos/Usuario) ────────────────
+
+  /** Obtiene el historial de seguimiento de una orden */
+  getTrackingHistory(orderId: number): Observable<PublicTrackingResponse> {
+    return this.http.get<PublicTrackingResponse>(`${API_URL}/orders/${orderId}/tracking`);
+  }
+
+  /** Detalle de cualquier orden (Admin) */
+  getOrderDetail(id: number): Observable<OrderResponse> {
+    this.loadingSignal.set(true);
+    return this.http.get<OrderResponse>(`${API_URL}/orders/${id}`).pipe(
+      tap({
+        next: (order) => {
+          this.currentOrderSignal.set(order);
+          this.loadingSignal.set(false);
+        },
+        error: (err) => this.handleError(err)
+      })
+    );
+  }
+
+  // ── AUXILIARES ──────────────────────────────────────────────
+
+  private handleError(error: any) {
+    this.loadingSignal.set(false);
+    this.errorSignal.set(error.error?.message || 'Error en la operación');
+    console.error('OrderService Error:', error);
+  }
+
+  /** Limpia el estado del servicio */
+  clearState() {
+    this.currentOrderSignal.set(null);
+    this.errorSignal.set(null);
   }
 }

@@ -78,3 +78,8 @@ export interface PublicTrackingResponse {
   created_at: Date;
   history: OrderTracking[];
 }
+
+export interface UpdateTrackingRequest {
+  status: OrderStatus;
+  note?: string;
+}

@@ -18,13 +18,14 @@ import { DataViewModule } from 'primeng/dataview';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { PanelModule } from 'primeng/panel';
+import { Table, TableModule } from 'primeng/table';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     ButtonModule,
     CardModule,
     InputNumberModule,
@@ -37,6 +38,7 @@ import { PanelModule } from 'primeng/panel';
     CheckboxModule,
     ScrollPanelModule,
     PanelModule,
+    TableModule,
   ],
   templateUrl: './cart.html',
   styleUrls: ['./cart.css']
@@ -47,6 +49,7 @@ export class Cart implements OnInit {
   private confirmationService = inject(ConfirmationAlertService);
   private alertService = inject(AlertService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   loading = signal(false);
   checkoutDialog = signal(false);
@@ -62,6 +65,12 @@ export class Cart implements OnInit {
   ngOnInit(): void {
     this.cartService.loadCart();
     this.addressService.getMyAddresses().subscribe();
+
+    this.route.queryParams.subscribe(params => {
+      if (params['success'] === 'true' && params['addressId']) {
+        this.processSuccessfulPayment(+params['addressId']);
+      }
+    });
   }
 
   updateQuantity(itemId: number, quantity: number): void {
@@ -149,38 +158,33 @@ export class Cart implements OnInit {
   }
 
   confirmCheckout(): void {
-    if (!this.selectedAddress()) {
-      this.alertService.warn('Dirección requerida', 'Por favor selecciona una dirección de envío');
-      return;
-    }
+    if (!this.selectedAddress()) return;
 
-    this.confirmationService.confirmCustom(
-      '¿Confirmas realizar la compra?',
-      'Confirmar compra',
-      'pi pi-shopping-cart',
-      () => {
-        this.loading.set(true);
-        this.cartService.checkout({
-          addressId: this.selectedAddress()!.id
-        }).subscribe({
-          next: (response) => {
-            this.loading.set(false);
-            this.checkoutDialog.set(false);
-            this.alertService.success(
-              'Compra realizada',
-              `Tu compra #${response.orderId} se ha realizado con éxito. ¡Gracias por tu preferencia!`
-            );
-            setTimeout(() => {
-              this.router.navigate(['/orders', response.orderId]);
-            }, 2000);
-          },
-          error: (error) => {
-            this.loading.set(false);
-            this.alertService.error('Error', error.error?.message || 'Error al procesar la compra');
-          }
-        });
+    this.loading.set(true);
+    this.cartService.checkout({ addressId: this.selectedAddress()!.id }).subscribe({
+      next: (response) => {
+        window.location.href = response.url;
+      },
+      error: (error) => {
+        this.loading.set(false);
+        this.alertService.error('Error', 'No se pudo conectar con la pasarela de pago');
       }
-    );
+    });
+  }
+
+  processSuccessfulPayment(addressId: number): void {
+    this.loading.set(true);
+    this.cartService.confirmPayment(addressId).subscribe({
+      next: (response) => {
+        this.loading.set(false);
+        this.alertService.success('¡Pago Exitoso!', 'Tu pedido ha sido registrado.');
+        this.router.navigate(['/orders', response.orderId]);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.alertService.error('Error de Registro', 'El pago se hizo pero hubo un problema al guardar la orden.');
+      }
+    });
   }
 
   goToAddAddress(): void {

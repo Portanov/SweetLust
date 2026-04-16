@@ -11,6 +11,7 @@ import { DividerModule } from 'primeng/divider';
 import { TimelineModule } from 'primeng/timeline';
 import { SkeletonModule } from 'primeng/skeleton';
 import { OrderStatus } from '../../../assets/models/shop/order.model';
+import { ScrollPanelModule } from 'primeng/scrollpanel';
 
 @Component({
   selector: 'app-order-detail',
@@ -23,7 +24,8 @@ import { OrderStatus } from '../../../assets/models/shop/order.model';
     TagModule,
     DividerModule,
     TimelineModule,
-    SkeletonModule
+    SkeletonModule,
+    ScrollPanelModule
   ],
   templateUrl: './order-detail.html',
   styleUrls: ['./order-detail.css']
@@ -43,6 +45,18 @@ export class OrderDetail implements OnInit {
     if (orderId) {
       this.orderService.getMyOrderDetail(+orderId).subscribe();
     }
+  }
+
+  get fullAddress() {
+    const addr = this.order()?.address;
+    if (!addr) return null;
+    return {
+      recipient: addr.recipient_name,
+      phone: addr.recipient_phone,
+      line1: `${addr.street} #${addr.ext_number}${addr.int_number ? ' Int. ' + addr.int_number : ''}`,
+      line2: `${addr.neighborhood}, ${addr.city}, ${addr.state}`,
+      cp: `C.P. ${addr.postal_code}`,
+    };
   }
 
   getStatusSeverity(status: OrderStatus): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {

@@ -1,3 +1,4 @@
+// products.service.ts
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -13,8 +14,9 @@ import {
   CategoryWithCount,
   ProductCategory
 } from '../../assets/models/shop/product.model';
+import { environment } from '../../environments/environment';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = environment.apiUrl;
 
 @Injectable({
   providedIn: 'root'
@@ -22,9 +24,12 @@ const API_URL = 'http://localhost:3000/api';
 export class ProductService {
   private http = inject(HttpClient);
 
+  // ─────────────────────────────────────────────────────────────────
+  // RUTAS PÚBLICAS
+  // ─────────────────────────────────────────────────────────────────
+
   /**
    * Obtiene todos los productos con múltiples filtros
-   * Soporta: search, category, minPrice, maxPrice, onSale, inStock
    */
   getProducts(filters?: ProductFilters): Observable<ProductResponse> {
     let params = new HttpParams();
@@ -56,35 +61,6 @@ export class ProductService {
   }
 
   /**
-   * Crea un nuevo producto (solo admin)
-   */
-  createProduct(product: CreateProductRequest): Observable<Product> {
-    return this.http.post<Product>(`${API_URL}/products`, product);
-  }
-
-  /**
-   * Actualiza un producto existente (solo admin)
-   */
-  updateProduct(id: number, product: UpdateProductRequest): Observable<Product> {
-    return this.http.patch<Product>(`${API_URL}/products/${id}`, product);
-  }
-
-  /**
-   * Elimina un producto (solo admin)
-   */
-  deleteProduct(id: number): Observable<void> {
-    return this.http.delete<void>(`${API_URL}/products/${id}`);
-  }
-
-  /**
-   * Actualiza el stock de un producto (solo admin)
-   */
-  updateStock(id: number, quantity: number): Observable<Product> {
-    return this.http.patch<Product>(`${API_URL}/products/${id}/stock`, { quantity });
-  }
-
-
-  /**
    * Obtiene los 3 productos más vendidos
    */
   getBestSellers(): Observable<Product[]> {
@@ -106,37 +82,77 @@ export class ProductService {
   }
 
   /**
-   * Crea una nueva oferta para un producto (solo admin)
-   */
-  createOffer(productId: number, offer: CreateOfferRequest): Observable<Offer> {
-    return this.http.post<Offer>(`${API_URL}/products/${productId}/offers`, offer);
-  }
-
-  /**
-   * Obtiene todas las ofertas de un producto (incluyendo inactivas)
+   * Obtiene todas las ofertas de un producto (solo lectura)
    */
   getOffersByProduct(productId: number): Observable<Offer[]> {
     return this.http.get<Offer[]>(`${API_URL}/products/${productId}/offers`);
   }
 
+  // ─────────────────────────────────────────────────────────────────
+  // RUTAS DE ADMIN
+  // ─────────────────────────────────────────────────────────────────
+
+  /**
+   * Crea un nuevo producto (solo admin)
+   * @route POST /admin/products
+   */
+  createProduct(product: CreateProductRequest): Observable<Product> {
+    return this.http.post<Product>(`${API_URL}/admin/products`, product);
+  }
+
+  /**
+   * Actualiza un producto existente (solo admin)
+   * @route PATCH /admin/products/:id
+   */
+  updateProduct(id: number, product: UpdateProductRequest): Observable<Product> {
+    return this.http.patch<Product>(`${API_URL}/admin/products/${id}`, product);
+  }
+
+  /**
+   * Elimina un producto (solo admin)
+   * @route DELETE /admin/products/:id
+   */
+  deleteProduct(id: number): Observable<void> {
+    return this.http.delete<void>(`${API_URL}/admin/products/${id}`);
+  }
+
+  /**
+   * Actualiza el stock de un producto (solo admin)
+   * @route PATCH /admin/products/:id/stock
+   */
+  updateStock(id: number, quantity: number): Observable<Product> {
+    return this.http.patch<Product>(`${API_URL}/admin/products/${id}/stock`, { quantity });
+  }
+
+  /**
+   * Crea una nueva oferta para un producto (solo admin)
+   * @route POST /admin/products/:id/offers
+   */
+  createOffer(productId: number, offer: CreateOfferRequest): Observable<Offer> {
+    return this.http.post<Offer>(`${API_URL}/admin/products/${productId}/offers`, offer);
+  }
+
   /**
    * Actualiza una oferta existente (solo admin)
+   * @route PATCH /admin/products/offers/:offerId
    */
   updateOffer(offerId: number, offer: UpdateOfferRequest): Observable<Offer> {
-    return this.http.patch<Offer>(`${API_URL}/products/offers/${offerId}`, offer);
+    return this.http.patch<Offer>(`${API_URL}/admin/products/offers/${offerId}`, offer);
   }
 
   /**
    * Desactiva una oferta (solo admin)
+   * @route PATCH /admin/products/offers/:offerId/deactivate
    */
   deactivateOffer(offerId: number): Observable<Offer> {
-    return this.http.patch<Offer>(`${API_URL}/products/offers/${offerId}/deactivate`, {});
+    return this.http.patch<Offer>(`${API_URL}/admin/products/offers/${offerId}/deactivate`, {});
   }
 
   /**
    * Elimina permanentemente una oferta (solo admin)
+   * @route DELETE /admin/products/offers/:offerId
    */
   deleteOffer(offerId: number): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${API_URL}/products/offers/${offerId}`);
+    return this.http.delete<{ message: string }>(`${API_URL}/admin/products/offers/${offerId}`);
   }
 }

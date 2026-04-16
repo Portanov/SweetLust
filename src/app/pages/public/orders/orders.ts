@@ -1,6 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { OrderService } from '../../../services/orders/order.service';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -8,30 +7,58 @@ import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
 import { SkeletonModule } from 'primeng/skeleton';
 import { OrderStatus } from '../../../assets/models/shop/order.model';
+import { ScrollPanelModule } from 'primeng/scrollpanel';
+import { ChipModule } from 'primeng/chip';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-orders',
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     ButtonModule,
     CardModule,
     TagModule,
     DividerModule,
-    SkeletonModule
+    SkeletonModule,
+    ScrollPanelModule,
+    ChipModule,
   ],
   templateUrl: './orders.html',
   styleUrls: ['./orders.css']
 })
 export class Orders implements OnInit {
   private orderService = inject(OrderService);
+  public router = inject(Router);
 
   orders = this.orderService.orders;
   loading = this.orderService.loading;
 
+  selectedStatus = signal<OrderStatus | null>(null);
+
+  filteredOrders = computed(() => {
+    const selected = this.selectedStatus();
+    if (selected === null) {
+      return this.orders();
+    }
+    return this.orders().filter(order => order.status === selected);
+  });
+
+  availableStatuses = [
+    OrderStatus.CONFIRMADO,
+    OrderStatus.PROCESANDO,
+    OrderStatus.ENVIADO,
+    OrderStatus.EN_CAMINO,
+    OrderStatus.ENTREGADO,
+    OrderStatus.CANCELADO
+  ];
+
   ngOnInit(): void {
     this.orderService.getMyOrders().subscribe();
+  }
+
+  filterOrdersByStatus(status: OrderStatus): void {
+    this.selectedStatus.set(this.selectedStatus() === status ? null : status);
   }
 
   getStatusSeverity(status: OrderStatus): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
@@ -67,6 +94,25 @@ export class Orders implements OnInit {
         return 'Entregado';
       case OrderStatus.CANCELADO:
         return 'Cancelado';
+      default:
+        return status;
+    }
+  }
+
+  getStatusIcon(status: OrderStatus): string {
+    switch (status) {
+      case OrderStatus.PROCESANDO:
+        return 'pi pi-clock';
+      case OrderStatus.CONFIRMADO:
+        return 'pi pi-check-circle';
+      case OrderStatus.ENVIADO:
+        return 'fa-solid fa-cart-flatbed';
+      case OrderStatus.EN_CAMINO:
+        return 'fa-solid fa-truck';
+      case OrderStatus.ENTREGADO:
+        return 'fa-solid fa-boxes-packing';
+      case OrderStatus.CANCELADO:
+        return 'pi pi-times-circle';
       default:
         return status;
     }

@@ -10,8 +10,9 @@ import {
   CheckoutRequest,
   CheckoutResponse
 } from '../../assets/models/shop/cart.model';
+import { environment } from '../../environments/environment';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = environment.apiUrl;
 
 @Injectable({
   providedIn: 'root'
@@ -91,9 +92,13 @@ export class CartService {
     );
   }
 
-  checkout(checkoutData: CheckoutRequest): Observable<CheckoutResponse> {
-    return this.http.post<CheckoutResponse>(`${API_URL}/cart/checkout`, checkoutData).pipe(
-      tap((response) => {
+  checkout(checkoutData: CheckoutRequest): Observable<{ url: string }> {
+    return this.http.post<{ url: string }>(`${API_URL}/cart/checkout`, checkoutData);
+  }
+
+  confirmPayment(addressId: number): Observable<CheckoutResponse> {
+    return this.http.post<CheckoutResponse>(`${API_URL}/cart/confirm-payment`, { addressId }).pipe(
+      tap(() => {
         this.cartItems.set([]);
         this.cartTotal.set(0);
         this.itemCount.set(0);

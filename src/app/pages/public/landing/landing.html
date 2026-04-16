@@ -7,6 +7,7 @@
   >
   </app-banner-carousel>
   <div class="main-content">
+    <!--Espacio de publicidad de tienda-->
     <div class="grid grid-cols-2 gap-2 p-8 py-16 bg-zinc-800">
       <div class="p-6 text-white font-caviar flex flex-col justify-around">
         <h1 class="text-7xl font-tropical text-center">Descubre tu sensualidad</h1>
@@ -26,100 +27,131 @@
         ></p-button>
       </div>
       <div class="">
-        <img src="images/sensualidad.jpg" alt="sensualidad" class="border-8 border-white rounded-2xl" />
+        <img
+          src="images/sensualidad.jpg"
+          alt="sensualidad"
+          class="border-8 border-white rounded-2xl"
+        />
       </div>
     </div>
-    <div class="grid grid-cols-2 gap-2 px-10 py-16">
-      <div class="p-16 flex flex-col justify-around">
-        <h1 class="text-9xl font-tropical">Nuestros Best Seller</h1>
+    <!--Espacio de nuevos productos-->
+    <div class="w-3/4 mx-auto p-8 py-16">
+      <h1 class="text-6xl text-center font-tropical">Nuevos productos</h1>
+      <div class="flex items-center justify-center mt-4">
+        <hr class="w-48 border-gray-400" />
       </div>
-      <div class="">
-        <p-carousel [value]="products()" [numVisible]="1" [numScroll]="1" orientation="vertical" verticalViewPortHeight="500px"
-          contentClass="flex items-center">
-          <ng-template let-product #item>
-            <p-card [style]="{ width: '28rem', overflow: 'hidden' }">
-              <ng-template #header>
-                <div class="relative" style="height: 290px; overflow: hidden;">
-                  <img [src]="product.image" [alt]="product.title" style="width: 100%; height: 100%; object-fit: cover;">
-                  @if (product.offer) {
-                  <div class="absolute top-2 right-2 z-10">
-                    <p-tag severity="danger" [value]="getOfferLabel(product)" icon="pi pi-tag"></p-tag>
-                  </div>
-                  }
-                  <div class="absolute bottom-2 left-2 z-10">
-                    <p-button [icon]="isFavorite(product.id) ? 'pi pi-heart-fill' : 'pi pi-heart'" [rounded]="true"
-                      severity="secondary" (onClick)="toggleFavorite(product.id, $event)" />
-                  </div>
-                </div>
-              </ng-template>
-              <ng-template #title>
-                <h1 class="text-2xl text-center cinzel">{{product.title}}</h1>
-              </ng-template>
-              <ng-template #subtitle>
-                <p class="text-md text-center font-caviar">${{product.final_price ? product.final_price : product.price}}
-                  MXN</p>
-              </ng-template>
-              <div class="p-6 py-2">
-                <p class="w-full truncate text-justify font-light text-md text-gray-400">{{product.description}}</p>
+
+      <p-carousel
+        [value]="newProducts()"
+        [showIndicators]="false"
+        [numVisible]="4"
+        [numScroll]="1"
+        [circular]="true"
+        class="my-8"
+        autoplayInterval="3000"
+      >
+        <ng-template let-product #item>
+          <p-card header="Simple Card" class="m-2 p-4 pb-2 rounded-none shadow-none">
+            <ng-template #header>
+              <img [src]="product.image" alt="" class="border border-gray-300" />
+            </ng-template>
+            <ng-template #title>
+              <h1 class="text-sm font-bold">{{product.title}}</h1>
+            </ng-template>
+            <ng-template #subtitle>
+              <p class="text-lg text-center poiret-one">${{product.price}} MXN</p>
+            </ng-template>
+            <ng-template #footer>
+              <div class="text-center">
+                <p-button
+                  label="Agregar al carrito"
+                  icon="pi pi-cart-plus"
+                  variant="outlined"
+                  severity="secondary"
+                  size="small"
+                  styleClass="poiret-one font-bold"
+                  (onClick)="addToCart(product, $event)"
+                  fluid
+                  [rounded]="true"
+                >
+                </p-button>
               </div>
-              <ng-template #footer>
-                <div class="text-center">
-                  <p-button icon="pi pi-shopping-cart" label="Añadir al carrito" [raised]="true"
-                    (onClick)="addToCart(product.id, $event)" fluid />
-                </div>
-              </ng-template>
-            </p-card>
-          </ng-template>
-        </p-carousel>
-      </div>
+            </ng-template>
+          </p-card>
+        </ng-template>
+      </p-carousel>
     </div>
-    <div class="grid grid-cols-2 gap-2 px-8 pb-10 pt-16 bg-gray-400">
-      <div class="flex items-center justify-center">
-        <p-carousel [value]="newProducts()" [circular]="true" autoplayInterval="3000" [numVisible]="1" [numScroll]="1" [style]="{width: '33.5rem'}">
-          <ng-template let-newProduct #item>
-            <p-card [style]="{ width: '28rem', overflow: 'hidden' }" class="h-full">
-              <ng-template #header>
-                <div class="relative" style="height: 290px; overflow: hidden;">
-                  <img [src]="newProduct.image" [alt]="newProduct.title" style="width: 100%; height: 100%; object-fit: cover;">
-                  @if (newProduct.offer) {
-                  <div class="absolute top-2 right-2 z-10">
-                    <p-tag severity="danger" [value]="getOfferLabel(newProduct)" icon="pi pi-tag"></p-tag>
-                  </div>
-                  }
-                  <div class="absolute bottom-2 left-2 z-10">
-                    <p-button
-                      [icon]="isFavorite(newProduct.id) ? 'pi pi-heart-fill' : 'pi pi-heart'"
-                      [rounded]="true" severity="secondary"
-                      (onClick)="toggleFavorite(newProduct.id, $event)" />
+
+    <!--Productos mas vendidos-->
+    <div class="grid grid-cols-2 gap-2 px-10 py-16 bg-linear-to-br from-gray-100 to-gray-200">
+      <div class="p-16 flex flex-col justify-center">
+        <h1 class="text-9xl text-gray-800 tracking-tight font-tropical">Nuestros Best Seller</h1>
+        <p class="mt-4 text-gray-600 poiret-one text-2xl">
+          Los productos más vendidos de la temporada
+        </p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-6">
+        @for (product of products(); track product.id; let i = $index) {
+          @let position = i + 1;
+          @if (i == 1) {
+            <div class="col-span-4 col-start-2 col-end-4 bg-white shadow-xs border border-zinc-400">
+              <div class="grid grid-cols-2">
+                <div class="relative">
+                  <img [src]="product.image" alt="" class="border-e border-gray-300" />
+                  <div class="absolute top-0 left-0 p-2 px-4 bg-gray-400">
+                    <p class="text-md text-white cinzel">
+                      {{position}}
+                    </p>
                   </div>
                 </div>
-              </ng-template>
-              <ng-template #title>
-                <h1 class="text-2xl text-center cinzel">{{newProduct.title}}</h1>
-              </ng-template>
-              <ng-template #subtitle>
-                <p class="text-md text-center font-caviar">${{newProduct.final_price ? newProduct.final_price : newProduct.price}} MXN</p>
-              </ng-template>
-              <div class="p-6 py-2">
-                <p class="w-full truncate text-justify font-light text-md text-gray-400">{{newProduct.description}}</p>
-              </div>
-              <ng-template #footer>
-                <div class="text-center">
+                <div class="p-4">
+                  <h1 class="font-bold mb-2">{{product.title}}</h1>
+                  <p class="font-light text-center mb-3">${{product.price}} MXN</p>
+                  <p class="text-xs w-full text-truncate mb-2 text-gray-400">{{product.description}}</p>
                   <p-button
-                    icon="pi pi-shopping-cart"
-                    label="Añadir al carrito"
-                    [raised]="true"
-                    (onClick)="addToCart(newProduct.id, $event)"
-                  fluid />
+                    icon="pi pi-arrow-right"
+                    label="Comprar Ahora"
+                    severity="contrast"
+                    [rounded]="true"
+                    styleClass="poiret-one"
+                    iconPos="right"
+                    size="small"
+                    fluid
+                  ></p-button>
                 </div>
-              </ng-template>
-            </p-card>
-          </ng-template>
-        </p-carousel>
-      </div>
-      <div class="p-12">
-        <h1 class="text-9xl text-right font-tropical">Nuestros nuevos productos</h1>
-        <p class="text-right mt-3 font-caviar text-lg text-gray-600">Deleitate con nuestros nuevos productos y visita la tienda para mas novedades.</p>
+              </div>
+            </div>
+          } @else {
+            <div [className]="'col-span-2 bg-white border ' + (position === 1 ? 'border-amber-500':'border-yellow-950')">
+              <div class="grid grid-cols-2">
+                <div class="relative">
+                  <img [src]="product.image" alt="" class="border-e border-gray-300" />
+                  <div [className]="'absolute top-0 left-0 px-4 p-2' + (position === 1 ? ' bg-amber-500':' bg-amber-950')">
+                    <p class="text-md text-white cinzel">
+                      {{position}}
+                    </p>
+                  </div>
+                </div>
+                <div class="p-4">
+                  <h1 class="font-bold mb-2">{{product.title}}</h1>
+                  <p class="font-light text-center mb-3">${{product.price}} MXN</p>
+                  <p class="text-xs w-full text-truncate mb-2 text-gray-400">{{product.description}}</p>
+                  <p-button
+                    icon="pi pi-arrow-right"
+                    label="Comprar Ahora"
+                    severity="contrast"
+                    [rounded]="true"
+                    styleClass="poiret-one"
+                    iconPos="right"
+                    size="small"
+                    fluid
+                  ></p-button>
+                </div>
+              </div>
+            </div>
+          }
+        }
       </div>
     </div>
   </div>
