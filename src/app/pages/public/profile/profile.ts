@@ -321,10 +321,22 @@ export class Profile implements OnInit {
     return true;
   }
 
-  setDefaultAddress(addressId: number): void {
+  setDefaultAddress(addressId: number, address: Address): void {
     this.loading.set(true);
 
-    this.addressService.updateAddress(addressId, { is_default: true }).subscribe({
+    this.addressService.updateAddress(addressId, { 
+      recipient_name: address.recipient_name,
+      recipient_phone: address.recipient_phone,
+      street: address.street,
+      ext_number: address.ext_number,
+      int_number: address.int_number,
+      neighborhood: address.neighborhood,
+      city: address.city,
+      state: address.state,
+      postal_code: address.postal_code,
+      references: address.references,
+      is_default: true
+    }).subscribe({
       next: () => {
         this.loading.set(false);
         this.messageService.add({
