@@ -413,6 +413,7 @@ export class SidebarComponent implements OnInit {
   supportItems: MenuItem[] = [
     { icon: 'pi pi-question-circle', label: 'Preguntas Frecuentes', link: '/questions' },
     { icon: 'pi pi-wrench', label: 'Contacto', link: '/support' },
+    { icon: 'pi pi-map', label: 'Nuestra tienda', link: '/map' },
   ];
 
   authenticatedItems: MenuItem[] = [

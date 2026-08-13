@@ -59,6 +59,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/public/support/support').then((m) => m.Support),
       },
+      {
+        path: 'map',
+        loadComponent: () =>
+          import('./pages/public/map/map').then((m) => m.Map),
+      },
     ],
   },
 

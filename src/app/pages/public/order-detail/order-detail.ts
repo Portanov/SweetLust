@@ -18,7 +18,6 @@ import { ScrollPanelModule } from 'primeng/scrollpanel';
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     ButtonModule,
     CardModule,
     TagModule,

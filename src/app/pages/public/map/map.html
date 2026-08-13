@@ -1,0 +1,49 @@
+<section class="branches-section mt-18 mb-6">
+  <div class="branches-header">
+    <p class="branches-kicker">SweetLust</p>
+    <h2>Nuestras sucursales</h2>
+    <p class="branches-description">
+      Visitanos en nuestra sucursal principal si eres de Querétaro
+    </p>
+  </div>
+
+  <div class="map-shell w-3/4 mx-auto">
+    <aol-map [width]="'100%'" [height]="'500px'">
+      <aol-view [zoom]="16">
+        <aol-coordinate [x]="-100.40498857953855" [y]="20.64195968231045" [srid]="'EPSG:4326'"></aol-coordinate>
+      </aol-view>
+
+      <aol-layer-tile>
+        <aol-source-osm></aol-source-osm>
+      </aol-layer-tile>
+
+      <aol-layer-vector>
+        <aol-source-vector>
+          <aol-feature>
+            <aol-geometry-point>
+              <aol-coordinate [x]="-100.40498857953855" [y]="20.64195968231045" [srid]="'EPSG:4326'"></aol-coordinate>
+            </aol-geometry-point>
+
+            <aol-style>
+              <aol-style-circle [radius]="10">
+                <aol-style-fill [color]="'#ec3750'"></aol-style-fill>
+                <aol-style-stroke [color]="'#ffffff'" [width]="3"></aol-style-stroke>
+              </aol-style-circle>
+              <aol-style-text
+                [text]="'Sucursal Principal'"
+                [offsetY]="-22"
+                [font]="'700 13px Montserrat, sans-serif'"
+              >
+                <aol-style-fill [color]="'#202124'"></aol-style-fill>
+                <aol-style-stroke [color]="'#ffffff'" [width]="4"></aol-style-stroke>
+              </aol-style-text>
+            </aol-style>
+          </aol-feature>
+        </aol-source-vector>
+      </aol-layer-vector>
+
+      <aol-interaction-default></aol-interaction-default>
+      <aol-control-defaults></aol-control-defaults>
+    </aol-map>
+  </div>
+</section>

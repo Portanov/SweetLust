@@ -35,7 +35,13 @@ import { PanelModule } from 'primeng/panel';
         </div>
 
         <div class="text-center md:text-right alumni-sans">
-          <p class="text-zinc-200 m-0 text-md">© 2024 Sweety Lust</p>
+          <p class="text-zinc-200 m-0 text-md">
+            Contacto: <a href="mailto:soporte@sweetylust.com" class="text-pink-400 hover:text-pink-300">soporte@sweetylust.com</a>
+          </p>
+          <p class="text-zinc-200 m-0 text-md mt-1">
+            O llamando al <a href="tel:+525512345678" class="text-pink-400 hover:text-pink-300">55 1234 5678</a>
+          </p>
+          <p class="text-zinc-200 m-0 text-md">© 2026 Sweety Lust</p>
           <p class="text-zinc-300 m-0 text-sm mt-1">Todos los derechos reservados</p>
         </div>
       </div>

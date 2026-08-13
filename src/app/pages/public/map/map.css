@@ -1,0 +1,51 @@
+:host {
+	display: block;
+}
+
+.branches-header {
+	text-align: center;
+	margin-bottom: 1.4rem;
+}
+
+.branches-kicker {
+	margin: 0;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	font-size: 0.75rem;
+	font-weight: 700;
+	color: #a7532b;
+}
+
+.branches-header h2 {
+	margin: 0.35rem 0 0.4rem;
+	font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+	line-height: 1.1;
+	color: #2d1608;
+	font-family: "Poppins", "Segoe UI", sans-serif;
+}
+
+.branches-description {
+	max-width: 780px;
+	margin: 0 auto;
+	color: #5c3b29;
+	font-size: 0.98rem;
+}
+
+.map-shell {
+	border-radius: 20px;
+	overflow: hidden;
+	border: 1px solid rgba(167, 103, 59, 0.22);
+	box-shadow: 0 14px 34px -20px rgba(0, 0, 0, 0.65);
+}
+
+@media (max-width: 768px) {
+	.branches-section {
+		width: 94%;
+		padding: 1.2rem;
+		border-radius: 20px;
+	}
+
+	.branches-description {
+		font-size: 0.92rem;
+	}
+}
