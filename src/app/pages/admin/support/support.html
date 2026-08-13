@@ -1,0 +1,177 @@
+<section class="min-h-screen">
+	<div class="flex justify-between items-center mb-8">
+		<h1 class="text-5xl font-tropical text-gray-800">Soporte <span class="cormorant-garamond-400 text-[20px]">&
+				reportes</span></h1>
+		<p-button label="Actualizar" icon="pi pi-refresh" [loading]="loading()" (onClick)="loadReports()"></p-button>
+	</div>
+
+	<p-card styleClass="support-card">
+		<p-table [value]="reports()" [loading]="loading()" [paginator]="true" [rows]="10" responsiveLayout="scroll" [tableStyle]="{ 'min-width': '70rem' }">
+			<ng-template pTemplate="caption">
+				<div class="table-toolbar">
+					<div class="toolbar-left">
+						<p-iconfield iconPosition="left" class="table-search">
+							<p-inputicon>
+								<i class="pi pi-search"></i>
+							</p-inputicon>
+							<input pInputText id="search" [formControl]="searchForm.controls.search"
+								placeholder="Buscar por cliente, asunto o correo" />
+						</p-iconfield>
+
+						<p-select id="status" [options]="statusOptions" optionLabel="label" optionValue="value"
+							[formControl]="searchForm.controls.status" placeholder="Filtrar por estado" appendTo="body"></p-select>
+					</div>
+
+					<div class="filters-actions">
+						<p-button label="Nuevo reporte" icon="pi pi-plus" (onClick)="openCreateDialog()"></p-button>
+					</div>
+				</div>
+			</ng-template>
+			<ng-template pTemplate="header">
+				<tr>
+					<th>ID</th>
+					<th>Cliente</th>
+					<th>Asunto</th>
+					<th>Estado</th>
+					<th>Creado</th>
+					<th>Acciones</th>
+				</tr>
+			</ng-template>
+
+			<ng-template pTemplate="body" let-report>
+				<tr>
+					<td>#{{ report.id }}</td>
+					<td>
+						<div class="report-person">
+							<span class="report-avatar">{{ report.name.charAt(0).toUpperCase() }}</span>
+							<div>
+								<p>{{ report.name }}</p>
+								<span>{{ report.email }}</span>
+							</div>
+						</div>
+					</td>
+					<td>
+						<div class="subject-cell">
+							<p>{{ report.subject }}</p>
+							<span>{{ report.phone || 'Sin teléfono' }}</span>
+						</div>
+					</td>
+					<td>
+						<p-tag [value]="getStatusLabel(report.status)" [severity]="getSeverity(report.status)"></p-tag>
+					</td>
+					<td>{{ formatDate(report.created_at) }}</td>
+					<td>
+						<div class="action-buttons justify-center">
+							<p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="secondary"
+								pTooltip="Ver detalles" (onClick)="openDetailDialog(report)"></p-button>
+							<p-button icon="pi pi-sync" [rounded]="true" [text]="true" severity="info"
+								pTooltip="Actualizar estado" (onClick)="openUpdateDialog(report)"></p-button>
+						</div>
+					</td>
+				</tr>
+			</ng-template>
+
+			<ng-template pTemplate="emptymessage">
+				<tr>
+					<td colspan="6" class="empty-state">No se encontraron reportes</td>
+				</tr>
+			</ng-template>
+		</p-table>
+	</p-card>
+</section>
+
+<p-dialog header="Detalle del reporte" [(visible)]="detailDialog" [modal]="true" [style]="{ width: '560px' }"
+	(onHide)="closeDetailDialog()">
+	@if (selectedDetailReport()) {
+	<div class="detail-grid">
+		<div>
+			<span class="detail-label">Cliente</span>
+			<p>{{ selectedDetailReport()?.name }}</p>
+		</div>
+		<div>
+			<span class="detail-label">Correo</span>
+			<p>{{ selectedDetailReport()?.email }}</p>
+		</div>
+		<div>
+			<span class="detail-label">Teléfono</span>
+			<p>{{ selectedDetailReport()?.phone || 'Sin teléfono' }}</p>
+		</div>
+		<div>
+			<span class="detail-label">Estado</span>
+			<p-tag [value]="getStatusLabel(selectedDetailReport()!.status)" [severity]="getSeverity(selectedDetailReport()!.status)"></p-tag>
+		</div>
+		<div class="detail-full">
+			<span class="detail-label">Asunto</span>
+			<p>{{ selectedDetailReport()?.subject }}</p>
+		</div>
+		<div class="detail-full">
+			<span class="detail-label">Mensaje</span>
+			<p class="detail-message">{{ selectedDetailReport()?.message }}</p>
+		</div>
+		<div>
+			<span class="detail-label">Creado</span>
+			<p>{{ formatDate(selectedDetailReport()!.created_at) }}</p>
+		</div>
+		<div>
+			<span class="detail-label">Actualizado</span>
+			<p>{{ formatDate(selectedDetailReport()!.updated_at) }}</p>
+		</div>
+	</div>
+	@if (selectedDetailReport()) {
+	<div class="dialog-actions">
+		<p-button label="Cerrar" severity="secondary" [outlined]="true" (onClick)="closeDetailDialog()"></p-button>
+	</div>
+	}
+	} @else {
+	<p class="loading-state">Cargando detalle...</p>
+	}
+</p-dialog>
+
+<p-dialog header="Nuevo reporte" [(visible)]="createDialog" [modal]="true" [style]="{ width: '620px' }"
+	(onHide)="closeCreateDialog()">
+	<form [formGroup]="createForm" (ngSubmit)="createReport()" class="dialog-form" novalidate>
+		<div class="dialog-grid">
+			<div class="field">
+				<label for="create-name">Nombre completo</label>
+				<input pInputText id="create-name" formControlName="name" />
+			</div>
+			<div class="field">
+				<label for="create-email">Correo electrónico</label>
+				<input pInputText id="create-email" type="email" formControlName="email" />
+			</div>
+			<div class="field">
+				<label for="create-phone">Teléfono</label>
+				<input pInputText id="create-phone" formControlName="phone" />
+			</div>
+			<div class="field field-full">
+				<label for="create-subject">Asunto</label>
+				<input pInputText id="create-subject" formControlName="subject" />
+			</div>
+			<div class="field field-full">
+				<label for="create-message">Mensaje</label>
+				<textarea pTextarea id="create-message" rows="6" formControlName="message"></textarea>
+			</div>
+		</div>
+
+		<div class="dialog-actions">
+			<p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="closeCreateDialog()"></p-button>
+			<p-button type="submit" label="Guardar" [loading]="loading()"></p-button>
+		</div>
+	</form>
+</p-dialog>
+
+<p-dialog header="Actualizar estado" [(visible)]="updateDialog" [modal]="true" [style]="{ width: '420px' }"
+	(onHide)="closeUpdateDialog()">
+	<form [formGroup]="updateForm" (ngSubmit)="updateReport()" class="dialog-form" novalidate>
+		<div class="field">
+			<label for="update-status">Estado</label>
+			<p-select id="update-status" [options]="statusOptions" optionLabel="label" optionValue="value"
+				formControlName="status" appendTo="body"></p-select>
+		</div>
+
+		<div class="dialog-actions">
+			<p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="closeUpdateDialog()"></p-button>
+			<p-button type="submit" label="Actualizar" [loading]="loading()"></p-button>
+		</div>
+	</form>
+</p-dialog>

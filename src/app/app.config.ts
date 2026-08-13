@@ -10,6 +10,7 @@ import { authInterceptor } from './assets/interceptors/auth/auth.interceptor';
 import { withInterceptors } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
 import { ConfirmationService } from 'primeng/api';
+import { provideLucideIcons, LucidePanelLeftOpen, LucidePanelLeftClose } from '@lucide/angular';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -33,6 +34,10 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideRouter(routes),
     MessageService,
-    ConfirmationService
+    ConfirmationService,
+    provideLucideIcons(
+      LucidePanelLeftOpen,
+      LucidePanelLeftClose,
+    ),
   ]
 };

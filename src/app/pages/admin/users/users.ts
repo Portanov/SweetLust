@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { UserService } from '../../../services/user/user.service';
 import { AlertService } from '../../../services/alert/alert.service';
 import { ButtonModule } from 'primeng/button';
@@ -26,6 +27,7 @@ import { UserRole } from '../../../assets/models/user/user.model';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     ButtonModule,
     CardModule,
     InputTextModule,
@@ -34,7 +36,6 @@ import { UserRole } from '../../../assets/models/user/user.model';
     DialogModule,
     TableModule,
     TagModule,
-    ToolbarModule,
     IconFieldModule,
     InputIconModule,
     TooltipModule,
@@ -56,11 +57,12 @@ export class AdminUsers implements OnInit {
   userDialog = signal(false);
   editingUser = signal(false);
   selectedUserId = signal<number | null>(null);
-  globalFilter = signal('');
+  searchValue = '';
+  selectedRole: UserRole | null = null;
 
   roleOptions = [
-    { label: 'Cliente', value: 'client' },
-    { label: 'Administrador', value: 'admin' }
+    { label: 'Cliente', value: UserRole.CLIENT },
+    { label: 'Administrador', value: UserRole.ADMIN }
   ];
 
   userForm = this.fb.group({
@@ -220,10 +222,5 @@ export class AdminUsers implements OnInit {
       role: 'client'
     });
     this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
-  }
-
-  onGlobalFilter(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.globalFilter.set(input.value);
   }
 }

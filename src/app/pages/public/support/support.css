@@ -1,0 +1,128 @@
+.support-page {
+	min-height: 100vh;
+	padding: 5rem 1.5rem 3rem;
+	background:
+		radial-gradient(circle at top left, rgba(244, 114, 182, 0.18), transparent 30%),
+		radial-gradient(circle at top right, rgba(15, 23, 42, 0.08), transparent 26%),
+		linear-gradient(180deg, #fff7fb 0%, #ffffff 48%, #fafafa 100%);
+}
+
+.support-shell {
+	max-width: 980px;
+	margin: 0 auto;
+}
+
+.support-hero {
+	max-width: 720px;
+	margin: 0 auto 2rem;
+	text-align: center;
+}
+
+.support-kicker {
+	margin: 0 0 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.24em;
+	font-size: 0.75rem;
+	font-weight: 700;
+	color: #be185d;
+}
+
+.support-hero h1 {
+	margin: 0;
+	font-size: clamp(2rem, 4vw, 3.5rem);
+	font-weight: 800;
+	color: #111827;
+}
+
+.support-hero p {
+	margin: 1rem auto 0;
+	max-width: 620px;
+	color: #6b7280;
+	line-height: 1.7;
+}
+
+.support-card {
+	border: 1px solid rgba(229, 231, 235, 0.9);
+	border-radius: 1.5rem;
+	box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+	overflow: hidden;
+}
+
+:host ::ng-deep .support-card .p-card-body {
+	padding: 2rem;
+}
+
+.support-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.support-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1rem 1.25rem;
+}
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.field-full {
+	grid-column: 1 / -1;
+}
+
+.field label {
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: #374151;
+}
+
+:host ::ng-deep .support-form .p-inputtext,
+:host ::ng-deep .support-form .p-textarea {
+	width: 100%;
+	border-radius: 0.9rem;
+	border-color: #e5e7eb;
+	padding: 0.9rem 1rem;
+}
+
+:host ::ng-deep .support-form .p-inputtext:focus,
+:host ::ng-deep .support-form .p-textarea:focus {
+	border-color: #ec4899;
+	box-shadow: 0 0 0 0.2rem rgba(236, 72, 153, 0.16);
+}
+
+.error-text {
+	color: #dc2626;
+	font-size: 0.78rem;
+}
+
+.support-actions {
+	display: flex;
+	justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+	.support-page {
+		padding: 3.5rem 1rem 2rem;
+	}
+
+	.support-grid {
+		grid-template-columns: 1fr;
+	}
+
+	:host ::ng-deep .support-card .p-card-body {
+		padding: 1.25rem;
+	}
+
+	.support-actions {
+		justify-content: stretch;
+	}
+
+	:host ::ng-deep .support-actions .p-button,
+	:host ::ng-deep .support-actions button {
+		width: 100%;
+	}
+}

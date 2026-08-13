@@ -1,88 +1,69 @@
-<div class="p-6 bg-gray-50 min-h-screen">
-    <div class="max-w-7xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl cinzel text-gray-800">Panel de Administración</h1>
-            <p-button label="Actualizar" icon="pi pi-refresh" [loading]="loading()" (onClick)="ngOnInit()"></p-button>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <p-table [value]="orders()" [rows]="10" [paginator]="true" [loading]="loading()" responsiveLayout="scroll">
-                <ng-template pTemplate="header">
-                    <tr class="text-xs uppercase text-gray-500 bg-gray-50">
-                        <th class="p-4">ID</th>
-                        <th>Cliente</th>
-                        <th>Fecha</th>
-                        <th>Total</th>
-                        <th>Estado</th>
-                        <th class="text-center">Gestión</th>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="body" let-order>
-                    <tr class="text-sm">
-                        <td class="p-4 font-bold">#{{order.id}}</td>
-                        <td>
-                            <div class="flex flex-col">
-                                <span class="font-medium text-gray-700">{{order.user?.username}}</span>
-                                <span class="text-xs text-gray-400">{{order.user?.email}}</span>
-                            </div>
-                        </td>
-                        <td>{{order.created_at | date:'dd/MM/yyyy HH:mm'}}</td>
-                        <td class="font-bold text-gray-700">{{order.total | currency:'MXN'}}</td>
-                        <td>
-                            <p-tag [value]="order.status" [severity]="getSeverity(order.status)"></p-tag>
-                        </td>
-                        <td>
-                            <div class="flex justify-center gap-2">
-                                <p-button icon="pi pi-map-marker" [rounded]="true" [text]="true" severity="secondary"
-                                    (onClick)="viewTracking(order)" pTooltip="Ver Historial"></p-button>
-                                <p-button icon="pi pi-pencil" [rounded]="true" severity="primary"
-                                    (onClick)="openUpdateStatus(order)" pTooltip="Actualizar Estado"></p-button>
-                            </div>
-                        </td>
-                    </tr>
-                </ng-template>
-            </p-table>
-        </div>
+<div class="dashboard-shell">
+  <section class="panel top-products-panel">
+    <div class="panel-header">
+      <h2>
+        Top productos
+        <span>más vendidos este mes</span>
+      </h2>
     </div>
+
+    <div class="product-list">
+      @for (product of topProducts; track product.rank) {
+        <div class="product-row">
+          <div class="rank">{{ product.rank }}</div>
+
+          <div class="thumb" [style.background]="product.accent">
+            @if (product.image) {
+              <img [src]="product.image" [alt]="product.name" />
+            } @else {
+              <span>{{ product.short }}</span>
+            }
+          </div>
+
+          <div class="product-meta">
+            <div class="name">{{ product.name }}</div>
+            <div class="category">
+              Ventas · {{ product.sold }}
+            </div>
+            <div class="product-meter">
+              <p-meterGroup
+                [value]="[{ label: '', value: product.meterValue, color: product.barColor }]"
+                [min]="0"
+                [max]="100"
+                orientation="horizontal"
+                styleClass="product-meter-control"
+              ></p-meterGroup>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="panel activity-panel">
+    <div class="panel-header with-tabs">
+      <h2>Actividad diaria</h2>
+
+      <div class="segmented-control" aria-label="Tipo de actividad">
+        <button type="button" class="tab active">Reportes</button>
+        <button type="button" class="tab">Ventas</button>
+      </div>
+    </div>
+
+    <p class="section-subtitle">reportes y ventas · agosto 2026</p>
+
+    <article class="chart-card">
+      <div class="chart-label">REPORTES POR DÍA</div>
+      <div class="chart-container">
+        <p-chart type="line" [data]="reportsChartData" [options]="chartOptions"></p-chart>
+      </div>
+    </article>
+
+    <article class="chart-card">
+      <div class="chart-label">VENTAS POR DÍA</div>
+      <div class="chart-container">
+        <p-chart type="line" [data]="salesChartData" [options]="chartOptions"></p-chart>
+      </div>
+    </article>
+  </section>
 </div>
-
-<p-dialog header="Actualizar Seguimiento" [(visible)]="showUpdateDialog" [modal]="true" [style]="{width: '400px'}">
-    <div class="flex flex-col gap-4 pt-4">
-        <div class="flex flex-col gap-1">
-            <label class="text-xs font-bold text-gray-500 uppercase">Nuevo Estado</label>
-            <p-select [options]="statusOptions" [(ngModel)]="updateData.status" optionLabel="label" optionValue="value"
-                styleClass="w-full" placeholder="Seleccione estado">
-            </p-select>
-        </div>
-        <div class="flex flex-col gap-1">
-            <label class="text-xs font-bold text-gray-500 uppercase">Nota de seguimiento</label>
-            <textarea pTextarea [(ngModel)]="updateData.note" rows="4" class="w-full"
-                placeholder="Ej: El paquete ha sido recolectado por la paquetería."></textarea>
-        </div>
-        <div class="flex justify-end gap-2 mt-4">
-            <p-button label="Cancelar" severity="secondary" [text]="true"
-                (onClick)="showUpdateDialog.set(false)"></p-button>
-            <p-button label="Guardar Cambio" (onClick)="saveStatusUpdate()"></p-button>
-        </div>
-    </div>
-</p-dialog>
-
-<p-dialog header="Historial de la Orden" [(visible)]="showTrackingDialog" [modal]="true" [style]="{width: '500px'}">
-    <div class="py-4">
-        @if (selectedOrder()?.tracking) {
-        <p-timeline [value]="selectedOrder()!.tracking!">
-            <ng-template pTemplate="content" let-event>
-                <div class="mb-6 ml-2">
-                    <p class="font-bold text-gray-800 text-sm uppercase tracking-tighter">{{event.status}}</p>
-                    <p class="text-xs text-gray-400 mb-2">{{event.created_at | date:'medium'}}</p>
-                    <div class="bg-blue-50 p-3 rounded-lg text-sm text-gray-600 border-l-4 border-blue-400">
-                        {{event.note || 'Sin detalles adicionales'}}
-                    </div>
-                </div>
-            </ng-template>
-        </p-timeline>
-        } @else {
-        <p class="text-center text-gray-400">Cargando historial...</p>
-        }
-    </div>
-</p-dialog>

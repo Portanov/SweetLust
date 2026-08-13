@@ -1,35 +1,64 @@
-<div class="products-admin-container mx-auto mt-16">
-  <div class="products-header">
-    <div>
-      <h1 class="products-title">
-        <i class="pi pi-box"></i>
-        Gestión de Productos
-      </h1>
-      <p class="products-subtitle">Administra el catálogo de productos y sus ofertas</p>
-    </div>
+<div class="min-h-screen">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-5xl font-tropical text-gray-800">Productos <span class="cormorant-garamond-400 text-[20px]">&
+        inventario</span></h1>
+    <p-button label="Actualizar" icon="pi pi-refresh" [loading]="loading()" (onClick)="ngOnInit()"></p-button>
   </div>
-
-  <div class="products-card">
-    <p-toolbar>
-      <div class="p-toolbar-group-start">
-        <p-button label="Nuevo Producto" icon="pi pi-plus" styleClass="p-button-success"
-          (onClick)="openNewProduct()"></p-button>
-      </div>
-      <div class="p-toolbar-group-end">
-        <p-iconfield>
-          <p-inputIcon class="pi pi-search"></p-inputIcon>
-          <input pInputText type="text" placeholder="Buscar producto..." (input)="onSearch($event)" />
-        </p-iconfield>
-      </div>
-    </p-toolbar>
-
-    <p-table #dt [value]="pagedProducts()" [loading]="loading()" [paginator]="true" [rows]="rows()" [first]="first()"
-      [rowsPerPageOptions]="[5, 10, 20]" [totalRecords]="total()" [lazy]="false" (onPage)="onPageChange($event)"
-      class="p-datatable-striped">
+  <div class="products-table-panel">
+    <p-table
+      #dt
+      [value]="tableProducts()"
+      [loading]="loading()"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [globalFilterFields]="['title', 'description', 'offer.label', 'stockFilter', 'offerFilter']"
+      [tableStyle]="{ 'min-width': '78rem' }"
+    >
       <ng-template pTemplate="caption">
-        <div class="table-caption">
-          <span class="font-semibold">Lista de Productos</span>
-          <span class="text-sm text-gray-500">Total: {{ total() }} productos</span>
+        <div class="table-toolbar">
+          <div class="toolbar-left">
+            <p-iconfield iconPosition="left" class="table-search">
+              <p-inputicon>
+                <i class="pi pi-search"></i>
+              </p-inputicon>
+              <input
+                pInputText
+                type="text"
+                [(ngModel)]="searchValue"
+                (input)="dt.filterGlobal(searchValue, 'contains')"
+                placeholder="Buscar producto, descripcion u oferta..."
+              />
+            </p-iconfield>
+
+            <p-select
+              [(ngModel)]="selectedStockFilter"
+              [options]="stockFilterOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Stock"
+              [showClear]="true"
+              appendTo="body"
+              (onChange)="dt.filter($event.value, 'stockFilter', 'equals')"
+            ></p-select>
+
+            <p-select
+              [(ngModel)]="selectedOfferFilter"
+              [options]="offerFilterOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Oferta"
+              [showClear]="true"
+              appendTo="body"
+              (onChange)="dt.filter($event.value, 'offerFilter', 'equals')"
+            ></p-select>
+          </div>
+
+          <div class="toolbar-right">
+            <span class="table-summary">{{ total() }} productos</span>
+            <p-button label="Nuevo Producto" icon="pi pi-plus" [rounded]="true" severity="contrast" variant="outlined"
+              (onClick)="openNewProduct()"></p-button>
+          </div>
         </div>
       </ng-template>
 

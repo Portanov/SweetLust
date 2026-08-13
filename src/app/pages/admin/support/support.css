@@ -1,0 +1,260 @@
+.admin-support {
+	min-height: 100vh;
+	padding: 2rem;
+	background:
+		radial-gradient(circle at top right, rgba(244, 114, 182, 0.12), transparent 28%),
+		linear-gradient(180deg, #fff 0%, #fafafa 100%);
+}
+
+.page-header {
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	gap: 1rem;
+}
+
+.title-group {
+	display: flex;
+	align-items: center;
+	gap: 0.9rem;
+	flex-wrap: wrap;
+}
+
+.title-group h1 {
+	margin: 0;
+}
+
+.support-kicker {
+	margin: 0 0 0.5rem;
+	text-transform: uppercase;
+	letter-spacing: 0.22em;
+	font-size: 0.72rem;
+	font-weight: 700;
+	color: #be185d;
+}
+
+.support-header p {
+	margin: 0.75rem 0 0;
+	color: #6b7280;
+	max-width: 720px;
+}
+
+.header-actions {
+	display: flex;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+
+.support-card {
+	border-radius: 1.4rem;
+	overflow: hidden;
+	box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+	border: 1px solid #f1d9df;
+}
+
+:host ::ng-deep .support-card .p-card-body {
+	padding: 1.25rem;
+}
+
+.table-toolbar,
+.toolbar-left {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.table-toolbar {
+	justify-content: space-between;
+}
+
+.table-search {
+	width: min(100%, 24rem);
+}
+
+.table-search input {
+	width: 100%;
+}
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+}
+
+.field label {
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: #374151;
+}
+
+.filters-actions,
+.dialog-actions,
+.action-buttons {
+	display: flex;
+	gap: 0.5rem;
+}
+
+:host ::ng-deep .support-card .p-datatable-header {
+	background: #fff;
+	border-bottom: 1px solid #f3e3e8;
+}
+
+:host ::ng-deep .support-card .p-datatable .p-datatable-thead > tr > th {
+	background: #fbf5f7;
+	color: #7d4153;
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	padding: 1rem;
+	border-color: #f3e3e8;
+}
+
+:host ::ng-deep .support-card .p-datatable .p-datatable-tbody > tr > td {
+	padding: 1rem;
+	border-color: #f7e9ed;
+}
+
+:host ::ng-deep .support-card .p-datatable .p-datatable-tbody > tr:hover {
+	background: #fff9fb;
+}
+
+:host ::ng-deep .support-card .p-paginator {
+	background: #fff;
+	border-top: 1px solid #f3e3e8;
+}
+
+:host ::ng-deep .support-card .p-inputtext,
+:host ::ng-deep .support-card .p-select,
+:host ::ng-deep .dialog-form .p-inputtext,
+:host ::ng-deep .dialog-form .p-textarea,
+:host ::ng-deep .dialog-form .p-select {
+	width: 100%;
+	border-radius: 9999px;
+}
+
+:host ::ng-deep .dialog-form .p-textarea {
+	border-radius: 0.9rem;
+}
+
+.report-person {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.report-avatar {
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	background: linear-gradient(135deg, #0f172a, #be185d);
+	color: #fff;
+	font-weight: 700;
+}
+
+.report-person p,
+.subject-cell p {
+	margin: 0;
+	font-weight: 600;
+	color: #111827;
+}
+
+.report-person span,
+.subject-cell span {
+	display: block;
+	margin-top: 0.2rem;
+	color: #6b7280;
+	font-size: 0.85rem;
+}
+
+.subject-cell {
+	display: flex;
+	flex-direction: column;
+}
+
+.empty-state,
+.loading-state {
+	text-align: center;
+	padding: 1.5rem;
+	color: #6b7280;
+}
+
+.detail-grid,
+.dialog-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1rem;
+}
+
+.detail-full,
+.dialog-grid .field-full {
+	grid-column: 1 / -1;
+}
+
+.detail-label {
+	display: block;
+	margin-bottom: 0.35rem;
+	font-size: 0.75rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: #9ca3af;
+}
+
+.detail-grid p {
+	margin: 0;
+	color: #111827;
+	line-height: 1.6;
+}
+
+.detail-message {
+	white-space: pre-wrap;
+}
+
+.dialog-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	padding-top: 0.5rem;
+}
+
+.dialog-actions {
+	justify-content: flex-end;
+	padding-top: 0.5rem;
+}
+
+@media (max-width: 900px) {
+	.page-header,
+	.detail-grid,
+	.dialog-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.page-header {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.header-actions {
+		width: 100%;
+	}
+
+	:host ::ng-deep .header-actions .p-button {
+		flex: 1;
+	}
+
+	.filters-actions,
+	.dialog-actions,
+	.action-buttons {
+		flex-wrap: wrap;
+	}
+
+	.table-toolbar,
+	.toolbar-left {
+		flex-direction: column;
+		align-items: stretch;
+	}
+}

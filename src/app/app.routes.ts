@@ -1,4 +1,3 @@
-// src/app.routes.ts
 import { Routes } from '@angular/router';
 import { PublicLayout } from './layouts/public-layout/public-layout';
 import { AdminLayout } from './layouts/admin-layout/admin-layout';
@@ -55,6 +54,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/public/order-detail/order-detail').then((m) => m.OrderDetail),
       },
+      {
+        path: 'support',
+        loadComponent: () =>
+          import('./pages/public/support/support').then((m) => m.Support),
+      },
     ],
   },
 
@@ -91,6 +95,12 @@ export const routes: Routes = [
           import('./pages/admin/dashboard/dashboard').then((m) => m.Dashboard),
       },
       {
+        path: 'orders',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./pages/admin/orders/orders').then((m) => m.Orders)
+      },
+      {
         path: 'users',
         canActivate: [adminGuard],
         loadComponent: () =>
@@ -101,6 +111,11 @@ export const routes: Routes = [
         canActivate: [adminGuard],
         loadComponent: () =>
           import('./pages/admin/shop/shop').then((m) => m.Shop),
+      },
+      {
+        path: 'support',
+        loadComponent: () =>
+          import('./pages/admin/support/support').then((m) => m.AdminSupport),
       },
     ],
   },

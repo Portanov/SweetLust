@@ -15,7 +15,6 @@ import { TableModule } from 'primeng/table';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
-import { ToolbarModule } from 'primeng/toolbar';
 import { TagModule } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
 import { TooltipModule } from 'primeng/tooltip';
@@ -40,7 +39,6 @@ import { CheckboxModule } from 'primeng/checkbox';
     TableModule,
     ConfirmDialogModule,
     ToastModule,
-    ToolbarModule,
     TagModule,
     SelectModule,
     TooltipModule,
@@ -70,8 +68,28 @@ export class Shop implements OnInit {
   selectedOffer = signal<Offer | null>(null);
   existingOffers = signal<Offer[]>([]);
   showOffersList = signal(false);
-  first = signal(0);
-  rows = signal(10);
+  searchValue = '';
+  selectedStockFilter: 'available' | 'low' | 'out' | null = null;
+  selectedOfferFilter: 'offer' | 'temporary' | 'permanent' | 'none' | null = null;
+
+  tableProducts = computed(() => this.products().map((product) => ({
+    ...product,
+    stockFilter: this.getStockFilter(product),
+    offerFilter: this.getOfferFilter(product),
+  })));
+
+  stockFilterOptions = [
+    { label: 'Disponible', value: 'available' },
+    { label: 'Stock bajo', value: 'low' },
+    { label: 'Agotado', value: 'out' },
+  ];
+
+  offerFilterOptions = [
+    { label: 'Con oferta', value: 'offer' },
+    { label: 'Temporal', value: 'temporary' },
+    { label: 'Permanente', value: 'permanent' },
+    { label: 'Sin oferta', value: 'none' },
+  ];
 
   offerTypes = [
     { label: 'Porcentaje de descuento', value: OfferType.PERCENTAGE },
@@ -103,12 +121,6 @@ export class Shop implements OnInit {
   ngOnInit(): void {
     this.loadProducts();
   }
-
-  pagedProducts = computed(() => {
-    const start = this.first();
-    const end = start + this.rows();
-    return this.products().slice(start, end);
-  });
 
   /**
    * Carga productos - el backend ya devuelve offer = null si no hay oferta activa
@@ -184,28 +196,6 @@ export class Shop implements OnInit {
     });
   }
 
-  onPageChange(event: any): void {
-    this.first.set(event.first);
-    this.rows.set(event.rows);
-  }
-
-  onSearch(event: any): void {
-    const query = event.target.value;
-    this.loading.set(true);
-    this.productService.getProducts({ search: query }).subscribe({
-      next: (response) => {
-        this.products.set(response.products);
-        this.total.set(response.total);
-        this.first.set(0);
-        this.loading.set(false);
-      },
-      error: (error) => {
-        this.loading.set(false);
-        this.alertService.error('Error', 'Error al buscar productos');
-      }
-    });
-  }
-
   openNewProduct(): void {
     this.productForm.reset({
       title: '',
@@ -217,6 +207,34 @@ export class Shop implements OnInit {
     this.isEditing.set(false);
     this.selectedProductId.set(null);
     this.productDialog.set(true);
+  }
+
+  getStockFilter(product: Product): 'available' | 'low' | 'out' {
+    if (product.stock <= 0) {
+      return 'out';
+    }
+
+    if (product.stock < 10) {
+      return 'low';
+    }
+
+    return 'available';
+  }
+
+  getOfferFilter(product: Product): 'offer' | 'temporary' | 'permanent' | 'none' {
+    if (!product.offer) {
+      return 'none';
+    }
+
+    if (this.isPermanentOffer(product.offer)) {
+      return 'permanent';
+    }
+
+    if (this.isTemporaryOffer(product.offer)) {
+      return 'temporary';
+    }
+
+    return 'offer';
   }
 
   editProduct(product: Product): void {

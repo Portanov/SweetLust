@@ -83,3 +83,15 @@ export interface UpdateTrackingRequest {
   status: OrderStatus;
   note?: string;
 }
+
+export interface TopSellingProduct {
+  productId: number;
+  name: string;
+  image: string;
+  soldQuantity: number;
+}
+
+export interface DailySalesByDay {
+  day: string;
+  salesCount: number;
+}

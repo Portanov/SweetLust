@@ -3,6 +3,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Delius&family=Nova+Round&family=Playwrite+DE+Grund:wght@100..400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Hubballi&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Poiret+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&display=swap');
 
 @import "tailwindcss";
 @import "tailwindcss-primeui";
@@ -78,6 +79,13 @@
   font-family: "Poiret One", sans-serif;
   font-weight: 400;
   font-style: normal;
+}
+
+.cormorant-garamond-400 {
+  font-family: "Cormorant Garamond", serif;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: italic;
 }
 
 body {

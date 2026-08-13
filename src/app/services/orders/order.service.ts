@@ -8,6 +8,8 @@ import {
   PublicTrackingResponse,
   OrderStatus,
   UpdateTrackingRequest,
+  TopSellingProduct,
+  DailySalesByDay,
 } from '../../assets/models/shop/order.model';
 import { environment } from '../../../environments/environment';
 
@@ -148,6 +150,16 @@ export class OrderService {
         error: (err) => this.handleError(err)
       })
     );
+  }
+
+  /** Obtiene los 10 productos más vendidos del mes actual */
+  getTopSellingProducts(): Observable<TopSellingProduct[]> {
+    return this.http.get<TopSellingProduct[]>(`${API_URL}/orders/admin/top-selling-products`);
+  }
+
+  /** Obtiene ventas por día del mes actual, incluyendo días sin ventas */
+  getDailySalesCurrentMonth(): Observable<DailySalesByDay[]> {
+    return this.http.get<DailySalesByDay[]>(`${API_URL}/orders/admin/daily-sales-current-month`);
   }
 
   updateOrderStatus(orderId: number, data: UpdateTrackingRequest): Observable<any> {

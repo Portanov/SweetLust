@@ -1,0 +1,59 @@
+<section class="support-page">
+	<div class="support-shell">
+		<div class="support-hero">
+			<p class="support-kicker">Soporte</p>
+			<h1>Cuéntanos qué necesitas</h1>
+			<p>
+				Envíanos tu reporte, duda o comentario y nuestro equipo te responderá lo antes posible.
+			</p>
+		</div>
+
+		<p-card styleClass="support-card">
+			<form [formGroup]="form" (ngSubmit)="submit()" class="support-form" novalidate>
+				<div class="support-grid">
+					<div class="field">
+						<label for="name">Nombre completo</label>
+						<input pInputText id="name" formControlName="name" placeholder="Tu nombre" />
+						@if (form.get('name')?.invalid && form.get('name')?.touched) {
+						<small class="error-text">El nombre es obligatorio.</small>
+						}
+					</div>
+
+					<div class="field">
+						<label for="email">Correo electrónico</label>
+						<input pInputText id="email" type="email" formControlName="email" placeholder="correo@ejemplo.com" />
+						@if (form.get('email')?.invalid && form.get('email')?.touched) {
+						<small class="error-text">Ingresa un correo válido.</small>
+						}
+					</div>
+
+					<div class="field">
+						<label for="phone">Teléfono</label>
+						<input pInputText id="phone" formControlName="phone" placeholder="Opcional" />
+					</div>
+
+					<div class="field field-full">
+						<label for="subject">Asunto</label>
+						<input pInputText id="subject" formControlName="subject" placeholder="¿De qué trata tu reporte?" />
+						@if (form.get('subject')?.invalid && form.get('subject')?.touched) {
+						<small class="error-text">El asunto es obligatorio.</small>
+						}
+					</div>
+
+					<div class="field field-full">
+						<label for="message">Mensaje</label>
+						<textarea pTextarea id="message" rows="7" formControlName="message"
+							placeholder="Describe tu problema con el mayor detalle posible"></textarea>
+						@if (form.get('message')?.invalid && form.get('message')?.touched) {
+						<small class="error-text">El mensaje es obligatorio.</small>
+						}
+					</div>
+				</div>
+
+				<div class="support-actions">
+					<p-button type="submit" label="Enviar reporte" icon="pi pi-send" [loading]="loading"></p-button>
+				</div>
+			</form>
+		</p-card>
+	</div>
+</section>

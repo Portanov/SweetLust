@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, inject, effect } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AvatarModule } from 'primeng/avatar';
 import { ButtonModule } from 'primeng/button';
@@ -16,11 +16,7 @@ interface MenuItem {
   icon: string;
   label: string;
   badge?: number;
-  progress?: string;
-  active?: boolean;
   link: string;
-  roles?: ('admin' | 'client')[];
-  requiresAuth?: boolean;
 }
 
 @Component({
@@ -59,7 +55,7 @@ interface MenuItem {
               <span
                 class="text-4xl pb-1 font-light tracking-widest bg-linear-to-r from-white via-pink-100 to-white bg-clip-text text-transparent font-logo"
               >
-                  Sweety Lust
+                Sweety Lust
               </span>
             </div>
             <p-button
@@ -75,56 +71,94 @@ interface MenuItem {
 
           <div class="flex-1 overflow-y-auto custom-scrollbar px-3 py-6 font-caviar">
             <!--links para navegación general-->
-            @if (!authService.isAdmin()) {
-              <div class="space-y-2">
-                <div class="px-4 mb-3 flex items-center gap-2">
-                  <i class="pi pi-home text-pink-400/60 text-xs"></i>
-                  <span class="text-xs font-medium text-white/50 tracking-wide uppercase"
-                    >Navegación</span
-                  >
-                  <div class="flex-1 h-px bg-linear-to-r from-white/10 to-transparent"></div>
-                </div>
-                @for (item of publicItems; track item.label) {
-                  <a
-                    pRipple
-                    [class.active]="isActive(item.link)"
-                    class="relative flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer group overflow-hidden"
-                    routerLink="{{ item.link }}"
-                    routerLinkActive="active"
-                  >
-                    <div
-                      class="absolute inset-0 bg-linear-to-r from-pink-500/0 via-pink-500/0 to-pink-500/0 group-hover:from-pink-500/5 group-hover:via-pink-400/5 group-hover:to-transparent transition-all duration-500"
-                    ></div>
-                    <div class="relative">
-                      <div
-                        class="absolute inset-0 bg-pink-400/20 rounded-lg blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                      ></div>
-                      <i
-                        [class]="
-                          item.icon +
-                          ' text-lg group-hover:text-pink-300 transition-all duration-300 group-hover:scale-110'
-                        "
-                      ></i>
-                    </div>
-                    <span
-                      class="font-medium text-sm group-hover:translate-x-0.5 transition-transform duration-300"
-                      >{{ item.label }}</span
-                    >
-                    @if (item.badge) {
-                      <span
-                        class="ml-auto bg-linear-to-r from-pink-500/30 to-pink-400/20 text-pink-200 text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10"
-                        >{{ item.badge }}</span
-                      >
-                    }
-                    @if (isActive(item.link)) {
-                      <div
-                        class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-linear-to-b from-pink-400 to-pink-300 rounded-r-full"
-                      ></div>
-                    }
-                  </a>
-                }
+            <div class="space-y-2">
+              <div class="px-4 mb-3 flex items-center gap-2">
+                <i class="pi pi-home text-pink-400/60 text-xs"></i>
+                <span class="text-xs font-medium text-white/50 tracking-wide uppercase"
+                  >Navegación</span
+                >
+                <div class="flex-1 h-px bg-linear-to-r from-white/10 to-transparent"></div>
               </div>
-            }
+              @for (item of publicItems; track item.label) {
+                <a
+                  pRipple
+                  [class.active]="isActive(item.link)"
+                  class="relative flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer group overflow-hidden"
+                  routerLink="{{ item.link }}"
+                  routerLinkActive="active"
+                >
+                  <div
+                    class="absolute inset-0 bg-linear-to-r from-pink-500/0 via-pink-500/0 to-pink-500/0 group-hover:from-pink-500/5 group-hover:via-pink-400/5 group-hover:to-transparent transition-all duration-500"
+                  ></div>
+                  <div class="relative">
+                    <div
+                      class="absolute inset-0 bg-pink-400/20 rounded-lg blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    ></div>
+                    <i
+                      [class]="
+                        item.icon +
+                        ' text-lg group-hover:text-pink-300 transition-all duration-300 group-hover:scale-110'
+                      "
+                    ></i>
+                  </div>
+                  <span
+                    class="font-medium text-sm group-hover:translate-x-0.5 transition-transform duration-300"
+                    >{{ item.label }}</span
+                  >
+                  @if (item.badge) {
+                    <span
+                      class="ml-auto bg-linear-to-r from-pink-500/30 to-pink-400/20 text-pink-200 text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10"
+                      >{{ item.badge }}</span
+                    >
+                  }
+                  @if (isActive(item.link)) {
+                    <div
+                      class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-linear-to-b from-pink-400 to-pink-300 rounded-r-full"
+                    ></div>
+                  }
+                </a>
+              }
+
+              <div class="support-dropdown relative">
+                <div
+                  pRipple
+                  [class.active]="isSupportActive()"
+                  class="relative flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer overflow-hidden"
+                >
+                  <div
+                    class="absolute inset-0 bg-linear-to-r from-pink-500/0 via-pink-500/0 to-pink-500/0 hover:from-pink-500/5 hover:via-pink-400/5 hover:to-transparent transition-all duration-500"
+                  ></div>
+                  <div class="relative">
+                    <i class="pi pi-question-circle text-lg"></i>
+                  </div>
+                  <span class="font-medium text-sm">Soporte</span>
+                  <i class="pi pi-angle-down ml-auto text-xs text-white/60"></i>
+                  @if (isSupportActive()) {
+                    <div
+                      class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-linear-to-b from-pink-400 to-pink-300 rounded-r-full"
+                    ></div>
+                  }
+                </div>
+
+                <div class="support-dropdown-menu absolute top-full left-0 w-full pt-1 z-10">
+                  <div
+                    class="rounded-xl bg-[#2a1119]/95 border border-white/10 backdrop-blur-sm p-1"
+                  >
+                    @for (item of supportItems; track item.label) {
+                      <a
+                        pRipple
+                        [routerLink]="item.link"
+                        [class.active]="isActive(item.link)"
+                        class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/75 hover:text-white hover:bg-white/10 transition-all duration-300"
+                      >
+                        <i [class]="item.icon + ' text-sm text-pink-300/80'"></i>
+                        <span class="text-sm">{{ item.label }}</span>
+                      </a>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <!--links de clientes-->
             @if (authService.isLoggedIn() && !authService.isAdmin()) {
@@ -179,83 +213,30 @@ interface MenuItem {
             }
 
             <!--links de administradores-->
-            @if (authService.isLoggedIn() && authService.isAdmin()) {
-              <div class="space-y-2">
-                <div class="px-4 mb-3 flex items-center gap-2">
-                  <i class="pi pi-cog text-pink-400/60 text-xs"></i>
-                  <span class="text-xs font-medium text-white/50 tracking-wide uppercase"
-                    >Administración</span
-                  >
-                  <div class="flex-1 h-px bg-linear-to-r from-white/10 to-transparent"></div>
-                </div>
-                @for (item of adminItems; track item.label) {
-                  <a
-                    pRipple
-                    [class.active]="isActive(item.link)"
-                    class="relative flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer group overflow-hidden"
-                    routerLink="{{ item.link }}"
-                    routerLinkActive="active"
-                  >
-                    <div
-                      class="absolute inset-0 bg-linear-to-r from-pink-500/0 via-pink-500/0 to-pink-500/0 group-hover:from-pink-500/5 group-hover:via-pink-400/5 group-hover:to-transparent transition-all duration-500"
-                    ></div>
-                    <div class="relative">
-                      <div
-                        class="absolute inset-0 bg-pink-400/20 rounded-lg blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                      ></div>
-                      <i
-                        [class]="
-                          item.icon +
-                          ' text-lg group-hover:text-pink-300 transition-all duration-300 group-hover:scale-110'
-                        "
-                      ></i>
-                    </div>
-                    <span
-                      class="font-medium text-sm group-hover:translate-x-0.5 transition-transform duration-300"
-                      >{{ item.label }}</span
-                    >
-                    @if (item.badge) {
-                      <span
-                        class="ml-auto bg-linear-to-r from-pink-500/30 to-pink-400/20 text-pink-200 text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/10"
-                        >{{ item.badge }}</span
-                      >
-                    }
-                    @if (isActive(item.link)) {
-                      <div
-                        class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-linear-to-b from-pink-400 to-pink-300 rounded-r-full"
-                      ></div>
-                    }
-                  </a>
-                }
-              </div>
-            }
-
             <div class="my-6 px-4"></div>
 
-            @if (!authService.isAdmin()) {
-              <div class="space-y-2">
-                <div class="px-4 mb-3 flex items-center gap-2">
-                  <i class="pi pi-share-alt text-pink-400/60 text-xs"></i>
-                  <span class="text-xs font-medium text-white/50 tracking-wide uppercase"
-                    >Enlaces Externos</span
-                  >
-                  <div class="flex-1 h-px bg-linear-to-r from-white/10 to-transparent"></div>
-                </div>
-                @for (item of collectionItems; track item.label) {
-                  <a
-                    [href]="item.link"
-                    target="_blank"
-                    pRipple
-                    class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer group"
-                  >
-                    <i
-                      [class]="item.icon + ' group-hover:text-pink-300 transition-colors text-sm'"
-                    ></i>
-                    <span class="text-sm">{{ item.label }}</span>
-                  </a>
-                }
+            <div class="space-y-2">
+              <div class="px-4 mb-3 flex items-center gap-2">
+                <i class="pi pi-share-alt text-pink-400/60 text-xs"></i>
+                <span class="text-xs font-medium text-white/50 tracking-wide uppercase"
+                  >Enlaces Externos</span
+                >
+                <div class="flex-1 h-px bg-linear-to-r from-white/10 to-transparent"></div>
               </div>
-            }
+              @for (item of collectionItems; track item.label) {
+                <a
+                  [href]="item.link"
+                  target="_blank"
+                  pRipple
+                  class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer group"
+                >
+                  <i
+                    [class]="item.icon + ' group-hover:text-pink-300 transition-colors text-sm'"
+                  ></i>
+                  <span class="text-sm">{{ item.label }}</span>
+                </a>
+              }
+            </div>
           </div>
 
           <div class="mt-auto relative">
@@ -392,6 +373,24 @@ interface MenuItem {
       .active i {
         color: #f472b6;
       }
+
+      .support-dropdown-menu {
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(4px);
+        transition:
+          opacity 0.2s ease,
+          transform 0.2s ease,
+          visibility 0.2s ease;
+        pointer-events: none;
+      }
+
+      .support-dropdown:hover .support-dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
     `,
   ],
 })
@@ -409,19 +408,17 @@ export class SidebarComponent implements OnInit {
   publicItems: MenuItem[] = [
     { icon: 'pi pi-home', label: 'Inicio', link: '/' },
     { icon: 'pi pi-shopping-bag', label: 'Tienda', link: '/shop' },
+  ];
+
+  supportItems: MenuItem[] = [
     { icon: 'pi pi-question-circle', label: 'Preguntas Frecuentes', link: '/questions' },
+    { icon: 'pi pi-wrench', label: 'Contacto', link: '/support' },
   ];
 
   authenticatedItems: MenuItem[] = [
     { icon: 'pi pi-shopping-cart', label: 'Mi Carrito', link: '/cart', badge: 0 },
     { icon: 'pi pi-heart', label: 'Mis Favoritos', link: '/favorites' },
     { icon: 'pi pi-history', label: 'Mis Pedidos', link: '/orders' },
-  ];
-
-  adminItems: MenuItem[] = [
-    { icon: 'pi pi-chart-line', label: 'Dashboard', link: '/admin/dashboard' },
-    { icon: 'pi pi-users', label: 'Usuarios', link: '/admin/users' },
-    { icon: 'pi pi-shopping-bag', label: 'Productos', link: '/admin/products' },
   ];
 
   collectionItems = [
@@ -449,6 +446,10 @@ export class SidebarComponent implements OnInit {
 
   getAuthenticatedItems(): MenuItem[] {
     return this.authenticatedItems;
+  }
+
+  isSupportActive(): boolean {
+    return this.supportItems.some((item) => this.isActive(item.link));
   }
 
   getUserName(): string {

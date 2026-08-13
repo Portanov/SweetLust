@@ -1,30 +1,54 @@
-<div class="users-container mx-auto mt-16">
-  <div class="users-header">
-    <h1 class="users-title">
-      <i class="pi pi-users"></i>
-      Gestión de Usuarios
-    </h1>
-    <p class="users-subtitle">Administra los usuarios del sistema</p>
+<div class="min-h-screen">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-5xl font-tropical text-gray-800">Usuarios <span class="cormorant-garamond-400 text-[20px]">&
+        administradores</span></h1>
+    <p-button label="Actualizar" icon="pi pi-refresh" [loading]="loading()" (onClick)="ngOnInit()"></p-button>
   </div>
+  <div class="users-panel">
+    <p-table
+      #dt
+      [value]="users()"
+      [loading]="loading()"
+      [globalFilterFields]="['username', 'email', 'role', 'phone']"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      [tableStyle]="{ 'min-width': '75rem' }"
+    >
+      <ng-template pTemplate="caption">
+        <div class="table-toolbar">
+          <div class="toolbar-left">
+            <p-iconfield iconPosition="left" class="table-search">
+              <p-inputicon>
+                <i class="pi pi-search"></i>
+              </p-inputicon>
+              <input
+                pInputText
+                type="text"
+                [(ngModel)]="searchValue"
+                (input)="dt.filterGlobal(searchValue, 'contains')"
+                placeholder="Buscar usuario, correo o telefono..."
+              />
+            </p-iconfield>
 
-  <div class="users-card">
-    <p-toolbar>
-      <div class="p-toolbar-group-start">
-        <p-button label="Nuevo Usuario" icon="pi pi-plus" styleClass="p-button-success"
-          (onClick)="openNewUser()"></p-button>
-      </div>
-      <div class="p-toolbar-group-end">
-        <p-iconField iconPosition="left">
-          <p-inputIcon class="pi pi-search"></p-inputIcon>
-          <input pInputText type="text" placeholder="Buscar usuario..." (input)="onGlobalFilter($event)" />
-        </p-iconField>
-      </div>
-    </p-toolbar>
+            <p-select
+              [(ngModel)]="selectedRole"
+              [options]="roleOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Filtrar por rol"
+              [showClear]="true"
+              appendTo="body"
+              (onChange)="dt.filter($event.value, 'role', 'equals')"
+            ></p-select>
+          </div>
 
-    <p-table [value]="users()" [loading]="loading()" [globalFilterFields]="['username', 'email', 'role']" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 20, 50]"
-      class="p-datatable-striped">
+          <p-button label="Nuevo Usuario" icon="pi pi-plus" [rounded]="true" severity="contrast" variant="outlined"
+            (onClick)="openNewUser()"></p-button>
+        </div>
+      </ng-template>
       <ng-template pTemplate="header">
-        <tr>
+        <tr class="text-xs">
           <th>ID</th>
           <th>Usuario</th>
           <th>Email</th>
@@ -32,7 +56,7 @@
           <th>Fecha Nac.</th>
           <th>Rol</th>
           <th>Fecha Registro</th>
-          <th>Acciones</th>
+          <th class="text-center">Acciones</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-user>
@@ -54,7 +78,7 @@
           </td>
           <td>{{ formatDate(user.created_at) }}</td>
           <td>
-            <div class="action-buttons">
+            <div class="action-buttons justify-center">
               <p-button icon="pi pi-pencil" styleClass="p-button-rounded p-button-info p-button-text"
                 (onClick)="editUser(user)" pTooltip="Editar rol"></p-button>
               <p-button icon="pi pi-sync" styleClass="p-button-rounded p-button-warning p-button-text"
@@ -68,7 +92,7 @@
       </ng-template>
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="8" class="text-center">
+          <td colspan="8" class="empty-table-cell">
             No se encontraron usuarios
           </td>
         </tr>
@@ -101,7 +125,7 @@
         <div class="field">
           <label for="password">Contraseña *</label>
           <p-password id="password" formControlName="password" [toggleMask]="true" feedback="true"
-            class="w-full"></p-password>
+            fluid></p-password>
           @if (userForm.get('password')?.invalid && userForm.get('password')?.touched) {
           <small class="error-text">Mínimo 6 caracteres</small>
           }
@@ -110,7 +134,7 @@
 
         <div class="field">
           <label for="phone">Teléfono *</label>
-          <p-inputNumber id="phone" formControlName="phone" [useGrouping]="false" class="w-full"></p-inputNumber>
+          <p-inputNumber mask="(999) 999-9999" id="phone" formControlName="phone" [useGrouping]="false" fluid></p-inputNumber>
           @if (userForm.get('phone')?.invalid && userForm.get('phone')?.touched) {
           <small class="error-text">Ingresa un teléfono de 10 dígitos</small>
           }
@@ -118,7 +142,7 @@
 
         <div class="field">
           <label for="birth_date">Fecha de nacimiento *</label>
-          <p-datepicker id="birth_date" formControlName="birth_date" dateFormat="dd/mm/yy" class="w-full"></p-datepicker>
+          <p-datepicker id="birth_date" formControlName="birth_date" dateFormat="dd/mm/yy" [iconDisplay]="'input'" [showIcon]="true" inputId="icondisplay" fluid></p-datepicker>
           @if (userForm.get('birth_date')?.invalid && userForm.get('birth_date')?.touched) {
           <small class="error-text">La fecha de nacimiento es requerida</small>
           }
