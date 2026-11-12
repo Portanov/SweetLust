@@ -34,7 +34,8 @@
     "@primeuix/themes": "^2.0.3",
     "@tailwindcss/postcss": "^4.2.2",
     "chart.js": "^4.5.1",
-    "ol": "^10.10.0",
+    "ngx-openlayers": "^20.0.0",
+    "ol": "~10.7.0",
     "postcss": "^8.5.8",
     "primeicons": "^7.0.0",
     "primeng": "^20.4.0",
@@ -56,12 +57,13 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "postcss": "^8.5.3",
     "typescript": "~5.9.2"
   },
   "allowScripts": {
     "lmdb@3.4.2": true,
     "@parcel/watcher@2.6.0": true,
     "esbuild@0.28.1": true,
-    "msgpackr-extract@3.0.4": true
+    "msgpackr-extract@3.0.7": true
   }
 }

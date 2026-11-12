@@ -16,7 +16,7 @@ import {
   StyleStrokeComponent,
   StyleTextComponent,
   ViewComponent,
-} from 'ng-openlayers';
+} from 'ngx-openlayers';
 
 
 @Component({
