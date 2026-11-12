@@ -11,34 +11,25 @@ import { catchError, map, throwError } from 'rxjs';
 import { AuthService } from '../../../services/auth/auth.service';
 import { environment } from '../../../../environments/environment';
 
-const PUBLIC_AUTH_ROUTES = [
-  '/auth/register',
-  '/auth/login-first-step',
-  '/auth/verify-pin',
-];
-
 const TRUSTED_DOMAINS = [new URL(environment.apiUrl).hostname];
+const API_BASE_PATH = new URL(environment.apiUrl).pathname;
 
+// Rutas verdaderamente públicas: no necesitan enviar la cookie de sesión.
 function isPublicRoute(url: string, method: string): boolean {
-  if (PUBLIC_AUTH_ROUTES.some(route => url === route || url.startsWith(route))) {
-    return true;
-  }
-  if (url.startsWith('/admin/')) {
-    return false;
-  }
-  if (method === 'GET' && (url === '/products' || url.startsWith('/products/'))) {
-    return true;
-  }
-  if (url === '/products' || url.startsWith('/products/')) {
-    return false;
+  let pathname: string;
+  try {
+    pathname = new URL(url, environment.apiUrl).pathname;
+  } catch {
+    pathname = url;
   }
 
-  return false;
+  const productsPath = `${API_BASE_PATH}/products`;
+  return method === 'GET' && (pathname === productsPath || pathname.startsWith(`${productsPath}/`));
 }
 
 function isTrustedDomain(url: string) {
   try {
-    return TRUSTED_DOMAINS.includes(new URL(url).hostname);
+    return TRUSTED_DOMAINS.includes(new URL(url, environment.apiUrl).hostname);
   } catch {
     return true;
   }
@@ -50,16 +41,15 @@ export const authInterceptor: HttpInterceptorFn = (
 ) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const token = authService.currentToken();
 
   const isPublic = isPublicRoute(req.url, req.method);
-  const shouldAttach = token && !isPublic && isTrustedDomain(req.url);
+  const shouldAttachCredentials = !isPublic && isTrustedDomain(req.url);
 
-  const authReq = shouldAttach
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+  const credReq = shouldAttachCredentials
+    ? req.clone({ withCredentials: true })
     : req;
 
-  return next(authReq).pipe(
+  return next(credReq).pipe(
     map((event) => {
       if (event instanceof HttpResponse && event.body && typeof event.body === 'object') {
         const body = event.body as Record<string, unknown>;
@@ -70,9 +60,9 @@ export const authInterceptor: HttpInterceptorFn = (
       return event;
     }),
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && token) {
+      // Solo forzamos logout/redirect si había una sesión activa; un 401 anónimo no debe expulsar de páginas públicas.
+      if (error.status === 401 && authService.isLoggedIn()) {
         authService.logout();
-        void router.navigate(['/login']);
       }
       if (error.status === 403) {
         void router.navigate(['/unauthorized']);

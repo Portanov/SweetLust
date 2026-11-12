@@ -23,7 +23,6 @@ export interface LoginFirstStepRequest {
 }
 
 export interface LoginFirstStepResponse {
-  temp_token: string;
   message: string;
   requires_2fa: boolean;
 }
@@ -31,11 +30,9 @@ export interface LoginFirstStepResponse {
 export interface VerifyPinRequest {
   email: string;
   pin: string;
-  temp_token: string;
 }
 
 export interface VerifyPinResponse {
-  access_token: string;
   user: User;
 }
 

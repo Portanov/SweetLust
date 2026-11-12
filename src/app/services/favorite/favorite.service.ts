@@ -1,8 +1,9 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap, catchError, throwError } from 'rxjs';
 import { FavoriteResponse, Favorite, AddFavoriteRequest, RemoveFavoriteRequest } from '../../assets/models/shop/favorite.model';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../auth/auth.service';
 
 const API_URL = environment.apiUrl;
 
@@ -11,6 +12,7 @@ const API_URL = environment.apiUrl;
 })
 export class FavoritesService {
   private http = inject(HttpClient);
+  private authService = inject(AuthService);
 
   private favoritesSignal = signal<Favorite[]>([]);
   private loadingSignal = signal(false);
@@ -27,7 +29,13 @@ export class FavoritesService {
   readonly favoriteCount = computed(() => this.favoritesSignal().length);
 
   constructor() {
-    this.loadFavorites();
+    effect(() => {
+      if (this.authService.isLoggedIn()) {
+        this.loadFavorites();
+      } else {
+        this.favoritesSignal.set([]);
+      }
+    });
   }
 
   /**
@@ -35,6 +43,8 @@ export class FavoritesService {
    * GET /favorites
    */
   loadFavorites(): void {
+    if (!this.authService.isLoggedIn()) return;
+
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 

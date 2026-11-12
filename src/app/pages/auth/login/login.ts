@@ -31,7 +31,6 @@ export class Login {
 
   loading = signal(false);
   showPinForm = signal(false);
-  tempToken = signal<string | null>(null);
   userEmail = signal<string | null>(null);
 
   loginForm = this.fb.group({
@@ -56,7 +55,6 @@ export class Login {
     this.authService.loginFirstStep({ email: email!, password: password! }).subscribe({
       next: (res) => {
         this.loading.set(false);
-        this.tempToken.set(res.temp_token);
         this.userEmail.set(email!);
         this.showPinForm.set(true);
       },
@@ -78,7 +76,6 @@ export class Login {
     this.authService.verifyPin({
       email: this.userEmail()!,
       pin: this.pinForm.value.pin!,
-      temp_token: this.tempToken()!,
     }).subscribe({
       next: (res) => {
         this.loading.set(false);
@@ -114,7 +111,6 @@ export class Login {
     }).subscribe({
       next: (res) => {
         this.loading.set(false);
-        this.tempToken.set(res.temp_token);
       },
       error: (err) => {
         this.loading.set(false);

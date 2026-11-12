@@ -6,7 +6,7 @@ export const adminGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (!authService.isLoggedIn() || authService.isTokenExpired()) {
+  if (!authService.isLoggedIn()) {
     authService.logout();
     return router.createUrlTree(['/login']);
   }
@@ -23,7 +23,7 @@ export const adminMatchGuard: CanMatchFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (!authService.isLoggedIn() || authService.isTokenExpired()) {
+  if (!authService.isLoggedIn()) {
     authService.logout();
     return router.createUrlTree(['/login']);
   }

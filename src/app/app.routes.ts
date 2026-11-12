@@ -1,13 +1,14 @@
 import { Routes } from '@angular/router';
 import { PublicLayout } from './layouts/public-layout/public-layout';
 import { AdminLayout } from './layouts/admin-layout/admin-layout';
-import { authGuard, authMatchGuard, guestGuard } from './guards/auth-guard/auth.guard';
+import { authGuard, authMatchGuard, guestGuard, noAdminGuard } from './guards/auth-guard/auth.guard';
 import { adminGuard, adminMatchGuard } from './guards/admin-guard/admin.guard';
 
 export const routes: Routes = [
   {
     path: '',
     component: PublicLayout,
+    canActivateChild: [noAdminGuard],
     children: [
       {
         path: '',

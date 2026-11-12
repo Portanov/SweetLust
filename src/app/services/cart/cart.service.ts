@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import {
@@ -11,6 +11,7 @@ import {
   CheckoutResponse
 } from '../../assets/models/shop/cart.model';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../auth/auth.service';
 
 const API_URL = environment.apiUrl;
 
@@ -19,6 +20,7 @@ const API_URL = environment.apiUrl;
 })
 export class CartService {
   private http = inject(HttpClient);
+  private authService = inject(AuthService);
 
   private cartItems = signal<any[]>([]);
   private cartTotal = signal(0);
@@ -31,10 +33,20 @@ export class CartService {
   readonly status = this.cartStatus.asReadonly();
 
   constructor() {
-    this.loadCart();
+    effect(() => {
+      if (this.authService.isLoggedIn()) {
+        this.loadCart();
+      } else {
+        this.cartItems.set([]);
+        this.cartTotal.set(0);
+        this.itemCount.set(0);
+      }
+    });
   }
 
   loadCart(): void {
+    if (!this.authService.isLoggedIn()) return;
+
     this.http.get<CartResponse>(`${API_URL}/cart`).subscribe({
       next: (response) => {
         this.cartItems.set(response.summary.items);
